@@ -31,7 +31,8 @@ jobs:
       - name: Create Prerelease Tag
         id: create_prerelease_tag
         run: |
-          gh release create continuous -p -t 'Continuous build' --notes "Building time: ${NOW}
+          NOW=$(date '+%Y-%m-%d %H:%M:%S %z')
+          gh release create continuous -t 'Continuous build' --notes "Building time: ${NOW}
           - - -
           "
           # Make sure draft is false
