@@ -40,25 +40,7 @@ jobs:
 
   static-build:
     runs-on: ubuntu-latest
-    container: "abcfy2/muslcc-toolchain-ubuntu:${{ matrix.cross_host }}"
-    strategy:
-      fail-fast: false
-      matrix:
-        cross_host:
-          - arm-linux-musleabi
-          - aarch64-linux-musl
-          - mips-linux-musl
-          - mipsel-linux-musl
-          - mips64-linux-musl
-          - x86_64-linux-musl
-          - x86_64-w64-mingw32
-          - i686-w64-mingw32
-        use_libressl: [0, 1]
-        exclude:
-          - cross_host: x86_64-w64-mingw32
-            use_libressl: 1
-          - cross_host: i686-w64-mingw32
-            use_libressl: 1
+    container: "abcfy2/muslcc-toolchain-ubuntu:x86_64-w64-mingw32"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -66,13 +48,12 @@ jobs:
         id: cache
         with:
           path: downloads/
-          key: build-cache-${{ matrix.cross_host }}-${{ github.sha }}
+          key: build-cache-x86_64-w64-mingw32-${{ github.sha }}
           restore-keys: |
-            build-cache-${{ matrix.cross_host }}-
+            build-cache-x86_64-w64-mingw32-
       - name: compile
         env:
-          CROSS_HOST: "${{ matrix.cross_host }}"
-          USE_LIBRESSL: "${{ matrix.use_libressl }}"
+          CROSS_HOST: "x86_64-w64-mingw32"
         run: |
           if [ "${GITHUB_EVENT_NAME}" = release ]; then
             export ARIA2_VER="${GITHUB_REF#refs/*/}"
@@ -81,20 +62,15 @@ jobs:
           "${GITHUB_WORKSPACE}/build.sh"
       - name: zip archiving
         env:
-          CROSS_HOST: "${{ matrix.cross_host }}"
-          USE_LIBRESSL: "${{ matrix.use_libressl }}"
+          CROSS_HOST: "x86_64-w64-mingw32"
         run: |
           apt install -y zip
-          if [ x"${USE_LIBRESSL}" = x"1" ]; then
-            ARCHIVE_NAME="aria2-${CROSS_HOST}_libressl_static.zip"
-          else
-            ARCHIVE_NAME="aria2-${CROSS_HOST}_static.zip"
-          fi
+          ARCHIVE_NAME="aria2-${CROSS_HOST}_static.zip"
           echo "ARCHIVE_NAME=${ARCHIVE_NAME}" >> $GITHUB_ENV
           zip -j9v "/tmp/${ARCHIVE_NAME}" "${GITHUB_WORKSPACE}"/aria2c*
       - name: Prerelease assets
         if: github.event_name == 'push' || github.event_name == 'schedule'
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: /tmp/${{ env.ARCHIVE_NAME }}
           prerelease: true
@@ -105,7 +81,7 @@ jobs:
           append_body: true
       - name: Upload Github Assets
         if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           files: /tmp/${{ env.ARCHIVE_NAME }}
           name: aria2 ${{ env.ARIA2_VER }} static release
