@@ -401,41 +401,54 @@ prepare_libssh2() {
   echo "- libssh2: ${libssh2_ver}, source: ${libssh2_latest_url:-cached libssh2}" >>"${BUILD_INFO}"
 }
 
-build_aria2() {  
-  # 固定的下载 URL  
-  aria2_latest_url="https://github.com/rzhy1/aria2/archive/master.tar.gz"  
-  
-  # 如果使用中国的镜像，可以在这里修改URL  
-  if [ x"${USE_CHINA_MIRROR}" = x1 ]; then  
-    aria2_latest_url="https://mirror.ghproxy.com/${aria2_latest_url}"  
-  fi  
-  
-  # 下载aria2的tar.gz文件  
-  wget -O "${DOWNLOADS_DIR}/aria2-master.tar.gz" "${aria2_latest_url}"  
-  
-  # 解压到/usr/src/aria2-master目录  
-  mkdir -p "/usr/src/aria2-master"  
-  tar -zxf "${DOWNLOADS_DIR}/aria2-master.tar.gz" --strip-components=1 -C "/usr/src/aria2-master"  
-  
-  # 进入aria2目录  
-  cd "/usr/src/aria2-master"  
-  
-  # 如果configure脚本不存在，则生成它  
-  if [ ! -f ./configure ]; then  
-    autoreconf -i  
-  fi  
-  
-  # 配置和编译aria2  
-  # 这里可以根据需要添加更多的配置选项  
-  ./configure --prefix=/usr/local --enable-static --disable-shared  
-  make -j$(nproc)  
-  
-  # 安装aria2  
-  make install  
-  
-  # 记录信息到BUILD_INFO文件  
-  echo "- aria2: source: ${aria2_latest_url}" >>"${BUILD_INFO}"  
-  echo >>"${BUILD_INFO}"  
+build_aria2() {
+  if [ -n "${ARIA2_VER}" ]; then
+    aria2_tag="${ARIA2_VER}"
+  else
+    aria2_tag=master
+    # Check download cache whether expired
+    if [ -f "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz" ]; then
+      cached_file_ts="$(stat -c '%Y' "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz")"
+      current_ts="$(date +%s)"
+      if [ "$((${current_ts} - "${cached_file_ts}"))" -gt 86400 ]; then
+        echo "Delete expired aria2 archive file cache..."
+        rm -f "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz"
+      fi
+    fi
+  fi
+
+  if [ -n "${ARIA2_VER}" ]; then
+    aria2_latest_url="https://github.com/aria2/aria2/releases/download/release-${ARIA2_VER}/aria2-${ARIA2_VER}.tar.gz"
+  else
+    aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
+  fi
+  if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
+    aria2_latest_url="https://mirror.ghproxy.com/${aria2_latest_url}"
+  fi
+
+  if [ ! -f "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz" ]; then
+    retry wget -cT10 -O "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz.part" "${aria2_latest_url}"
+    mv -fv "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz.part" "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz"
+  fi
+  mkdir -p "/usr/src/aria2-${aria2_tag}"
+  tar -zxf "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz" --strip-components=1 -C "/usr/src/aria2-${aria2_tag}"
+  cd "/usr/src/aria2-${aria2_tag}"
+  sed -i 's/PREF_MAX_CONNECTION_PER_SERVER, TEXT_MAX_CONNECTION_PER_SERVER, "1", 1, 16, 'x'/PREF_MAX_CONNECTION_PER_SERVER, TEXT_MAX_CONNECTION_PER_SERVER, "1", 1, 1024, 'x'/g' src/OptionHandlerFactory.cc
+  sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_m, 1_g))/g' src/OptionHandlerFactory.cc
+
+  if [ ! -f ./configure ]; then
+    autoreconf -i
+  fi
+  if [ x"${TARGET_HOST}" = xwin ]; then
+    ARIA2_EXT_CONF='--without-openssl'
+  # else
+  #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
+  fi
+  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF}
+  make -j$(nproc)
+  make install
+  echo "- aria2: source: ${aria2_latest_url:-cached aria2}" >>"${BUILD_INFO}"
+  echo >>"${BUILD_INFO}"
 }
 
 get_build_info() {
