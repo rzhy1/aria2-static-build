@@ -2,37 +2,15 @@
 
 # This scrip is for static cross compiling
 # Please run this scrip in docker image: abcfy2/muslcc-toolchain-ubuntu:${CROSS_HOST}
-# E.g: docker run --rm -v `git rev-parse --show-toplevel`:/build abcfy2/muslcc-toolchain-ubuntu:arm-linux-musleabi /build/build.sh
+# E.g: docker run --rm -v `git rev-parse --show-toplevel`:/build abcfy2/muslcc-toolchain-ubuntu:x86_64-w64-mingw32 /build/build.sh
 # Artifacts will copy to the same directory.
 
 set -o pipefail
 
 # value from: https://musl.cc/ (without -cross or -native)
-# export CROSS_HOST="${CROSS_HOST:-arm-linux-musleabi}"
+export CROSS_HOST="x86_64-w64-mingw32"
 # value from openssl source: ./Configure LIST
-case "${CROSS_HOST}" in
-arm-linux*)
-  export OPENSSL_COMPILER=linux-armv4
-  ;;
-aarch64-linux*)
-  export OPENSSL_COMPILER=linux-aarch64
-  ;;
-mips-linux* | mipsel-linux*)
-  export OPENSSL_COMPILER=linux-mips32
-  ;;
-mips64-linux*)
-  export OPENSSL_COMPILER=linux64-mips64
-  ;;
-x86_64-linux*)
-  export OPENSSL_COMPILER=linux-x86_64
-  ;;
-s390x-linux*)
-  export OPENSSL_COMPILER=linux64-s390x
-  ;;
-*)
-  export OPENSSL_COMPILER=gcc
-  ;;
-esac
+export OPENSSL_COMPILER="linux-x86_64"
 # export CROSS_ROOT="${CROSS_ROOT:-/cross_root}"
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 
@@ -91,41 +69,13 @@ apt install -y g++ \
 BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
 TARGET_HOST="${CROSS_HOST#*-}"
-case "${TARGET_ARCH}" in
-"armel"*)
-  TARGET_ARCH=armel
-  ;;
-"arm"*)
-  TARGET_ARCH=arm
-  ;;
-esac
-case "${TARGET_HOST}" in
-*"mingw"*)
-  TARGET_HOST=Windows
-  rm -fr "${CROSS_ROOT}"
-  hash -r
-  # if [ ! -f "/usr/share/keyrings/winehq-archive.key" ]; then
-  #   rm -f /usr/share/keyrings/winehq-archive.key.part
-  #   retry wget -cT30 -O /usr/share/keyrings/winehq-archive.key.part https://dl.winehq.org/wine-builds/winehq.key
-  #   mv -fv /usr/share/keyrings/winehq-archive.key.part /usr/share/keyrings/winehq-archive.key
-  # fi
-  # if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-  #   WINEHQ_URL="http://mirrors.tuna.tsinghua.edu.cn/wine-builds/ubuntu/"
-  # else
-  #   WINEHQ_URL="http://dl.winehq.org/wine-builds/ubuntu/"
-  # fi
-  # echo "deb [signed-by=/usr/share/keyrings/winehq-archive.key] ${WINEHQ_URL} ${UBUNTU_CODENAME} main" >/etc/apt/sources.list.d/winehq.list
-  apt update
-  apt install -y wine mingw-w64
-  export WINEPREFIX=/tmp/
-  RUNNER_CHECKER="wine"
-  ;;
-*)
-  TARGET_HOST=Linux
-  apt install -y "qemu-user-static"
-  RUNNER_CHECKER="qemu-${TARGET_ARCH}-static"
-  ;;
-esac
+TARGET_HOST=Windows
+rm -fr "${CROSS_ROOT}"
+hash -r
+apt update
+apt install -y wine mingw-w64
+export WINEPREFIX=/tmp/
+RUNNER_CHECKER="wine"
 
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
@@ -234,28 +184,13 @@ prepare_zlib() {
     mkdir -p "/usr/src/zlib-${zlib_tag}"
     tar -Jxf "${DOWNLOADS_DIR}/zlib-${zlib_tag}.tar.gz" --strip-components=1 -C "/usr/src/zlib-${zlib_tag}"
     cd "/usr/src/zlib-${zlib_tag}"
-    if [ x"${TARGET_HOST}" = xWindows ]; then
-      make -f win32/Makefile.gcc BINARY_PATH="${CROSS_PREFIX}/bin" INCLUDE_PATH="${CROSS_PREFIX}/include" LIBRARY_PATH="${CROSS_PREFIX}/lib" SHARED_MODE=0 PREFIX="${CROSS_HOST}-" -j$(nproc) install
-    else
-      CHOST="${CROSS_HOST}" ./configure --prefix="${CROSS_PREFIX}" --static
-      make -j$(nproc)
-      make install
-    fi
+    make -f win32/Makefile.gcc BINARY_PATH="${CROSS_PREFIX}/bin" INCLUDE_PATH="${CROSS_PREFIX}/include" LIBRARY_PATH="${CROSS_PREFIX}/lib" SHARED_MODE=0 PREFIX="${CROSS_HOST}-" -j$(nproc) install
     zlib_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc")"
     echo "- zlib: ${zlib_ver}, source: ${zlib_latest_url:-cached zlib}" >>"${BUILD_INFO}"
   fi
 }
 
 prepare_xz() {
-  # Download from github release (now breakdown)
-  # xz_release_info="$(retry wget -qO- --compression=auto https://api.github.com/repos/tukaani-project/xz/releases \| jq -r "'[.[] | select(.prerelease == false)][0]'")"
-  # xz_tag="$(printf '%s' "${xz_release_info}" | jq -r '.tag_name')"
-  # xz_archive_name="$(printf '%s' "${xz_release_info}" | jq -r '.assets[].name | select(endswith("tar.xz"))')"
-  # xz_latest_url="https://github.com/tukaani-project/xz/releases/download/${xz_tag}/${xz_archive_name}"
-  # if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-  #   xz_latest_url="https://mirror.ghproxy.com/${xz_latest_url}"
-  # fi
-  # Download from sourceforge
   xz_tag="$(retry wget -qO- --compression=auto https://sourceforge.net/projects/lzmautils/files/ \| grep -i \'span class=\"sub-label\"\' \| head -1 \| sed -r "'s/.*xz-(.+)\.tar\.gz.*/\1/'")"
   xz_latest_url="https://sourceforge.net/projects/lzmautils/files/xz-${xz_tag}.tar.xz"
   if [ ! -f "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz" ]; then
@@ -351,10 +286,8 @@ prepare_sqlite() {
   mkdir -p "/usr/src/sqlite-${sqlite_tag}"
   tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
   cd "/usr/src/sqlite-${sqlite_tag}"
-  if [ x"${TARGET_HOST}" = x"Windows" ]; then
-    ln -sf mksourceid.exe mksourceid
-    SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
-  fi
+  ln -sf mksourceid.exe mksourceid
+  SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared ${SQLITE_EXT_CONF}
   make -j$(nproc)
   make install
@@ -436,11 +369,7 @@ build_aria2() {
   if [ ! -f ./configure ]; then
     autoreconf -i
   fi
-  if [ x"${TARGET_HOST}" = xwin ]; then
-    ARIA2_EXT_CONF='--without-openssl'
-  # else
-  #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
-  fi
+  ARIA2_EXT_CONF='--without-openssl'
   ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF}
   make -j$(nproc)
   make install
@@ -480,8 +409,5 @@ prepare_libssh2
 build_aria2
 
 get_build_info
-# mips test will hang, I don't know why. So I just ignore test failures.
-# test_build
 
-# get release
 cp -fv "${CROSS_PREFIX}/bin/"aria2* "${SELF_DIR}"
