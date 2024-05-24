@@ -34,7 +34,7 @@ s390x-linux*)
   ;;
 esac
 # export CROSS_ROOT="${CROSS_ROOT:-/cross_root}"
-export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
+export USE_ZLIB_NG="${USE_ZLIB_NG:-0}"
 
 retry() {
   # max retry 5 times
@@ -220,7 +220,7 @@ prepare_zlib() {
       -DWITH_GTEST=OFF
     cmake --build build
     cmake --install build
-    zlib_ng_ver="$(Version: ${zlib_ng_latest_tag})"
+    zlib_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc")"
     echo "- zlib-ng: ${zlib_ng_ver}, source: ${zlib_ng_latest_url:-cached zlib-ng}" >>"${BUILD_INFO}"
     # Fix mingw build sharedlibdir lost issue
     sed -i 's@^sharedlibdir=.*@sharedlibdir=${libdir}@' "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
