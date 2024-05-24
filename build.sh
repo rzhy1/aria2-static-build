@@ -223,7 +223,17 @@ prepare_zlib() {
     # 显示当前路径
     current_path=$(pwd)
     echo "当前路径：$current_path"
-    cat "/usr/src/zlib-ng-${zlib_ng_latest_tag}/build/zlib.pc"
+    # 搜索指定文件
+    file_path=$(find / -name "zlib-ng.pc" 2>/dev/null)
+
+    # 检查文件是否存在
+    if [ -n "$file_path" ]; then
+        echo "文件位置：$file_path"
+    else
+        echo "文件未找到"
+    fi
+    cat "/build/zlib.pc"
+    cat "/build/zlib-ng.pc"
     zlib_ver="$(grep Version: "zlib.pc")"
     echo "- zlib-ng: ${zlib_ng_ver}, source: ${zlib_ng_latest_url:-cached zlib-ng}" >>"${BUILD_INFO}"
     # Fix mingw build sharedlibdir lost issue
