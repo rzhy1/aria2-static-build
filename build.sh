@@ -450,6 +450,3 @@ build_aria2() {
   echo "- aria2: source: ${aria2_latest_url:-cached aria2}" >>"${BUILD_INFO}"
   echo >>"${BUILD_INFO}"
 }
-
-# get release
-cp -fv "${CROSS_PREFIX}/bin/"aria2* "${SELF_DIR}"
