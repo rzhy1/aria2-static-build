@@ -15,32 +15,8 @@ on:
     - cron: "0 0 * * 6"
 
 jobs:
-  create-prerelease:
-    name: Create Prerelease
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set current date as env variable
-        run: echo "NOW=$(date --utc)" >> $GITHUB_ENV
-      - name: Delete Continuous Release
-        run: gh release delete continuous --cleanup-tag || true
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: Create Prerelease Tag
-        id: create_prerelease_tag
-        run: |
-          NOW=$(date '+%Y-%m-%d %H:%M:%S %z')
-          gh release create continuous -t 'Continuous build' --notes "Building time: ${NOW}
-          - - -
-          "
-          # Make sure draft is false
-          gh release edit continuous --draft=false
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
   static-build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     container: "abcfy2/muslcc-toolchain-ubuntu:x86_64-w64-mingw32"
     steps:
       - name: Checkout
@@ -61,30 +37,16 @@ jobs:
             echo "ARIA2_VER=${ARIA2_VER}" >> $GITHUB_ENV
           fi
           "${GITHUB_WORKSPACE}/build.sh"
-      - name: Upload aria2c.exe as Release Asset
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-release-asset@v1
+      - name: Archive aria2c.exe
+        uses: actions/upload-artifact@v4
         with:
-          upload_url: ${{ steps.create_prerelease_tag.outputs.upload_url }}
-          asset_path: "${GITHUB_WORKSPACE}/aria2c"
-          asset_name: "aria2c.exe"
-          asset_content_type: application/octet-stream
-      - name: Prerelease assets
+          name: aria2c.exe
+          path: "${GITHUB_WORKSPACE}/aria2c"
+      - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          release_name: Continuous build
-          tag: continuous
-          draft: false
-          prerelease: true
-          body_path: "${GITHUB_WORKSPACE}/build_info.md"
-          append_body: true
-      - name: Upload Github Assets
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: ncipollo/release-action@v1
-        with:
-          release_name: aria2 ${{ env.ARIA2_VER }} static release
-          tag: continuous
-          draft: false
-          prerelease: false
-          body_path: "${GITHUB_WORKSPACE}/build_info.md"
-          append_body: true
+          tag: aria2c
+          allowUpdates: true
+          artifacts: "${GITHUB_WORKSPACE}/aria2c.exe"
+          bodyFile: "${{ github.workspace }}/build_info.md"
+          token: ${{ secrets.GITHUB_TOKEN }}
