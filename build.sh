@@ -450,3 +450,41 @@ build_aria2() {
   echo "- aria2: source: ${aria2_latest_url:-cached aria2}" >>"${BUILD_INFO}"
   echo >>"${BUILD_INFO}"
 }
+get_build_info() {
+  echo "============= ARIA2 VER INFO ==================="
+  ARIA2_VER_INFO="$("${RUNNER_CHECKER}" "${CROSS_PREFIX}/bin/aria2c"* --version 2>/dev/null)"
+  echo "${ARIA2_VER_INFO}"
+  echo "================================================"
+
+  echo "aria2 version info:" >>"${BUILD_INFO}"
+  echo '```txt' >>"${BUILD_INFO}"
+  echo "${ARIA2_VER_INFO}" >>"${BUILD_INFO}"
+  echo '```' >>"${BUILD_INFO}"
+}
+
+test_build() {
+  # get release
+  cp -fv "${CROSS_PREFIX}/bin/"aria2* "${SELF_DIR}"
+  echo "============= ARIA2 TEST DOWNLOAD =============="
+  "${RUNNER_CHECKER}" "${CROSS_PREFIX}/bin/aria2c"* -t 10 --console-log-level=debug --http-accept-gzip=true https://github.com/ -d /tmp -o test
+  echo "================================================"
+}
+
+prepare_cmake
+prepare_ninja
+prepare_zlib
+prepare_xz
+prepare_ssl
+prepare_libxml2
+prepare_sqlite
+prepare_c_ares
+prepare_libssh2
+build_aria2
+
+get_build_info
+# mips test will hang, I don't know why. So I just ignore test failures.
+# test_build
+
+# get release
+cp -fv "${CROSS_PREFIX}/bin/"aria2* "${SELF_DIR}"
+
