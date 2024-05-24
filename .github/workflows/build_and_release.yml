@@ -16,7 +16,7 @@ on:
 
 jobs:
   static-build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     container: "abcfy2/muslcc-toolchain-ubuntu:x86_64-w64-mingw32"
     steps:
       - name: Checkout
