@@ -207,10 +207,10 @@ prepare_zlib() {
     mkdir -p "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
     tar -zxf "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz" --strip-components=1 -C "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
     cd "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
-    ./configure  --prefix="${CROSS_PREFIX}" --zlib-compat --static --64
+    ./configure  --prefix="${CROSS_PREFIX}"  --static --64
     make -j$(nproc)
     make install
-    zlib_ver="$(grep VER= "zlib-ng.pc")"
+    zlib_ver="$(grep Version: "zlib-ng.pc")"
     echo "- zlib-ng: ${zlib_ng_ver}, source: ${zlib_ng_latest_url:-cached zlib-ng}" >>"${BUILD_INFO}"
     # Fix mingw build sharedlibdir lost issue
     sed -i 's@^sharedlibdir=.*@sharedlibdir=${libdir}@' "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
