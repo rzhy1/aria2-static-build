@@ -210,7 +210,7 @@ prepare_zlib() {
     ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --static --64
     make -j$(nproc)
     make install
-    zlib_ver="$(grep VER= "Makefile.in")"
+    zlib_ver="$(grep VER= "zlib-ng.pc")"
     echo "- zlib-ng: ${zlib_ng_ver}, source: ${zlib_ng_latest_url:-cached zlib-ng}" >>"${BUILD_INFO}"
     # Fix mingw build sharedlibdir lost issue
     sed -i 's@^sharedlibdir=.*@sharedlibdir=${libdir}@' "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
