@@ -207,7 +207,7 @@ prepare_zlib() {
     mkdir -p "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
     tar -zxf "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz" --strip-components=1 -C "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
     cd "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
-    ./configure  --prefix="${CROSS_PREFIX}" --static --64
+    ./configure  --prefix="${CROSS_PREFIX}" --zlib-compat --static --64
     make -j$(nproc)
     make install
     zlib_ver="$(grep VER= "zlib-ng.pc")"
