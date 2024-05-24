@@ -41,12 +41,12 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: aria2c.exe
-          path: "${GITHUB_WORKSPACE}/aria2c"
+          path: "${GITHUB_WORKSPACE}"/aria2c*
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           tag: aria2c
           allowUpdates: true
-          artifacts: "${GITHUB_WORKSPACE}/aria2c.exe"
+          artifacts: "${GITHUB_WORKSPACE}"/aria2c*
           bodyFile: "${{ github.workspace }}/build_info.md"
           token: ${{ secrets.GITHUB_TOKEN }}
