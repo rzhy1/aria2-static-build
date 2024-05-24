@@ -220,6 +220,7 @@ prepare_zlib() {
       -DWITH_GTEST=OFF
     cmake --build build
     cmake --install build
+    cat "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
     zlib_ver="$(grep Version: "zlib.pc")"
     echo "- zlib-ng: ${zlib_ng_ver}, source: ${zlib_ng_latest_url:-cached zlib-ng}" >>"${BUILD_INFO}"
     # Fix mingw build sharedlibdir lost issue
