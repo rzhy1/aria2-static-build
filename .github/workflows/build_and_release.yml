@@ -17,7 +17,7 @@ on:
 jobs:
   create-prerelease:
     name: Create Prerelease
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -40,7 +40,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   static-build:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     container: "abcfy2/muslcc-toolchain-ubuntu:x86_64-w64-mingw32"
     steps:
       - name: Checkout
