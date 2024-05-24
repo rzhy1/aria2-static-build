@@ -207,19 +207,9 @@ prepare_zlib() {
     mkdir -p "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
     tar -zxf "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz" --strip-components=1 -C "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
     cd "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
-    rm -fr build
-    cmake -B build \
-      -G Ninja \
-      -DBUILD_SHARED_LIBS=OFF \
-      -DZLIB_COMPAT=ON \
-      -DCMAKE_SYSTEM_NAME="${TARGET_HOST}" \
-      -DCMAKE_INSTALL_PREFIX="${CROSS_PREFIX}" \
-      -DCMAKE_C_COMPILER="${CROSS_HOST}-gcc" \
-      -DCMAKE_CXX_COMPILER="${CROSS_HOST}-g++" \
-      -DCMAKE_SYSTEM_PROCESSOR="${TARGET_ARCH}" \
-      -DWITH_GTEST=OFF
-    cmake --build build
-    cmake --install build
+    ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --static --64
+    make -j$(nproc)
+    make install
     zlib_ver="$(grep VER= "Makefile.in")"
     echo "- zlib-ng: ${zlib_ng_ver}, source: ${zlib_ng_latest_url:-cached zlib-ng}" >>"${BUILD_INFO}"
     # Fix mingw build sharedlibdir lost issue
