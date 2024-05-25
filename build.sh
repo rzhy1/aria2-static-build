@@ -196,17 +196,20 @@ prepare_ninja() {
 prepare_zlib() {
   if [ x"${USE_ZLIB_NG}" = x"1" ]; then
     zlib_ng_latest_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/zlib-ng/zlib-ng/releases \| jq -r "'.[0].tag_name'")"
-    zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${zlib_ng_latest_tag}.tar.gz"
-    if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-      zlib_ng_latest_url="https://mirror.ghproxy.com/${zlib_ng_latest_url}"
-    fi
-    if [ ! -f "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz" ]; then
-      retry wget -cT10 -O "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz.part" "${zlib_ng_latest_url}"
-      mv -fv "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz.part" "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz"
-    fi
-    mkdir -p "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
-    tar -zxf "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz" --strip-components=1 -C "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
-    cd "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
+    #zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${zlib_ng_latest_tag}.tar.gz"
+    #if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
+    #  zlib_ng_latest_url="https://mirror.ghproxy.com/${zlib_ng_latest_url}"
+    #fi
+    #if [ ! -f "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz" ]; then
+    #  retry wget -cT10 -O "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz.part" "${zlib_ng_latest_url}"
+    #  mv -fv "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz.part" "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz"
+    #fi
+    #mkdir -p "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
+    #tar -zxf "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz" --strip-components=1 -C "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
+    #cd "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
+    wget -q -O- https://github.com/zlib-ng/zlib-ng/archive/refs/heads/develop.zip
+    unzip develop.zip
+    cd zlib-ng-*
     rm -fr build
     cmake -B build \
       -G Ninja \
