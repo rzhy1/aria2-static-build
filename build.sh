@@ -207,8 +207,7 @@ prepare_zlib() {
     #mkdir -p "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
     #tar -zxf "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz" --strip-components=1 -C "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
     #cd "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
-    wget -q -O- https://github.com/zlib-ng/zlib-ng/archive/refs/heads/develop.zip
-    unzip develop.zip
+    wget -q -O- https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz | tar xz
     cd zlib-ng-*
     rm -fr build
     cmake -B build \
