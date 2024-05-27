@@ -484,7 +484,7 @@ prepare_c_ares
 prepare_libssh2
 build_aria2
 
-get_build_info
+#get_build_info
 # mips test will hang, I don't know why. So I just ignore test failures.
 # test_build
 
