@@ -28,7 +28,7 @@ jobs:
           key: build-cache-x86_64-w64-mingw32-${{ github.sha }}
           restore-keys: |
             build-cache-x86_64-w64-mingw32-
-      - name: compile
+      - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
         run: |
