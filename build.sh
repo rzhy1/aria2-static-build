@@ -453,17 +453,17 @@ build_aria2() {
   echo "- aria2: source: ${aria2_latest_url:-cached aria2}" >>"${BUILD_INFO}"
   echo >>"${BUILD_INFO}"
 }
-get_build_info() {
-  echo "============= ARIA2 VER INFO ==================="
-  ARIA2_VER_INFO="$("${RUNNER_CHECKER}" "${CROSS_PREFIX}/bin/aria2c"* --version 2>/dev/null)"
-  echo "${ARIA2_VER_INFO}"
-  echo "================================================"
+#get_build_info() {
+#  echo "============= ARIA2 VER INFO ==================="
+#  ARIA2_VER_INFO="$("${RUNNER_CHECKER}" "${CROSS_PREFIX}/bin/aria2c"* --version 2>/dev/null)"
+#  echo "${ARIA2_VER_INFO}"
+#  echo "================================================"
 
-  echo "aria2 version info:" >>"${BUILD_INFO}"
-  echo '```txt' >>"${BUILD_INFO}"
-  echo "${ARIA2_VER_INFO}" >>"${BUILD_INFO}"
-  echo '```' >>"${BUILD_INFO}"
-}
+#  echo "aria2 version info:" >>"${BUILD_INFO}"
+#  echo '```txt' >>"${BUILD_INFO}"
+#  echo "${ARIA2_VER_INFO}" >>"${BUILD_INFO}"
+#  echo '```' >>"${BUILD_INFO}"
+#}
 
 test_build() {
   # get release
