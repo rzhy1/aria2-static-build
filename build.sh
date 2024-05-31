@@ -450,8 +450,9 @@ build_aria2() {
   ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF}
   make -j$(nproc)
   make install
-  echo "- aria2: source: ${aria2_latest_url:-cached aria2}" >>"${BUILD_INFO}"
-  echo >>"${BUILD_INFO}"
+  ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
+  echo "- aria2: ${ARIA2_VER},  source: ${aria2_latest_url:-cached aria2}" >>"${BUILD_INFO}"
+  #echo >>"${BUILD_INFO}"
 }
 #get_build_info() {
 #  echo "============= ARIA2 VER INFO ==================="
