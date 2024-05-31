@@ -451,7 +451,7 @@ build_aria2() {
   make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
-  echo "- aria2: ${ARIA2_VER},  source: ${aria2_latest_url:-cached aria2}" >>"${BUILD_INFO}"
+  echo "- aria2: Version:${ARIA2_VER},  source: ${aria2_latest_url:-cached aria2}" >>"${BUILD_INFO}"
   #echo >>"${BUILD_INFO}"
 }
 #get_build_info() {
