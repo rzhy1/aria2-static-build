@@ -60,7 +60,7 @@ Cached build dependencies (`downloads/`), `build_info.md` and `aria2c` will be f
 You can set more optional environment variables in `docker` command like:
 
 ```sh
-docker run --rm -e USE_ZLIB_NG=1 -e USE_LIBRESSL=1 -e USE_CHINA_MIRROR=0 -v "%cd%:/app" rzhy/ubuntu1:x86_64-w64-mingw32 /bin/bash -c "cd /app && ./build.sh"
+docker run --rm -e USE_ZLIB_NG=1 -e USE_LIBRESSL=1 -e USE_CHINA_MIRROR=0 -v "%cd%:/app" rzhy/ubuntu:x86_64-w64-mingw32 /bin/bash -c "cd /app && ./build.sh"
 ```
 
 Optional environment variables:
