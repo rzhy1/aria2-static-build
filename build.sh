@@ -367,15 +367,19 @@ prepare_sqlite() {
 
 prepare_c_ares() {
   cares_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
-  cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
-  # cares_latest_url="https://github.com/c-ares/c-ares/archive/main.tar.gz"
+  # cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
+  cares_latest_url="https://github.com/c-ares/c-ares/archive/main.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz.part" "${cares_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz.part" "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz"
+    mkdir -p "/usr/src/c-ares-${cares_tag}"
+    tar -zxf "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz" --strip-components=1 -C "/usr/src/c-ares-${cares_tag}"
+    cd "/usr/src/c-ares-${cares_tag}"
+  else
+    zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz"
+    wget -q -O- https://github.com/c-ares/c-ares/archive/main.tar.g | tar xz
+    cd c-ares-main
   fi
-  mkdir -p "/usr/src/c-ares-${cares_tag}"
-  tar -zxf "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz" --strip-components=1 -C "/usr/src/c-ares-${cares_tag}"
-  cd "/usr/src/c-ares-${cares_tag}"
   if [ ! -f "./configure" ]; then
     autoreconf -i
   fi
