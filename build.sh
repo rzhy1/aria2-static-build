@@ -369,7 +369,7 @@ prepare_c_ares() {
   cares_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
   # cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
   cares_latest_url="https://github.com/c-ares/c-ares/archive/main.tar.gz"
-  if [ ! -f "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz" ]; then
+  if [ ! -f "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz" ] && ! [[ $cares_latest_url =~ [0-9] ]];then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz.part" "${cares_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz.part" "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz"
     mkdir -p "/usr/src/c-ares-${cares_tag}"
