@@ -377,7 +377,7 @@ prepare_c_ares() {
     cd "/usr/src/c-ares-${cares_tag}"
   else
     zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz"
-    wget -q -O- https://github.com/c-ares/c-ares/archive/main.tar.g | tar xz
+    wget -q -O- https://github.com/c-ares/c-ares/archive/main.tar.gz | tar xz
     cd c-ares-main
   fi
   if [ ! -f "./configure" ]; then
