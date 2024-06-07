@@ -206,6 +206,8 @@ prepare_zlib() {
       cd "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
       echo "当前完整路径是: $PWD"
     else
+      mkdir -p "/usr/src/zlib-ng"
+      cd "/usr/src/zlib-ng"
       wget -q -O- https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz | tar xz
       cd zlib-ng-develop
       echo "当前完整路径是: $PWD"
@@ -377,6 +379,8 @@ prepare_c_ares() {
     cd "/usr/src/c-ares-${cares_tag}"
     echo "当前完整路径是: $PWD"
   else
+    mkdir -p "/usr/src/c-ares"
+    cd "/usr/src/c-ares"
     wget -q -O- https://github.com/c-ares/c-ares/archive/main.tar.gz | tar xz
     cd c-ares-main
     echo "当前完整路径是: $PWD"
