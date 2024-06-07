@@ -366,8 +366,8 @@ prepare_sqlite() {
 }
 
 prepare_c_ares() {
-  cares_tag="$(retry wget -qO- --compression=auto https://c-ares.org/ \| sed -nr "'s@.*<a href=\"/download/.*\">c-ares (.+)</a>.*@\1@p'")"
-  cares_latest_url="https://c-ares.org/download/c-ares-${cares_tag}.tar.gz"
+  cares_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/c-ares/c-ares/releasess \| jq -r "'.[0].tag_name'")"
+  cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
   # cares_latest_url="https://github.com/c-ares/c-ares/archive/main.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz.part" "${cares_latest_url}"
