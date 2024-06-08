@@ -34,7 +34,7 @@ s390x-linux*)
   ;;
 esac
 # export CROSS_ROOT="${CROSS_ROOT:-/cross_root}"
-export USE_ZLIB_NG="${USE_ZLIB_NG:-0}"
+export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 
 retry() {
   # max retry 5 times
