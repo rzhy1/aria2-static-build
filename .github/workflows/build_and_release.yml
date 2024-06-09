@@ -29,8 +29,15 @@ jobs:
             build-cache-x86_64-w64-mingw32-
       - name: Install prerequisites
         run: |
-          sudo apt-get update
-          sudo apt-get install -y mingw-w64 mingw-w64-tools gcc g++
+          echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
+          apt update
+          apt upgrade -y
+          echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Installing required packages"
+          apt install -y --no-install-recommends \
+              make binutils autoconf automake autotools-dev libtool \
+              patch ca-certificates \
+              pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
+              autopoint libcppunit-dev libxml2-dev lzip 
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
