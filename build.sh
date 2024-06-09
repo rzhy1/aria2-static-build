@@ -40,7 +40,7 @@ ccache --max-size=5G
 
 # 下载并编译 GMP
 echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP"
-wget -q -O- https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz
+wget  -O- https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
 ./configure \
     --disable-shared \
