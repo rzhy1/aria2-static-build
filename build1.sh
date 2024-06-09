@@ -511,4 +511,3 @@ echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译�
 # get release
 cp -fv "${CROSS_PREFIX}/bin/"aria2* "${SELF_DIR}"
 mv -fv "${SELF_DIR}/"aria2c.exe "${SELF_DIR}/"aria2c1.exe 
-echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 重命名完成"
