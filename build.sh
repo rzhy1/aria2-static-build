@@ -27,14 +27,7 @@ apt-get install -y --no-install-recommends \
     autopoint libcppunit-dev libxml2-dev libgcrypt20-dev lzip \
     python3-docutils
 
-curl -L -O https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
-curl -L -O https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.bz2
-curl -L -O https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz
-curl -L -O https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz
-curl -L -O https://github.com/c-ares/c-ares/releases/download/v1.30.0/c-ares-1.30.0.tar.gz
-curl -L -O https://libssh2.org/download/libssh2-1.11.0.tar.gz
-
-tar xf gmp-6.3.0.tar.xz
+wget -q -O- https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar xz
 cd gmp-*
 ./configure \
     --disable-shared \
@@ -47,7 +40,7 @@ cd gmp-*
 make -j$(nproc) install
 cd ..
 
-tar xf expat-2.6.2.tar.bz2
+wget -q -O- https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.bz2 | tar xj
 cd expat-*
 ./configure \
     --disable-shared \
@@ -58,7 +51,7 @@ cd expat-*
 make -j$(nproc) install
 cd ..
 
-tar xf sqlite-autoconf-3460000.tar.gz
+wget -q -O- https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz | tar xz
 cd sqlite-autoconf-*
 ./configure \
     --disable-shared \
@@ -69,8 +62,7 @@ cd sqlite-autoconf-*
 make -j$(nproc) install
 cd ..
 
-file zlib-1.3.1.tar.gz
-tar xf zlib-1.3.1.tar.gz
+wget -q -O- https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
 cd zlib-*
 CC=$HOST-gcc \
 AR=$HOST-ar \
@@ -85,7 +77,7 @@ STRIP=$HOST-strip \
 make -j$(nproc) install
 cd ..
 
-tar xf c-ares-1.30.0.tar.gz
+wget -q -O- https://github.com/c-ares/c-ares/releases/download/v1.30.0/c-ares-1.30.0.tar.gz | tar xz
 cd c-ares-*
 ./configure \
     --disable-shared \
@@ -98,7 +90,7 @@ cd c-ares-*
 make -j$(nproc) install
 cd ..
 
-tar xf libssh2-1.11.0.tar.gz
+wget -q -O- https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
 cd libssh2-*
 ./configure \
     --disable-shared \
