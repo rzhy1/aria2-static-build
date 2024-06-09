@@ -31,7 +31,7 @@ jobs:
         run: |
           echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
           apt update
-          apt upgrade -y
+          #apt upgrade -y
           echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Installing required packages"
           apt install -y --no-install-recommends \
               make binutils autoconf automake autotools-dev libtool \
