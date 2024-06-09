@@ -145,4 +145,4 @@ autoreconf -i && \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" && \
 make -j$(nproc) && \
 $HOST-strip src/aria2c.exe
-mv src/aria2c.exe src/aria2c2.exe
+mv src/aria2c.exe src/aria2c1.exe
