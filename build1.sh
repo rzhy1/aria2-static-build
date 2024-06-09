@@ -73,8 +73,11 @@ rm -f /etc/apt/apt.conf.d/*
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
-echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 更新软件包索引"
 apt update
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 升级已安装的软件包"
+DEBIAN_FRONTEND=noninteractive apt upgrade -y
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装软件包"
 apt install -y g++ \
   autoconf \
   automake \
@@ -84,6 +87,7 @@ apt install -y g++ \
   make \
   pkgconf \
   wget \
+  tcl \
   unzip
 
 BUILD_ARCH="$(gcc -dumpmachine)"
