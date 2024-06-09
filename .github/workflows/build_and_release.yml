@@ -53,12 +53,12 @@ jobs:
           path: "${{ github.workspace }}/aria2/src/aria2c.exe"
       - name: Get version number
         run: |
-          VERSION=$(curl -s https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep "aria2" | awk '{print $2}')
+          VERSION=$(curl -s https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep "aria2 " | awk '{print $3}')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          tag: aria2c${{ env.ARIA2_VERSION }}
+          tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
           artifacts: "${{ github.workspace }}/aria2/src/aria2c.exe"
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -92,12 +92,12 @@ jobs:
           path: "${{ github.workspace }}/aria2c1*"
       - name: Get version number
         run: |
-          VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep "aria2" | awk '{print $2}')
+          VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep "aria2 " | awk '{print $3}')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          tag: aria2c${{ env.ARIA2_VERSION }}
+          tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
           artifacts: "${{ github.workspace }}/aria2c1*"
           bodyFile: "${{ github.workspace }}/build_info.md"
