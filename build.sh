@@ -35,7 +35,7 @@ apt install -y  -y --no-install-recommends \
 
 # 下载并编译 GMP
 echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP"
-wget  -O- https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz || curl -L https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz
+curl -L https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
 ./configure \
     --disable-shared \
