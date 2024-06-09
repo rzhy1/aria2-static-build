@@ -76,9 +76,9 @@ echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "fals
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 更新软件包索引"
 apt update
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 升级已安装的软件包"
-DEBIAN_FRONTEND=noninteractive apt upgrade -y
+apt upgrade -y
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装软件包"
-apt install -y g++ \
+apt install --no-install-recommends -y g++ \
   autoconf \
   automake \
   autopoint \
