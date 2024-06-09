@@ -15,21 +15,23 @@ set -euo pipefail
 HOST=x86_64-w64-mingw32
 PREFIX=/usr/local/$HOST
 
+export DEBIAN_FRONTEND=noninteractive
+
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 rm -f /etc/apt/apt.conf.d/*
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
 echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
-apt-get update
-DEBIAN_FRONTEND="noninteractive" apt-get upgrade -y
+apt update
+apt-get upgrade -y
 echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Installing required packages"
-apt-get install -y --no-install-recommends \
+apt install -y  -y --no-install-recommends \
     make binutils autoconf automake autotools-dev libtool \
     patch ca-certificates \
     pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
     autopoint libcppunit-dev lzip \
-    wget ccache
+    wget
 
 # 设置 ccache
 #export PATH="/usr/lib/ccache:$PATH"
