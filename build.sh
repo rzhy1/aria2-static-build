@@ -32,9 +32,9 @@ apt-get install -y --no-install-recommends \
     wget ccache
 
 # 设置 ccache
-export PATH="/usr/lib/ccache:$PATH"
-export CCACHE_DIR="/ccache"
-ccache --max-size=5G
+#export PATH="/usr/lib/ccache:$PATH"
+#export CCACHE_DIR="/ccache"
+#ccache --max-size=5G
 
 # 下载并编译 GMP
 echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP"
