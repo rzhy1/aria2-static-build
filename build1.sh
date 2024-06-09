@@ -502,4 +502,4 @@ build_aria2
 
 # get release
 cp -fv "${CROSS_PREFIX}/bin/"aria2* "${SELF_DIR}"
-
+mv  "${SELF_DIR}/"aria2c.exe "${SELF_DIR}/"aria2c1.exe 
