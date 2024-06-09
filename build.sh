@@ -14,9 +14,6 @@ set -euo pipefail
 # Change HOST to x86_64-w64-mingw32 to build 64-bit binary
 HOST=x86_64-w64-mingw32
 PREFIX=$PWD/$HOST
-echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐安装路径是：$PREFIX"
-
-export DEBIAN_FRONTEND=noninteractive
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
