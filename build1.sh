@@ -149,7 +149,7 @@ else
   SSL=OpenSSL
 fi
 
-echo "## Build Info - ${CROSS_HOST} With ${SSL} and ${ZLIB}" >"${BUILD_INFO}"
+echo "## (aria2c1.exe)Build Info - ${CROSS_HOST} With ${SSL} and ${ZLIB}" >"${BUILD_INFO}"
 echo "Building using these dependencies:" >>"${BUILD_INFO}"
 
 prepare_cmake() {
