@@ -30,17 +30,12 @@ apt install -y  -y --no-install-recommends \
     make binutils autoconf automake autotools-dev libtool \
     patch ca-certificates \
     pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
-    autopoint libcppunit-dev lzip \
-    wget ccache
-
-# 设置 ccache
-export PATH="/usr/lib/ccache:$PATH"
-export CCACHE_DIR="/ccache"
-ccache --max-size=5G
+    autopoint libcppunit-dev lzip wget
+    
 
 # 下载并编译 GMP
 echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP"
-wget  -O- https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz
+wget  -O- https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz || curl -L https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
 ./configure \
     --disable-shared \
