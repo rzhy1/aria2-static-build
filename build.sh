@@ -13,7 +13,7 @@
 set -euo pipefail
 # Change HOST to x86_64-w64-mingw32 to build 64-bit binary
 HOST=x86_64-w64-mingw32
-PREFIX=/usr/local/$HOST
+PREFIX=$PWD/$HOST
 
 export DEBIAN_FRONTEND=noninteractive
 
