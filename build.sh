@@ -15,8 +15,7 @@
 HOST=x86_64-w64-mingw32
 PREFIX=/usr/local/$HOST
 
-# It would be better to use nearest ubuntu archive mirror for faster
-# downloads.
+export DEBIAN_FRONTEND=noninteractive
 
 apt-get update
 DEBIAN_FRONTEND="noninteractive" apt-get upgrade -y
