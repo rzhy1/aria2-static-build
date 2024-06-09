@@ -17,8 +17,6 @@ PREFIX=/usr/local/$HOST
 
 # It would be better to use nearest ubuntu archive mirror for faster
 # downloads.
-sed -i 's/archive.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/ubuntu.sources && \
-sed -i 's/security.ubuntu.com/mirrors.ustc.edu.cn/g' /etc/apt/sources.list.d/ubuntu.sources
 
 apt-get update && \
 DEBIAN_FRONTEND="noninteractive" apt-get upgrade -y && \
@@ -145,4 +143,3 @@ autoreconf -i && \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" && \
 make -j$(nproc) && \
 $HOST-strip src/aria2c.exe
-mv src/aria2c.exe src/aria2c1.exe
