@@ -78,15 +78,11 @@ apt update
 apt install -y g++ \
   make \
   libtool \
-  #jq \
   pkgconf \
-  #tcl \
   autoconf \
   automake \
   autopoint \
-  #patch \
   wget \
-  #unzip
 
 BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
