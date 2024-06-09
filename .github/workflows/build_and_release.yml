@@ -92,7 +92,7 @@ jobs:
           path: "${{ github.workspace }}/aria2c1*"
       - name: Get version number
         run: |
-          VERSION=$(curl -s https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep "aria2" | awk '{print $2}')
+          VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep "aria2" | awk '{print $2}')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
       - name: Create Release
         uses: ncipollo/release-action@v1
