@@ -74,20 +74,19 @@ echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/0
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
-apt update
-apt install -y g++ \
+sudo apt-get update
+sudo apt-get install -y g++ \
   make \
   libtool \
-  jq \
+  #jq \
   pkgconf \
-  file \
-  tcl \
+  #tcl \
   autoconf \
   automake \
   autopoint \
-  patch \
+  #patch \
   wget \
-  unzip
+  #unzip
 
 BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
