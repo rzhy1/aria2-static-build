@@ -22,10 +22,10 @@ rm -f /etc/apt/apt.conf.d/*
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
-echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
 apt update
 apt-get upgrade -y
-echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Installing required packages"
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Installing required packages"
 apt install -y  -y --no-install-recommends \
     make binutils autoconf automake autotools-dev libtool \
     patch ca-certificates \
@@ -34,7 +34,7 @@ apt install -y  -y --no-install-recommends \
     
 
 # 下载并编译 GMP
-echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP"
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
 ./configure \
@@ -49,7 +49,7 @@ make -j$(nproc) install
 cd ..
 
 # 下载并编译 Expat
-echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat"
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat"
 curl -L https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.bz2 | tar xj
 cd expat-*
 ./configure \
@@ -62,7 +62,7 @@ make -j$(nproc) install
 cd ..
 
 # 下载并编译 SQLite
-echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite"
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite"
 curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz | tar xz
 cd sqlite-autoconf-*
 ./configure \
@@ -75,7 +75,7 @@ make -j$(nproc) install
 cd ..
 
 # 下载并编译 zlib
-echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib"
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib"
 curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
 cd zlib-*
 CC=$HOST-gcc \
@@ -92,7 +92,7 @@ make -j$(nproc) install
 cd ..
 
 # 下载并编译 c-ares
-echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares"
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares"
 curl -L https://github.com/c-ares/c-ares/releases/download/v1.30.0/c-ares-1.30.0.tar.gz | tar xz
 cd c-ares-*
 ./configure \
@@ -107,7 +107,7 @@ make -j$(nproc) install
 cd ..
 
 # 下载并编译 libssh2
-echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2"
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2"
 curl -L https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
 cd libssh2-*
 ./configure \
@@ -121,7 +121,7 @@ make -j$(nproc) install
 cd ..
 
 # 下载并编译 aria2
-echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2"
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2"
 PKG_CONFIG_PATH=/usr/local/$HOST/lib/pkgconfig
 ARIA2_VERSION=master
 ARIA2_REF=refs/heads/master
@@ -157,12 +157,6 @@ make -j$(nproc)
 $HOST-strip src/aria2c.exe
 echo "当前完整路径是: $PWD"
 # 查找 aria2c.exe 并显示其完整路径
-
-当前完整路径是: /__w/aria2-static-build/aria2-static-build/aria2
-2024/06/09 Sun 08:07:13.993282573 - Finding aria2c.exe
-/__w/aria2-static-build/aria2-static-build/aria2/src/aria2c.exe
-2024/06/09 Sun 08:07:14.001590371 - Script finished
-
 echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Finding aria2c.exe"
 find $(pwd) -name "aria2c.exe" -exec realpath {} \;
-echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成"
+echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成"
