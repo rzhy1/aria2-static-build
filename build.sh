@@ -18,9 +18,9 @@ PREFIX=/usr/local/$HOST
 export DEBIAN_FRONTEND=noninteractive
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
-rm -f /etc/apt/apt.conf.d/*
-echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
-echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
+#rm -f /etc/apt/apt.conf.d/*
+#echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
+#echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
 apt update
@@ -155,8 +155,4 @@ autoreconf -i
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
-echo "当前完整路径是: $PWD"
-# 查找 aria2c.exe 并显示其完整路径
-echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Finding aria2c.exe"
-find $(pwd) -name "aria2c.exe" -exec realpath {} \;
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成"
