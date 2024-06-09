@@ -18,8 +18,8 @@ PREFIX=/usr/local/$HOST
 # It would be better to use nearest ubuntu archive mirror for faster
 # downloads.
 
-apt-get update && \
-DEBIAN_FRONTEND="noninteractive" apt-get upgrade -y && \
+apt-get update
+DEBIAN_FRONTEND="noninteractive" apt-get upgrade -y
 apt-get install -y --no-install-recommends \
     make binutils autoconf automake autotools-dev libtool \
     patch ca-certificates \
@@ -27,15 +27,15 @@ apt-get install -y --no-install-recommends \
     autopoint libcppunit-dev libxml2-dev libgcrypt20-dev lzip \
     python3-docutils
 
-curl -L -O https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz && \
-curl -L -O https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.bz2 && \
-curl -L -O https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz && \
-curl -L -O https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz && \
-curl -L -O https://github.com/c-ares/c-ares/releases/download/v1.30.0/c-ares-1.30.0.tar.gz && \
+curl -L -O https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz
+curl -L -O https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.bz2
+curl -L -O https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz
+curl -L -O https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz
+curl -L -O https://github.com/c-ares/c-ares/releases/download/v1.30.0/c-ares-1.30.0.tar.gz
 curl -L -O https://libssh2.org/download/libssh2-1.11.0.tar.gz
 
-tar xf gmp-6.3.0.tar.xz && \
-cd gmp-* && \
+tar xf gmp-6.3.0.tar.xz
+cd gmp-*
 ./configure \
     --disable-shared \
     --enable-static \
@@ -43,35 +43,35 @@ cd gmp-* && \
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
-    CFLAGS="-mtune=generic -O2 -g0" && \
+    CFLAGS="-mtune=generic -O2 -g0"
 make -j$(nproc) install
 cd ..
 
-tar xf expat-2.6.2.tar.bz2 && \
-cd expat-* && \
+tar xf expat-2.6.2.tar.bz2
+cd expat-*
 ./configure \
     --disable-shared \
     --enable-static \
     --prefix=/usr/local/$HOST \
     --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) && \
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 cd ..
 
-tar xf sqlite-autoconf-3460000.tar.gz && \
-cd sqlite-autoconf-* && \
+tar xf sqlite-autoconf-3460000.tar.gz
+cd sqlite-autoconf-*
 ./configure \
     --disable-shared \
     --enable-static \
     --prefix=/usr/local/$HOST \
     --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) && \
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 cd ..
 
-file zlib-1.3.1.tar.gz && \
-tar xf zlib-1.3.1.tar.gz && \
-cd zlib-* && \
+file zlib-1.3.1.tar.gz
+tar xf zlib-1.3.1.tar.gz
+cd zlib-*
 CC=$HOST-gcc \
 AR=$HOST-ar \
 LD=$HOST-ld \
@@ -81,12 +81,12 @@ STRIP=$HOST-strip \
     --prefix=/usr/local/$HOST \
     --libdir=/usr/local/$HOST/lib \
     --includedir=/usr/local/$HOST/include \
-    --static && \
+    --static
 make -j$(nproc) install
 cd ..
 
-tar xf c-ares-1.30.0.tar.gz && \
-cd c-ares-* && \
+tar xf c-ares-1.30.0.tar.gz
+cd c-ares-*
 ./configure \
     --disable-shared \
     --enable-static \
@@ -94,19 +94,19 @@ cd c-ares-* && \
     --prefix=/usr/local/$HOST \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    LIBS="-lws2_32" && \
+    LIBS="-lws2_32"
 make -j$(nproc) install
 cd ..
 
-tar xf libssh2-1.11.0.tar.gz && \
-cd libssh2-* && \
+tar xf libssh2-1.11.0.tar.gz
+cd libssh2-*
 ./configure \
     --disable-shared \
     --enable-static \
     --prefix=/usr/local/$HOST \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    LIBS="-lws2_32" && \
+    LIBS="-lws2_32"
 make -j$(nproc) install
 cd ..
 
@@ -114,11 +114,11 @@ PKG_CONFIG_PATH=/usr/local/$HOST/lib/pkgconfig
 ARIA2_VERSION=master
 ARIA2_REF=refs/heads/master
 curl -L -o version.json https://api.github.com/repos/aria2/aria2/git/$ARIA2_REF
-git clone -b $ARIA2_VERSION --depth 1 https://github.com/aria2/aria2.git && \
-cd aria2 && \
-sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc && \
-sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc && \
-autoreconf -i && \
+git clone -b $ARIA2_VERSION --depth 1 https://github.com/aria2/aria2.gi
+cd aria2
+sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
+sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
+autoreconf -i
 ./configure \
     --host=$HOST \
     --prefix=$PREFIX \
@@ -140,6 +140,6 @@ autoreconf -i && \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
-    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" && \
-make -j$(nproc) && \
+    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+make -j$(nproc)
 $HOST-strip src/aria2c.exe
