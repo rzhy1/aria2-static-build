@@ -24,8 +24,8 @@ apt-get install -y --no-install-recommends \
     make binutils autoconf automake autotools-dev libtool \
     patch ca-certificates \
     pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
-    autopoint libcppunit-dev libxml2-dev libgcrypt20-dev lzip \
-    python3-docutils wget
+    autopoint libcppunit-dev libgcrypt20-dev lzip \
+    wget
 
 wget -q -O- https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
