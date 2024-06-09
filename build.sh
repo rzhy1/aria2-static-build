@@ -35,7 +35,7 @@ apt install -y  -y --no-install-recommends \
 
 # 下载并编译 GMP
 echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP"
-curl -L https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz
+curl -L https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
 ./configure \
     --disable-shared \
@@ -157,6 +157,12 @@ make -j$(nproc)
 $HOST-strip src/aria2c.exe
 echo "当前完整路径是: $PWD"
 # 查找 aria2c.exe 并显示其完整路径
+
+当前完整路径是: /__w/aria2-static-build/aria2-static-build/aria2
+2024/06/09 Sun 08:07:13.993282573 - Finding aria2c.exe
+/__w/aria2-static-build/aria2-static-build/aria2/src/aria2c.exe
+2024/06/09 Sun 08:07:14.001590371 - Script finished
+
 echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Finding aria2c.exe"
 find $(pwd) -name "aria2c.exe" -exec realpath {} \;
-echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Script finished"
+echo "★★★★★★★★★★$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成"
