@@ -23,7 +23,7 @@ export DEBIAN_FRONTEND=noninteractive
 #echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
-aptt update
+apt update
 apt upgrade -y
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Installing required packages"
 apt install -y --no-install-recommends \
