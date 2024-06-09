@@ -76,12 +76,13 @@ echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "fals
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
 apt update
 apt install -y g++ \
-  make \
-  libtool \
-  pkgconf \
   autoconf \
   automake \
   autopoint \
+  jq \
+  libtool \
+  make \
+  pkgconf \
   wget \
   unzip
 
