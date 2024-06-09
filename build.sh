@@ -15,6 +15,7 @@ set -euo pipefail
 HOST=x86_64-w64-mingw32
 PREFIX=$PWD/$HOST
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐安装路径是：$PREFIX"
+ls -l /etc/apt/apt.conf.d/
 
 export DEBIAN_FRONTEND=noninteractive
 
