@@ -27,7 +27,7 @@ apt-get install -y --no-install-recommends \
     autopoint libcppunit-dev libxml2-dev libgcrypt20-dev lzip \
     python3-docutils wget
 
-wget -q -O- https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar xz
+wget -q -O- https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
 ./configure \
     --disable-shared \
