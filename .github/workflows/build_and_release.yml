@@ -43,7 +43,6 @@ jobs:
           if [ "${GITHUB_EVENT_NAME}" = release ]; then
             export ARIA2_VER="${GITHUB_REF#refs/*/}"
             echo "ARIA2_VER=${ARIA2_VER}" >> $GITHUB_ENV
-            echo "ARIA2_VER=${ARIA2_VER}"
           fi
           chmod +x "${GITHUB_WORKSPACE}/build.sh"
           "${GITHUB_WORKSPACE}/build.sh"
@@ -52,10 +51,14 @@ jobs:
         with:
           name: aria2c.exe
           path: "${{ github.workspace }}/aria2/src/aria2c.exe"
+      - name: Get version number
+        run: |
+          VERSION=$(curl -s https://github.com/aria2/aria2/blob/master/NEWS | grep "aria2" | awk '{print $2}')
+          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          tag: aria2c
+          tag: aria2c${{ env.ARIA2_VERSION }}
           allowUpdates: true
           artifacts: "${{ github.workspace }}/aria2/src/aria2c.exe"
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -79,7 +82,6 @@ jobs:
           if [ "${GITHUB_EVENT_NAME}" = release ]; then
             export ARIA2_VER="${GITHUB_REF#refs/*/}"
             echo "ARIA2_VER=${ARIA2_VER}" >> $GITHUB_ENV
-            echo "ARIA2_VER=${ARIA2_VER}"
           fi
           chmod +x "${GITHUB_WORKSPACE}/build1.sh"
           "${GITHUB_WORKSPACE}/build1.sh"
@@ -88,10 +90,14 @@ jobs:
         with:
           name: aria2c1.exe
           path: "${{ github.workspace }}/aria2c1*"
+      - name: Get version number
+        run: |
+          VERSION=$(curl -s https://github.com/aria2/aria2/blob/master/NEWS | grep "aria2" | awk '{print $2}')
+          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
-          tag: aria2c
+          tag: aria2c${{ env.ARIA2_VERSION }}
           allowUpdates: true
           artifacts: "${{ github.workspace }}/aria2c1*"
           bodyFile: "${{ github.workspace }}/build_info.md"
