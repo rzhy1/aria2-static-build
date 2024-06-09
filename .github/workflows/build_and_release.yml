@@ -17,7 +17,7 @@ on:
 jobs:
   static-build_zlib_and_libexpat:
     runs-on: ubuntu-24.04
-    #container: "rzhy/ubuntu:x86_64-w64-mingw32"
+    container: "rzhy/ubuntu:x86_64-w64-mingw32"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
