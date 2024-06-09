@@ -18,9 +18,9 @@ PREFIX=/usr/local/$HOST
 export DEBIAN_FRONTEND=noninteractive
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
-#rm -f /etc/apt/apt.conf.d/*
-#echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
-#echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https    
+sudo rm -f /etc/apt/apt.conf.d/*
+echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
+echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https    
 
 # 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP"
@@ -34,7 +34,7 @@ cd gmp-*
     --disable-cxx \
     --enable-fat \
     CFLAGS="-mtune=generic -O2 -g0"
-make -j$(nproc) install
+sudo make -j$(nproc) install
 cd ..
 
 # 下载并编译 Expat
@@ -47,7 +47,7 @@ cd expat-*
     --prefix=/usr/local/$HOST \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-make -j$(nproc) install
+sudo make -j$(nproc) install
 cd ..
 
 # 下载并编译 SQLite
@@ -60,7 +60,7 @@ cd sqlite-autoconf-*
     --prefix=/usr/local/$HOST \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-make -j$(nproc) install
+sudo make -j$(nproc) install
 cd ..
 
 # 下载并编译 zlib
@@ -77,7 +77,7 @@ STRIP=$HOST-strip \
     --libdir=/usr/local/$HOST/lib \
     --includedir=/usr/local/$HOST/include \
     --static
-make -j$(nproc) install
+sudo make -j$(nproc) install
 cd ..
 
 # 下载并编译 c-ares
@@ -92,7 +92,7 @@ cd c-ares-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32"
-make -j$(nproc) install
+sudo make -j$(nproc) install
 cd ..
 
 # 下载并编译 libssh2
@@ -106,7 +106,7 @@ cd libssh2-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32"
-make -j$(nproc) install
+sudo make -j$(nproc) install
 cd ..
 
 # 下载并编译 aria2
@@ -142,6 +142,6 @@ autoreconf -i
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
-make -j$(nproc)
-$HOST-strip src/aria2c.exe
+sudo make -j$(nproc)
+sudo $HOST-strip src/aria2c.exe
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成"
