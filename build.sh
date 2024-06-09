@@ -13,7 +13,7 @@
 set -euo pipefail
 # Change HOST to x86_64-w64-mingw32 to build 64-bit binary
 HOST=x86_64-w64-mingw32
-PREFIX=$PWD/$HOST
+PREFIX=/usr/local/$HOST
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -29,7 +29,7 @@ cd gmp-*
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=/usr/local/$HOST \
+    --prefix=$PREFIX \
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
@@ -44,7 +44,7 @@ cd expat-*
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=/usr/local/$HOST \
+    --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
@@ -57,7 +57,7 @@ cd sqlite-autoconf-*
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=/usr/local/$HOST \
+    --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
@@ -73,9 +73,9 @@ LD=$HOST-ld \
 RANLIB=$HOST-ranlib \
 STRIP=$HOST-strip \
 ./configure \
-    --prefix=/usr/local/$HOST \
-    --libdir=/usr/local/$HOST/lib \
-    --includedir=/usr/local/$HOST/include \
+    --prefix=$PREFIX \
+    --libdir=$PREFIX/lib \
+    --includedir=$PREFIX/include \
     --static
 make -j$(nproc) install
 cd ..
@@ -88,7 +88,7 @@ cd c-ares-*
     --disable-shared \
     --enable-static \
     --without-random \
-    --prefix=/usr/local/$HOST \
+    --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32"
@@ -102,7 +102,7 @@ cd libssh2-*
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=/usr/local/$HOST \
+    --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32"
