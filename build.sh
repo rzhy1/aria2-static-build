@@ -31,12 +31,12 @@ apt install -y  -y --no-install-recommends \
     patch ca-certificates \
     pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
     autopoint libcppunit-dev lzip \
-    wget
+    wget ccache
 
 # 设置 ccache
-#export PATH="/usr/lib/ccache:$PATH"
-#export CCACHE_DIR="/ccache"
-#ccache --max-size=5G
+export PATH="/usr/lib/ccache:$PATH"
+export CCACHE_DIR="/ccache"
+ccache --max-size=5G
 
 # 下载并编译 GMP
 echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP"
