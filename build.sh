@@ -10,7 +10,7 @@
 # commands:
 #
 # $ sudo docker run --rm -it -v /path/to/dest:/out aria2-mingw cp /aria2/src/aria2c.exe /out
-
+set -euo pipefail
 # Change HOST to x86_64-w64-mingw32 to build 64-bit binary
 HOST=x86_64-w64-mingw32
 PREFIX=/usr/local/$HOST
@@ -24,7 +24,12 @@ apt-get install -y --no-install-recommends \
     patch ca-certificates \
     pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
     autopoint libcppunit-dev libgcrypt20-dev lzip \
-    wget
+    wget ccache
+
+# 设置 ccache
+export PATH="/usr/lib/ccache:$PATH"
+export CCACHE_DIR="/ccache"
+ccache --max-size=5G
 
 wget -q -O- https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
