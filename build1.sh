@@ -83,6 +83,7 @@ apt install -y g++ \
   automake \
   autopoint \
   wget \
+  unzip
 
 BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
