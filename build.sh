@@ -27,11 +27,11 @@ apt-get update
 apt-get upgrade -y
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Installing required packages"
 apt-get install -y --no-install-recommends \
-        make binutils autoconf automake autotools-dev libtool \
-        patch ca-certificates \
-        pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
-        autopoint libcppunit-dev libxml2-dev libgcrypt20-dev lzip \
-        python3-docutils
+    make binutils autoconf automake autotools-dev libtool \
+    patch ca-certificates \
+    pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
+    autopoint libcppunit-dev libxml2-dev libgcrypt20-dev lzip \
+    python3-docutils
     
 
 # 下载并编译 GMP
