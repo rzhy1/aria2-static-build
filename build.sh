@@ -23,14 +23,14 @@ export DEBIAN_FRONTEND=noninteractive
 #echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
-apt update
+apt-get update
 apt-get upgrade -y
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Installing required packages"
-apt install -y  -y --no-install-recommends \
+apt-get install -y  -y --no-install-recommends \
     make binutils autoconf automake autotools-dev libtool \
     patch ca-certificates \
     pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
-    autopoint libcppunit-dev lzip wget
+    autopoint libcppunit-dev lzip
     
 
 # 下载并编译 GMP
