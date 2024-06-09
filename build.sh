@@ -20,13 +20,15 @@ rm -f /etc/apt/apt.conf.d/*
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
+echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updating and upgrading packages"
 apt-get update
 DEBIAN_FRONTEND="noninteractive" apt-get upgrade -y
+echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Installing required packages"
 apt-get install -y --no-install-recommends \
     make binutils autoconf automake autotools-dev libtool \
     patch ca-certificates \
     pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
-    autopoint libcppunit-dev libgcrypt20-dev lzip \
+    autopoint libcppunit-dev lzip \
     wget ccache
 
 # 设置 ccache
@@ -34,6 +36,8 @@ export PATH="/usr/lib/ccache:$PATH"
 export CCACHE_DIR="/ccache"
 ccache --max-size=5G
 
+# 下载并编译 GMP
+echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP"
 wget -q -O- https://gmplib.org/download/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
 ./configure \
@@ -47,6 +51,8 @@ cd gmp-*
 make -j$(nproc) install
 cd ..
 
+# 下载并编译 Expat
+echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat"
 wget -q -O- https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.bz2 | tar xj
 cd expat-*
 ./configure \
@@ -58,6 +64,8 @@ cd expat-*
 make -j$(nproc) install
 cd ..
 
+# 下载并编译 SQLite
+echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite"
 wget -q -O- https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz | tar xz
 cd sqlite-autoconf-*
 ./configure \
@@ -69,6 +77,8 @@ cd sqlite-autoconf-*
 make -j$(nproc) install
 cd ..
 
+# 下载并编译 zlib
+echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib"
 wget -q -O- https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
 cd zlib-*
 CC=$HOST-gcc \
@@ -84,6 +94,8 @@ STRIP=$HOST-strip \
 make -j$(nproc) install
 cd ..
 
+# 下载并编译 c-ares
+echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares"
 wget -q -O- https://github.com/c-ares/c-ares/releases/download/v1.30.0/c-ares-1.30.0.tar.gz | tar xz
 cd c-ares-*
 ./configure \
@@ -97,6 +109,8 @@ cd c-ares-*
 make -j$(nproc) install
 cd ..
 
+# 下载并编译 libssh2
+echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2"
 wget -q -O- https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
 cd libssh2-*
 ./configure \
@@ -109,6 +123,8 @@ cd libssh2-*
 make -j$(nproc) install
 cd ..
 
+# 下载并编译 aria2
+echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2"
 PKG_CONFIG_PATH=/usr/local/$HOST/lib/pkgconfig
 ARIA2_VERSION=master
 ARIA2_REF=refs/heads/master
@@ -142,3 +158,8 @@ autoreconf -i
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
+echo "当前完整路径是: $PWD"
+# 查找 aria2c.exe 并显示其完整路径
+echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Finding aria2c.exe"
+find $(pwd) -name "aria2c.exe" -exec realpath {} \;
+echo "$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Script finished"
