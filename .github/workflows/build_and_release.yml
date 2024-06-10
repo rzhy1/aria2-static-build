@@ -53,7 +53,7 @@ jobs:
       #    path: "${{ github.workspace }}/aria2/src/aria2c.exe"
       - name: Get version number
         run: |
-          VERSION=$(curl -s https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep "aria2 " | awk '{print $3}')
+          VERSION=$(curl -s https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
           echo "ARIA2_VERSION=${VERSION}"
       - name: Create Release
