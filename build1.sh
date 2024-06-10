@@ -56,15 +56,6 @@ retry() {
 
 source /etc/os-release
 dpkg --add-architecture i386
-# Ubuntu mirror for local building
-if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-  cat >/etc/apt/sources.list <<EOF
-deb http://mirror.sjtu.edu.cn/ubuntu/ ${UBUNTU_CODENAME} main restricted universe multiverse
-deb http://mirror.sjtu.edu.cn/ubuntu/ ${UBUNTU_CODENAME}-updates main restricted universe multiverse
-deb http://mirror.sjtu.edu.cn/ubuntu/ ${UBUNTU_CODENAME}-backports main restricted universe multiverse
-deb http://mirror.sjtu.edu.cn/ubuntu/ ${UBUNTU_CODENAME}-security main restricted universe multiverse
-EOF
-fi
 
 export DEBIAN_FRONTEND=noninteractive
 
@@ -160,10 +151,7 @@ prepare_cmake() {
     cmake_latest_ver="$(retry wget -qO- --compression=auto https://cmake.org/download/ \| grep "'Latest Release'" \| sed -r "'s/.*Latest Release\s*\((.+)\).*/\1/'" \| head -1)"
     cmake_binary_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz"
     cmake_sha256_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-SHA-256.txt"
-    if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-      cmake_binary_url="https://mirror.ghproxy.com/${cmake_binary_url}"
-      cmake_sha256_url="https://mirror.ghproxy.com/${cmake_sha256_url}"
-    fi
+
     if [ -f "${DOWNLOADS_DIR}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz" ]; then
       cd "${DOWNLOADS_DIR}"
       cmake_sha256="$(retry wget -qO- --compression=auto "${cmake_sha256_url}")"
@@ -183,9 +171,6 @@ prepare_ninja() {
   if ! which ninja &>/dev/null; then
     ninja_ver="$(retry wget -qO- --compression=auto https://ninja-build.org/ \| grep "'The last Ninja release is'" \| sed -r "'s@.*<b>(.+)</b>.*@\1@'" \| head -1)"
     ninja_binary_url="https://github.com/ninja-build/ninja/releases/download/${ninja_ver}/ninja-linux.zip"
-    if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-      ninja_binary_url="https://mirror.ghproxy.com/${ninja_binary_url}"
-    fi
     if [ ! -f "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip" ]; then
       rm -f "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip.part"
       retry wget -cT10 -O "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip.part" "${ninja_binary_url}"
@@ -260,9 +245,6 @@ prepare_xz() {
   # xz_tag="$(printf '%s' "${xz_release_info}" | jq -r '.tag_name')"
   # xz_archive_name="$(printf '%s' "${xz_release_info}" | jq -r '.assets[].name | select(endswith("tar.xz"))')"
   # xz_latest_url="https://github.com/tukaani-project/xz/releases/download/${xz_tag}/${xz_archive_name}"
-  # if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-  #   xz_latest_url="https://mirror.ghproxy.com/${xz_latest_url}"
-  # fi
   # Download from sourceforge
   xz_tag="$(retry wget -qO- --compression=auto https://sourceforge.net/projects/lzmautils/files/ \| grep -i \'span class=\"sub-label\"\' \| head -1 \| sed -r "'s/.*xz-(.+)\.tar\.gz.*/\1/'")"
   xz_latest_url="https://sourceforge.net/projects/lzmautils/files/xz-${xz_tag}.tar.xz"
@@ -286,9 +268,6 @@ prepare_ssl() {
     if [ x"${USE_LIBRESSL}" = x1 ]; then
       # libressl
       libressl_tag="$(retry wget -qO- --compression=auto https://www.libressl.org/index.html \| grep "'release is'" \| tail -1 \| sed -r "'s/.* (.+)<.*>$/\1/'")" libressl_latest_url="https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${libressl_tag}.tar.gz"
-      if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-        libressl_latest_url="https://mirror.sjtu.edu.cn/OpenBSD/LibreSSL/libressl-${libressl_tag}.tar.gz"
-      fi
       if [ ! -f "${DOWNLOADS_DIR}/libressl-${libressl_tag}.tar.gz" ]; then
         retry wget -cT10 -O "${DOWNLOADS_DIR}/libressl-${libressl_tag}.tar.gz.part" "${libressl_latest_url}"
         mv -fv "${DOWNLOADS_DIR}/libressl-${libressl_tag}.tar.gz.part" "${DOWNLOADS_DIR}/libressl-${libressl_tag}.tar.gz"
@@ -309,9 +288,6 @@ prepare_ssl() {
       openssl_filename="$(retry wget -qO- --compression=auto https://www.openssl.org/source/ \| grep -o "'href=\"openssl-3.2.*tar.gz\"'" \| grep -o "'[^\"]*.tar.gz'" \| head -1)"
       openssl_ver="$(echo "${openssl_filename}" | sed -r 's/openssl-(.+)\.tar\.gz/\1/')"
       openssl_latest_url="https://github.com/openssl/openssl/archive/refs/tags/${openssl_filename}"
-      if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-        openssl_latest_url="https://mirror.ghproxy.com/${openssl_latest_url}"
-      fi
       if [ ! -f "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz" ]; then
         retry wget -cT10 -O "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz.part" "${openssl_latest_url}"
         mv -fv "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz.part" "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz"
@@ -349,9 +325,6 @@ prepare_libxml2() {
 prepare_sqlite() {
   sqlite_tag="$(retry wget -qO- --compression=auto https://www.sqlite.org/index.html \| sed -nr "'s/.*>Version (.+)<.*/\1/p'")"
   sqlite_latest_url="https://github.com/sqlite/sqlite/archive/release.tar.gz"
-  if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-    sqlite_latest_url="https://mirror.ghproxy.com/${sqlite_latest_url}"
-  fi
   if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
@@ -434,14 +407,11 @@ build_aria2() {
 
   if [ -n "${ARIA2_VER}" ]; then
     aria2_latest_url="https://github.com/aria2/aria2/releases/download/release-${ARIA2_VER}/aria2-${ARIA2_VER}.tar.gz"
-    echo "aria2_latest_url: $aria2_latest_url"
   else
     aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
-    echo "aria2_latest_url: $aria2_latest_url"
   fi
-  if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-    aria2_latest_url="https://mirror.ghproxy.com/${aria2_latest_url}"
-  fi
+  echo "aria2_latest_url: $aria2_latest_url"
+  
 
   if [ ! -f "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz.part" "${aria2_latest_url}"
