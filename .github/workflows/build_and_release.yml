@@ -27,34 +27,35 @@ jobs:
           key: build-cache-x86_64-w64-mingw32-${{ github.sha }}
           restore-keys: |
             build-cache-x86_64-w64-mingw32-
-      - name: Install prerequisites
-        run: |
-          sudo apt-get update
-          DEBIAN_FRONTEND=noninteractive sudo apt-get upgrade -y
-          sudo apt-get install -y --no-install-recommends \
-              make binutils autoconf automake autotools-dev libtool \
-              patch ca-certificates \
-              pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
-              autopoint libcppunit-dev  lzip 
-      - name: Compile
+      #- name: Install prerequisites
+      #  run: |
+      #    sudo apt-get update
+      #    DEBIAN_FRONTEND=noninteractive sudo apt-get upgrade -y
+      #    sudo apt-get install -y --no-install-recommends \
+      #        make binutils autoconf automake autotools-dev libtool \
+      #        patch ca-certificates \
+      #        pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
+      #        autopoint libcppunit-dev  lzip 
+      #- name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
-        run: |
-          if [ "${GITHUB_EVENT_NAME}" = release ]; then
-            export ARIA2_VER="${GITHUB_REF#refs/*/}"
-            echo "ARIA2_VER=${ARIA2_VER}" >> $GITHUB_ENV
-          fi
-          chmod +x "${GITHUB_WORKSPACE}/build.sh"
-          "${GITHUB_WORKSPACE}/build.sh"
-      - name: Archive aria2c.exe
-        uses: actions/upload-artifact@v4
-        with:
-          name: aria2c.exe
-          path: "${{ github.workspace }}/aria2/src/aria2c.exe"
+      #  run: |
+      #    if [ "${GITHUB_EVENT_NAME}" = release ]; then
+      #      export ARIA2_VER="${GITHUB_REF#refs/*/}"
+      #      echo "ARIA2_VER=${ARIA2_VER}" >> $GITHUB_ENV
+      #    fi
+      #    chmod +x "${GITHUB_WORKSPACE}/build.sh"
+      #    "${GITHUB_WORKSPACE}/build.sh"
+      #- name: Archive aria2c.exe
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: aria2c.exe
+      #    path: "${{ github.workspace }}/aria2/src/aria2c.exe"
       - name: Get version number
         run: |
           VERSION=$(curl -s https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep "aria2 " | awk '{print $3}')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "ARIA2_VERSION=${VERSION}"
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
