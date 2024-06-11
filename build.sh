@@ -22,7 +22,7 @@ PREFIX=$PWD/$HOST
 
 # 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP"
-wget -O- https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz | tar x --xz
+curl -L https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
 ./configure \
     --disable-shared \
@@ -37,7 +37,7 @@ cd ..
 
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat"
-wget -O- https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.bz2 | tar xj
+curl -L https://github.com/libexpat/libexpat/releases/download/R_2_6_2/expat-2.6.2.tar.bz2 | tar xj
 cd expat-*
 ./configure \
     --disable-shared \
@@ -50,7 +50,7 @@ cd ..
 
 # 下载并编译 SQLite
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite"
-wget -O- https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz | tar xz
+curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460000.tar.gz | tar xz
 cd sqlite-autoconf-*
 ./configure \
     --disable-shared \
@@ -63,7 +63,7 @@ cd ..
 
 # 下载并编译 zlib
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib"
-wget -O- https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
+curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
 cd zlib-*
 CC=$HOST-gcc \
 AR=$HOST-ar \
@@ -80,7 +80,7 @@ cd ..
 
 # 下载并编译 c-ares
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares"
-wget -O- https://github.com/c-ares/c-ares/releases/download/v1.30.0/c-ares-1.30.0.tar.gz | tar xz
+curl -L https://github.com/c-ares/c-ares/releases/download/v1.30.0/c-ares-1.30.0.tar.gz | tar xz
 cd c-ares-*
 ./configure \
     --disable-shared \
@@ -95,7 +95,7 @@ cd ..
 
 # 下载并编译 libssh2
 echo "⭐⭐⭐⭐⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2"
-wget -O- https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
+curl -L https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
 cd libssh2-*
 ./configure \
     --disable-shared \
