@@ -12,7 +12,7 @@ on:
     types:
       - released
   schedule:
-    - cron: "0 0 * * 6"
+    - cron: "0 0 * * *"
 
 jobs:
   static-build_zlib_and_libexpat:
