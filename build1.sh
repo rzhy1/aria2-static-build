@@ -145,6 +145,9 @@ fi
 
 echo "## (aria2c1.exe)Build Info - ${CROSS_HOST} With ${SSL} and ${ZLIB}" >"${BUILD_INFO}"
 echo "Building using these dependencies:" >>"${BUILD_INFO}"
+# 初始化表格
+echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
+echo "|------------|---------|--------|" >>"${BUILD_INFO}"
 
 prepare_cmake() {
   if ! which cmake &>/dev/null; then
@@ -214,7 +217,7 @@ prepare_zlib() {
     cmake --build build
     cmake --install build
     zlib_ng_ver="Version: ${zlib_ng_latest_tag}($(grep '^Version:' ${CROSS_PREFIX}/lib/pkgconfig/zlib.pc | awk '{print $2}'))"
-    echo "- zlib-ng: ${zlib_ng_ver}, source: ${zlib_ng_latest_url:-cached zlib-ng}" >>"${BUILD_INFO}"
+    echo "| zlib-ng | ${zlib_ng_ver} | ${zlib_ng_latest_url:-cached zlib-ng} |" >>"${BUILD_INFO}"
     # Fix mingw build sharedlibdir lost issue
     sed -i 's@^sharedlibdir=.*@sharedlibdir=${libdir}@' "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
   else
@@ -235,7 +238,7 @@ prepare_zlib() {
       make install
     fi
     zlib_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc")"
-    echo "- zlib: ${zlib_ver}, source: ${zlib_latest_url:-cached zlib}" >>"${BUILD_INFO}"
+    echo "| zlib | ${zlib_ver} | ${zlib_latest_url:-cached zlib} |" >>"${BUILD_INFO}"
   fi
 }
 
@@ -259,7 +262,8 @@ prepare_xz() {
   make -j8
   make install
   xz_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc")"
-  echo "- xz: ${xz_ver}, source: ${xz_latest_url:-cached xz}" >>"${BUILD_INFO}"
+  echo "| xz | ${xz_ver} | ${xz_latest_url:-cached xz} |" >>"${BUILD_INFO}"
+  
 }
 
 prepare_ssl() {
@@ -282,7 +286,7 @@ prepare_ssl() {
       make -j$(nproc)
       make install_sw
       libressl_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/openssl.pc")"
-      echo "- libressl: ${libressl_ver}, source: ${libressl_latest_url:-cached libressl}" >>"${BUILD_INFO}"
+      echo "| libressl | ${libressl_ver} | ${libressl_latest_url:-cached libressl} |" >>"${BUILD_INFO}"
     else
       # openssl
       openssl_filename="$(retry wget -qO- --compression=auto https://www.openssl.org/source/ \| grep -o "'href=\"openssl-3.2.*tar.gz\"'" \| grep -o "'[^\"]*.tar.gz'" \| head -1)"
@@ -299,7 +303,7 @@ prepare_ssl() {
       make -j$(nproc)
       make install_sw
       openssl_ver="$(grep Version: "${CROSS_PREFIX}"/lib*/pkgconfig/openssl.pc)"
-      echo "- openssl: ${openssl_ver}, source: ${openssl_latest_url:-cached openssl}" >>"${BUILD_INFO}"
+      echo "| openssl | ${openssl_ver} | ${openssl_latest_url:-cached openssl} |" >>"${BUILD_INFO}"
     fi
   fi
 }
@@ -319,7 +323,7 @@ prepare_libxml2() {
   make -j8
   make install
   libxml2_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc)"
-  echo "- libxml2: ${libxml2_ver}, source: ${libxml2_latest_url:-cached libxml2}" >>"${BUILD_INFO}"
+  echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
 }
 
 prepare_sqlite() {
@@ -340,7 +344,7 @@ prepare_sqlite() {
   make -j8
   make install
   sqlite_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc)"
-  echo "- sqlite: ${sqlite_ver}, source: ${sqlite_latest_url:-cached sqlite}" >>"${BUILD_INFO}"
+  echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
 }
 
 prepare_c_ares() {
@@ -368,7 +372,7 @@ prepare_c_ares() {
   make -j8
   make install
   cares_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc")"
-  echo "- c-ares: ${cares_ver}, source: ${cares_latest_url:-cached c-ares}" >>"${BUILD_INFO}"
+  echo "| c-ares | ${cares_ver} | ${cares_latest_url:-cached c-ares} |" >>"${BUILD_INFO}"
 }
 
 prepare_libssh2() {
@@ -386,7 +390,7 @@ prepare_libssh2() {
   make install
   unset CFLAGS
   libssh2_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc")"
-  echo "- libssh2: ${libssh2_ver}, source: ${libssh2_latest_url:-cached libssh2}" >>"${BUILD_INFO}"
+  echo "| libssh2 | ${libssh2_ver} | ${libssh2_latest_url:-cached libssh2} |" >>"${BUILD_INFO}"
 }
 
 build_aria2() {
@@ -435,20 +439,8 @@ build_aria2() {
   make -j8
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
-  echo "- aria2: Version:${ARIA2_VER},  source: ${aria2_latest_url:-cached aria2}" >>"${BUILD_INFO}"
-  #echo >>"${BUILD_INFO}"
+  echo "| aria2 | Version:${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
 }
-#get_build_info() {
-#  echo "============= ARIA2 VER INFO ==================="
-#  ARIA2_VER_INFO="$("${RUNNER_CHECKER}" "${CROSS_PREFIX}/bin/aria2c"* --version 2>/dev/null)"
-#  echo "${ARIA2_VER_INFO}"
-#  echo "================================================"
-
-#  echo "aria2 version info:" >>"${BUILD_INFO}"
-#  echo '```txt' >>"${BUILD_INFO}"
-#  echo "${ARIA2_VER_INFO}" >>"${BUILD_INFO}"
-#  echo '```' >>"${BUILD_INFO}"
-#}
 
 test_build() {
   # get release
