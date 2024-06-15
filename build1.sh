@@ -322,7 +322,7 @@ prepare_libxml2() {
   ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --without-python --without-icu --enable-static --disable-shared
   make -j8
   make install
-  libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libxml-*.pc" | awk '{print $2}')"
+  libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
 }
 
