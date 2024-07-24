@@ -309,7 +309,7 @@ prepare_ssl() {
 }
 
 prepare_libxml2() {
-  libxml2_latest_url="$(retry wget -qO- --compression=auto 'https://gitlab.gnome.org/api/graphql?rand=$(date +%s)' --header="'Content-Type: application/json'" --post-data="'{\"query\":\"query {project(fullPath:\\\"GNOME/libxml2\\\"){releases(first:1,sort:VERSION_DESC){nodes{tagName released_at: { operator: LE, value: \\\"$(date +%Y-%m-%d)\\\" } assets{links{nodes{directAssetUrl}}}}}}}\"}'" \| jq -r "'.data.project.releases.nodes[0].assets.links.nodes[0].directAssetUrl'")"
+  libxml2_latest_url="$(retry wget -qO- --compression=auto 'https://gitlab.gnome.org/api/graphql' --header="'Content-Type: application/json'" --post-data="'{"query":"query {project(fullPath:\"GNOME/libxml2\"){releases(first:1,sort:RELEASED_AT_DESC){nodes{assets{links{nodes{directAssetUrl}}}}}}}"}'" | jq -r "'.data.project.releases.nodes[0].assets.links.nodes[0].directAssetUrl'")"
   libxml2_tag="$(echo "${libxml2_latest_url}" | sed -r 's/.*libxml2-(.+).tar.*/\1/')"
   libxml2_filename="$(echo "${libxml2_latest_url}" | sed -r 's/.*(libxml2-(.+).tar.*)/\1/')"
   if [ ! -f "${DOWNLOADS_DIR}/${libxml2_filename}" ]; then
