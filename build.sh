@@ -80,7 +80,7 @@ cd ..
 
 # 下载并编译 c-ares
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares⭐⭐⭐⭐⭐⭐"
-curl -L https://github.com/c-ares/c-ares/releases/download/v1.32.3/c-ares-1.32.3.tar.gz | tar xz
+curl -L https://github.com/c-ares/c-ares/releases/download/v1.33.0/c-ares-1.33.0.tar.gz | tar xz
 cd c-ares-*
 ./configure \
     --disable-shared \
