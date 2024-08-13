@@ -57,7 +57,7 @@ cd sqlite-*
     --enable-static \
     --prefix=$PREFIX \
     --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+    --build="$(gcc -dumpmachine)" ${SQLITE_EXT_CONF}
 make -j$(nproc) install
 cd ..
 
