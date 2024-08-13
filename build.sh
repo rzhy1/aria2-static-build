@@ -57,7 +57,7 @@ cd sqlite-*
     --enable-static \
     --prefix=$PREFIX \
     --host=$HOST \
-    --build="$(gcc -dumpmachine)" ${SQLITE_EXT_CONF}
+    --build="$(gcc -dumpmachine)" "config_TARGET_EXEEXT=.exe"
 make -j$(nproc) install
 cd ..
 
