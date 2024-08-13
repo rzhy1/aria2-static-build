@@ -50,14 +50,14 @@ cd ..
 
 # 下载并编译 SQLite
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
-curl -L https://github.com/sqlite/sqlite/archive/release.tar.gz | tar xz
-cd sqlite-*
+curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
+cd sqlite-autoconf-*
 ./configure \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
     --host=$HOST \
-    --build="$(gcc -dumpmachine)" "config_TARGET_EXEEXT=.exe"
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 cd ..
 
