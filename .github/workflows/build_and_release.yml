@@ -61,6 +61,7 @@ jobs:
           tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
           artifacts: "${{ github.workspace }}/aria2/src/aria2c.exe"
+          bodyFile: "${{ github.workspace }}/build_info.md"
           token: ${{ secrets.GITHUB_TOKEN }}
   static-build_zlib_ng_and_libxml2:
     runs-on: ubuntu-24.04
