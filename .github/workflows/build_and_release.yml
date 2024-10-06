@@ -39,7 +39,7 @@ jobs:
               pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
               autopoint libcppunit-dev lzip 
 
-      - name: Compile aria2c
+      - name: Compile both scripts concurrently
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
         run: |
@@ -47,10 +47,14 @@ jobs:
             export ARIA2_VER="${GITHUB_REF#refs/*/}"
             echo "ARIA2_VER=${ARIA2_VER}" >> $GITHUB_ENV
           fi
+          # Grant execution permissions
           chmod +x "${GITHUB_WORKSPACE}/build.sh"
-          "${GITHUB_WORKSPACE}/build.sh"
           chmod +x "${GITHUB_WORKSPACE}/build1.sh"
-          "${GITHUB_WORKSPACE}/build1.sh"
+
+          # Execute both scripts concurrently
+          "${GITHUB_WORKSPACE}/build.sh" &   # Run build.sh in the background
+          "${GITHUB_WORKSPACE}/build1.sh" &  # Run build1.sh in the background
+          wait
 
       - name: Archive executables
         uses: actions/upload-artifact@v4
