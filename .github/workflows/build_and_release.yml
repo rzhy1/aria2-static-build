@@ -15,11 +15,12 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  static-build_zlib_and_libexpat:
+  static-build:
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - uses: actions/cache@v4
         id: cache
         with:
@@ -27,6 +28,7 @@ jobs:
           key: build-cache-x86_64-w64-mingw32-${{ github.sha }}
           restore-keys: |
             build-cache-x86_64-w64-mingw32-
+
       - name: Install prerequisites
         run: |
           sudo apt-get update
@@ -35,8 +37,9 @@ jobs:
               make binutils autoconf automake autotools-dev libtool \
               patch ca-certificates \
               pkg-config git curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
-              autopoint libcppunit-dev  lzip 
-      - name: Compile
+              autopoint libcppunit-dev lzip 
+
+      - name: Compile aria2c
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
         run: |
@@ -46,60 +49,27 @@ jobs:
           fi
           chmod +x "${GITHUB_WORKSPACE}/build.sh"
           "${GITHUB_WORKSPACE}/build.sh"
-      - name: Archive aria2c.exe
+          chmod +x "${GITHUB_WORKSPACE}/build1.sh"
+          "${GITHUB_WORKSPACE}/build1.sh"
+
+      - name: Archive executables
         uses: actions/upload-artifact@v4
         with:
-          name: aria2c.exe
-          path: "${{ github.workspace }}/aria2/src/aria2c.exe"
+          name: aria2c-executables
+          path: |
+            "${{ github.workspace }}/aria2/src/aria2c.exe"
+            "${{ github.workspace }}/aria2c1*"
+
       - name: Get version number
         run: |
           VERSION=$(curl -s https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
+
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
-          artifacts: "${{ github.workspace }}/aria2/src/aria2c.exe"
-          bodyFile: "${{ github.workspace }}/build_info.md"
-          token: ${{ secrets.GITHUB_TOKEN }}
-  static-build_zlib_ng_and_libxml2:
-    runs-on: ubuntu-24.04
-    container: "rzhy/ubuntu:x86_64-w64-mingw32"
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: downloads/
-          key: build-cache-x86_64-w64-mingw32-${{ github.sha }}
-          restore-keys: |
-            build-cache-x86_64-w64-mingw32-
-      - name: Compile
-        env:
-          CROSS_HOST: "x86_64-w64-mingw32"
-        run: |
-          if [ "${GITHUB_EVENT_NAME}" = release ]; then
-            export ARIA2_VER="${GITHUB_REF#refs/*/}"
-            echo "ARIA2_VER=${ARIA2_VER}" >> $GITHUB_ENV
-          fi
-          chmod +x "${GITHUB_WORKSPACE}/build1.sh"
-          "${GITHUB_WORKSPACE}/build1.sh"
-      - name: Archive aria2c1.exe
-        uses: actions/upload-artifact@v4
-        with:
-          name: aria2c1.exe
-          path: "${{ github.workspace }}/aria2c1*"
-      - name: Get version number
-        run: |
-          VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
-          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
-      - name: Create Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: aria2c-${{ env.ARIA2_VERSION }}
-          allowUpdates: true
-          artifacts: "${{ github.workspace }}/aria2c1*"
+          artifacts: "${{ github.workspace }}/aria2/src/aria2c.exe,${{ github.workspace }}/aria2c1*"
           bodyFile: "${{ github.workspace }}/build_info.md"
           token: ${{ secrets.GITHUB_TOKEN }}
