@@ -117,9 +117,10 @@ cd ..
 
 # 下载并编译 c-ares
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares⭐⭐⭐⭐⭐⭐"
-cares_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
+cares_tag=$(retry curl -s https://api.github.com/repos/c-ares/c-ares/releases/latest | jq -r '.tag_name | sub("^v"; "")')
 cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
 echo "cares最新版本是${cares_tag} ，下载地址是${cares_latest_url}"
+curl -L ${cares_latest_url} | tar xz
 #curl -L https://github.com/c-ares/c-ares/releases/download/v1.34.1/c-ares-1.34.1.tar.gz | tar xz
 cd c-ares-*
 ./configure \
@@ -135,9 +136,10 @@ cd ..
 
 # 下载并编译 libssh2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2⭐⭐⭐⭐⭐⭐"
-libssh2_tag="$(retry wget -qO- --compression=auto https://libssh2.org/ \| sed -nr "'s@.*libssh2 ([^<]*).*released on.*@\1@p'")"
+libssh2_tag=$(retry curl -s https://libssh2.org/ | sed -nr 's@.*libssh2 ([^<]*).*released on.*@\1@p')
 libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
 echo "libssh2最新版本是${libssh2_tag} ，下载地址是${libssh2_latest_url}"
+curl -L ${libssh2_latest_url} | tar xz
 #curl -L https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
 cd libssh2-*
 ./configure \
