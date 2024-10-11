@@ -94,10 +94,12 @@ cd ..
 
 # 下载并编译 zlib
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib⭐⭐⭐⭐⭐⭐"
-zlib_tag="$(retry wget -qO- --compression=auto https://zlib.net/ \| grep -i "'<FONT.*FONT>'" \| sed -r "'s/.*zlib\s*([^<]+).*/\1/'" \| head -1)"
-zlib_latest_url="https://zlib.net/zlib-${zlib_tag}.tar.xz"
+zlib_tag=$(retry curl -s https://api.github.com/repos/madler/zlib/releases/latest | jq -r '.name' | cut -d' ' -f2)
+zlib_latest_url=$(retry curl -s "https://api.github.com/repos/madler/zlib/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.gz$")) | .browser_download_url' | head -n 1)
+#zlib_tag="$(retry wget -qO- --compression=auto https://zlib.net/ \| grep -i "'<FONT.*FONT>'" \| sed -r "'s/.*zlib\s*([^<]+).*/\1/'" \| head -1)"
+#zlib_latest_url="https://zlib.net/zlib-${zlib_tag}.tar.gz"
 echo "sqlite最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
-curl -L ${zlib_latest_url} | tar x --xz
+curl -L ${zlib_latest_url} | tar xz
 #curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
 cd zlib-*
 CC=$HOST-gcc \
