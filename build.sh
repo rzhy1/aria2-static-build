@@ -76,10 +76,12 @@ cd ..
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
 sqlite_tag=$(curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
 #sqlite_tag="$(retry wget -qO- --compression=auto https://www.sqlite.org/index.html \| sed -nr "'s/.*>Version (.+)<.*/\1/p'")"
-sqlite_latest_url="https://github.com/sqlite/sqlite/archive/refs/tags/version-${sqlite_tag}.tar.gz" 
+#sqlite_latest_url="https://github.com/sqlite/sqlite/archive/refs/tags/version-${sqlite_tag}.tar.gz" 
+sqlite_latest_url="https://github.com/sqlite/sqlite/archive/master.tar.gz" 
 echo "sqlite最新版本是${sqlite_tag} ，下载地址是${sqlite_latest_url}"
-curl -L ${expat_latest_url} -o sqlite-${version}.tar.gz
-tar -xzf sqlite-${version}.tar.gz
+curl -L ${sqlite_latest_url} | tar xz
+#curl -L ${sqlite_latest_url} -o sqlite-${sqlite_tag}.tar.gz
+#tar -xzf sqlite-${sqlite_tag}.tar.gz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
 cd sqlite-*
 ./configure \
