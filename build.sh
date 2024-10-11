@@ -40,7 +40,11 @@ retry() {
 
 # 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
-gmp_tag="$(retry wget -qO- -L https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9.]+[^/"]+"' | sed -r 's/href="gmp-(.+)\.tar\.(xz|gz)"/\1/' | head -n 1)"
+gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | \
+    grep -oE 'href="gmp-[0-9.]+\.tar\.(bz2|gz|lz|xz|zst)"' | \
+    sort -rV | \
+    head -n 1 | \
+    sed -r 's/href="gmp-(.+)\.tar\..+"/\1/')"
 echo "⭐⭐⭐⭐⭐⭐gmp版本是$(gmp_tag) "
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 #curl -L https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz | tar x --xz
