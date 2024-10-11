@@ -28,16 +28,16 @@ retry() {
   local delay="$initial_delay"
   local cmd="$@"
 
-  for i in $(seq 1 "$try"); do
-    echo "Executing with retry ($i/$try): $cmd" >&2
-    if eval "$cmd"; then
+  for (( i=1; i <= try; i++ )); do
+    echo "正在执行 (尝试 $i/$try): $cmd" >&2
+    if "$cmd"; then
       return 0
     fi
-    echo "Execute '$cmd' failed, retrying in $delay seconds..." >&2
+    echo "命令执行失败，$delay 秒后重试..." >&2
     sleep "$delay"
     delay=$((delay * 2))
   done
-  echo "Execute '$cmd' failed after $try tries." >&2
+  echo "命令执行失败，已尝试 $try 次。" >&2
   return 1
 }
 
