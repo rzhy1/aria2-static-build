@@ -135,7 +135,10 @@ cd ..
 
 # 下载并编译 libssh2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2⭐⭐⭐⭐⭐⭐"
-curl -L https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
+libssh2_tag="$(retry wget -qO- --compression=auto https://libssh2.org/ \| sed -nr "'s@.*libssh2 ([^<]*).*released on.*@\1@p'")"
+libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
+echo "libssh2最新版本是${libssh2_tag} ，下载地址是${libssh2_latest_url}"
+#curl -L https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
 cd libssh2-*
 ./configure \
     --disable-shared \
