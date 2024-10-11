@@ -80,7 +80,7 @@ download_page=$(curl -s "https://www.sqlite.org/download.html")
 csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
 
 # 获取最新版本的 autoconf tar.gz 文件的 URL
-sqlite_tarball_url=$(echo "$csv_data" | grep "autoconf*.tar.gz" | cut -d ',' -f 3 | head -n 1)
+sqlite_tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1)
 
 # 获取版本号
 sqlite_tag1=$(echo "$csv_data" | grep "autoconf*.tar.gz" | cut -d ',' -f 2 | head -n 1)
