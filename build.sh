@@ -83,7 +83,7 @@ echo "sqlite最新版本是${sqlite_tag} ，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} -o sqlite-${sqlite_tag}.tar.gz
 tar -xzf sqlite-${sqlite_tag}.tar.gz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
-cd sqlite-*
+cd sqlite-${sqlite_tag}
 ./configure \
     --disable-shared \
     --enable-static \
