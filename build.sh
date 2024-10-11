@@ -74,10 +74,29 @@ cd ..
 
 # 下载并编译 SQLite
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
-sqlite_tag=$(curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
-csv_data=$(echo "https://www.sqlite.org/download.html" | sed -n '/Download product data for scripts to read/,/-->/p')
-tarball_url=$(echo "$csv_data" | grep "autoconf.*tar.gz" | cut -d ',' -f 3 | head -n 1)
+# 获取版本号 (添加错误处理)
+if ! sqlite_version=$(curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p'); then
+  echo "Error: Failed to get version from website" >&2
+  exit 1
+fi
+
+# 下载 download.html 页面
+if ! download_page=$(curl -s "https://www.sqlite.org/download.html"); then
+  echo "Error: Failed to download SQLite download page" >&2
+  exit 1
+fi
+
+# 提取 CSV 数据
+csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
+
+# 获取 tarball URL (添加错误处理和更精确的 grep 模式)
+if ! tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1); then
+  echo "Error: Failed to extract tarball URL from CSV data" >&2
+  exit 1
+fi
+
 sqlite_latest_url="https://www.sqlite.org/${tarball_url}"
+
 echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
 #curl -L ${sqlite_latest_url} -o sqlite-${sqlite_tag}.tar.gz
