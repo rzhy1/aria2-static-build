@@ -45,7 +45,7 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | \
     sort -rV | \
     head -n 1 | \
     sed -r 's/href="gmp-(.+)\.tar\..+"/\1/')"
-echo "⭐⭐⭐⭐⭐⭐gmp版本是$(gmp_tag) "
+echo "⭐⭐⭐⭐⭐⭐gmp版本是${gmp_tag} "
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 #curl -L https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
