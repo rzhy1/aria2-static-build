@@ -98,7 +98,7 @@ zlib_tag=$(retry curl -s https://api.github.com/repos/madler/zlib/releases/lates
 zlib_latest_url=$(retry curl -s "https://api.github.com/repos/madler/zlib/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.gz$")) | .browser_download_url' | head -n 1)
 #zlib_tag="$(retry wget -qO- --compression=auto https://zlib.net/ \| grep -i "'<FONT.*FONT>'" \| sed -r "'s/.*zlib\s*([^<]+).*/\1/'" \| head -1)"
 #zlib_latest_url="https://zlib.net/zlib-${zlib_tag}.tar.gz"
-echo "sqlite最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
+echo "zlib最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
 curl -L ${zlib_latest_url} | tar xz
 #curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
 cd zlib-*
@@ -117,7 +117,10 @@ cd ..
 
 # 下载并编译 c-ares
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares⭐⭐⭐⭐⭐⭐"
-curl -L https://github.com/c-ares/c-ares/releases/download/v1.34.1/c-ares-1.34.1.tar.gz | tar xz
+cares_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
+cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
+echo "cares最新版本是${cares_tag} ，下载地址是${cares_latest_url}"
+#curl -L https://github.com/c-ares/c-ares/releases/download/v1.34.1/c-ares-1.34.1.tar.gz | tar xz
 cd c-ares-*
 ./configure \
     --disable-shared \
