@@ -21,22 +21,24 @@ PREFIX=$PWD/$HOST
 #echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https    
 
 retry() {
-  local try="${1:-5}"
-  local initial_delay="${2:-1}" # 初始间隔 1 秒
-  shift 2
+    local try="${1:-5}"
+    local initial_delay="${2:-1}"
+    shift 2
 
-  local delay="$initial_delay"
-  for i in $(seq 1 "$try"); do
-    echo "Executing with retry ($i/$try): $@" >&2
-    if eval "$@"; then
-      return 0
-    fi
-    echo "Execute '$@' failed, retrying in $delay seconds..." >&2
-    sleep "$delay"
-    delay=$((delay * 2)) # 每次间隔加倍
-  done
-  echo "Execute '$@' failed after $try tries." >&2
-  return 1
+    local delay="$initial_delay"
+    local cmd="$@"
+
+    for (( i=1; i <= try; i++ )); do
+        echo "Executing (attempt $i/$try): $cmd" >&2
+        if "$cmd" ; then
+            return 0
+        fi
+        echo "Command failed, retrying in $delay seconds..." >&2
+        sleep "$delay"
+        delay=$((delay * 2))
+    done
+    echo "Command failed after $try tries." >&2
+    return 1
 }
 
 # 下载并编译 GMP
