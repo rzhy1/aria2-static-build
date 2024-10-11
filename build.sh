@@ -21,20 +21,21 @@ PREFIX=$PWD/$HOST
 #echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https    
 
 retry() {
-  # max retry 5 times
-  try=5
-  # sleep 3s every retry
-  sleep_time=30
-  for i in $(seq ${try}); do
-    echo "executing with retry: $@" >&2
+  local try="${1:-5}"
+  local initial_delay="${2:-1}" # 初始间隔 1 秒
+  shift 2
+
+  local delay="$initial_delay"
+  for i in $(seq 1 "$try"); do
+    echo "Executing with retry ($i/$try): $@" >&2
     if eval "$@"; then
       return 0
-    else
-      echo "execute '$@' failed, tries: ${i}" >&2
-      sleep ${sleep_time}
     fi
+    echo "Execute '$@' failed, retrying in $delay seconds..." >&2
+    sleep "$delay"
+    delay=$((delay * 2)) # 每次间隔加倍
   done
-  echo "execute '$@' failed" >&2
+  echo "Execute '$@' failed after $try tries." >&2
   return 1
 }
 
@@ -74,7 +75,7 @@ cd ..
 
 # 下载并编译 SQLite
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
-sqlite_tag=$(curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
+sqlite_tag=$(retry curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
 download_page=$(curl -s "https://www.sqlite.org/download.html")
 csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
 tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1)
