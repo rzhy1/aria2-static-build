@@ -20,6 +20,24 @@ PREFIX=$PWD/$HOST
 #echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 #echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https    
 
+retry() {
+  # max retry 5 times
+  try=5
+  # sleep 3s every retry
+  sleep_time=30
+  for i in $(seq ${try}); do
+    echo "executing with retry: $@" >&2
+    if eval "$@"; then
+      return 0
+    else
+      echo "execute '$@' failed, tries: ${i}" >&2
+      sleep ${sleep_time}
+    fi
+  done
+  echo "execute '$@' failed" >&2
+  return 1
+}
+
 # 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
 gmp_tag="$(retry wget -qO- https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9.]+[^/"]+"' | sed -r 's/href="gmp-(.+)\.tar\.(xz)"/\1/' | head -n 1)"
