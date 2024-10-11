@@ -23,7 +23,7 @@ PREFIX=$PWD/$HOST
 # 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
 gmp_tag="$(retry wget -qO- https://ftp.gnu.org/gnu/gmp/ \| grep -i 'href="/gnu/gmp/' \| head -1 \| sed -r "'s/href=\"//g' \| sed -r "'s/\".*//g'")"
-curl -L https://ftp.gnu.org/gnu/gmp/${gmp_tag} | tar x --xz
+curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 #curl -L https://ftp.gnu.org/gnu/gmp/gmp-6.3.0.tar.xz | tar x --xz
 cd gmp-*
 ./configure \
