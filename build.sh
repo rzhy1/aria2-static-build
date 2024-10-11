@@ -50,8 +50,9 @@ cd ..
 
 # 下载并编译 SQLite
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
-curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
-cd sqlite-autoconf-*
+#curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
+curl -L https://github.com/sqlite/sqlite/archive/release.tar.gz | tar xz
+cd sqlite-*
 ./configure \
     --disable-shared \
     --enable-static \
