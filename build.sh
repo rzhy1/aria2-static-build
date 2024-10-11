@@ -75,9 +75,9 @@ cd ..
 # 下载并编译 SQLite
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
 sqlite_tag=$(curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
-#sqlite_tag="$(retry wget -qO- --compression=auto https://www.sqlite.org/index.html \| sed -nr "'s/.*>Version (.+)<.*/\1/p'")"
-#sqlite_latest_url="https://github.com/sqlite/sqlite/archive/refs/tags/version-${sqlite_tag}.tar.gz" 
-sqlite_latest_url="https://github.com/sqlite/sqlite/archive/master.tar.gz" 
+csv_data=$(echo "https://www.sqlite.org/download.html" | sed -n '/Download product data for scripts to read/,/-->/p')
+tarball_url=$(echo "$csv_data" | grep "autoconf.*tar.gz" | cut -d ',' -f 3 | head -n 1)
+sqlite_latest_url="https://www.sqlite.org/${tarball_url}"
 echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
 #curl -L ${sqlite_latest_url} -o sqlite-${sqlite_tag}.tar.gz
