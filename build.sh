@@ -76,14 +76,25 @@ cd ..
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
 sqlite_tag=$(curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
 #sqlite_tag="$(retry wget -qO- --compression=auto https://www.sqlite.org/index.html \| sed -nr "'s/.*>Version (.+)<.*/\1/p'")"
-sqlite_latest_url="https://github.com/sqlite/sqlite/archive/refs/tags/version-${sqlite_tag}.tar.gz" 
+download_page=$(curl -s "https://www.sqlite.org/download.html")
+csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
+
+# 获取最新版本的 autoconf tar.gz 文件的 URL
+sqlite_tarball_url=$(echo "$csv_data" | grep "autoconf*.tar.gz" | cut -d ',' -f 3 | head -n 1)
+
+# 获取版本号
+sqlite_tag1=$(echo "$csv_data" | grep "autoconf*.tar.gz" | cut -d ',' -f 2 | head -n 1)
+
+# 构建完整的下载 URL
+sqlite_latest_url="https://www.sqlite.org/${sqlite_tarball_url}"
+#sqlite_latest_url="https://github.com/sqlite/sqlite/archive/refs/tags/version-${sqlite_tag}.tar.gz" 
 #sqlite_latest_url="https://github.com/sqlite/sqlite/archive/master.tar.gz" 
-echo "sqlite最新版本是${sqlite_tag} ，下载地址是${sqlite_latest_url}"
-#curl -L ${sqlite_latest_url} | tar xz
-curl -L ${sqlite_latest_url} -o sqlite-${sqlite_tag}.tar.gz
-tar -xzf sqlite-${sqlite_tag}.tar.gz
+echo "sqlite最新版本是${sqlite_tag}，sqlite_tag1是${sqlite_tag1} ，下载地址是${sqlite_latest_url}"
+curl -L ${sqlite_latest_url} | tar xz
+#curl -L ${sqlite_latest_url} -o sqlite-${sqlite_tag}.tar.gz
+#tar -xzf sqlite-${sqlite_tag}.tar.gz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
-cd sqlite-${sqlite_tag}
+cd sqlite-*
 ./configure \
     --disable-shared \
     --enable-static \
