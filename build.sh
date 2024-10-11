@@ -21,23 +21,20 @@ PREFIX=$PWD/$HOST
 #echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https    
 
 retry() {
-  local try="${1:-5}"
-  local initial_delay="${2:-1}"
-  shift 2
-
-  local delay="$initial_delay"
-  local cmd="$@"
-
-  for (( i=1; i <= try; i++ )); do
-    echo "正在执行 (尝试 $i/$try): $cmd" >&2
-    if "$cmd"; then
+  # max retry 5 times
+  try=5
+  # sleep 3s every retry
+  sleep_time=30
+  for i in $(seq ${try}); do
+    echo "executing with retry: $@" >&2
+    if eval "$@"; then
       return 0
+    else
+      echo "execute '$@' failed, tries: ${i}" >&2
+      sleep ${sleep_time}
     fi
-    echo "命令执行失败，$delay 秒后重试..." >&2
-    sleep "$delay"
-    delay=$((delay * 2))
   done
-  echo "命令执行失败，已尝试 $try 次。" >&2
+  echo "execute '$@' failed" >&2
   return 1
 }
 
