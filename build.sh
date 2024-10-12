@@ -13,6 +13,7 @@
 set -euo pipefail
 # Change HOST to x86_64-w64-mingw32 to build 64-bit binary
 HOST=x86_64-w64-mingw32
+PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 
@@ -123,6 +124,7 @@ STRIP=$HOST-strip \
     --includedir=$PREFIX/include \
     --static
 make -j$(nproc) install
+echo "| zlib | ${zlib_tag} | ${zlib_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 
 # 下载并编译 c-ares
@@ -142,6 +144,7 @@ cd c-ares-*
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32"
 make -j$(nproc) install
+echo "| zlib | ${zlib_tag} | ${zlib_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 
 # 下载并编译 libssh2
