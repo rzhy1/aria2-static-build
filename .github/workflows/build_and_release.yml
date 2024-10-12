@@ -93,6 +93,9 @@ jobs:
         with:
           name: aria2c1.exe
           path: "${{ github.workspace }}/aria2c1*"
+      - name: Combine build info
+        run: |
+          cat build-info-from-job1/build_info.md >> ${{ github.workspace }}/build_info.md
       - name: Get version number
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
