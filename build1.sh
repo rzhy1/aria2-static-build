@@ -143,7 +143,7 @@ else
   SSL=OpenSSL
 fi
 
-echo "## Building aria2c1.exe using these dependencies:" >>"${BUILD_INFO}"
+echo "## aria2c1.exe dependencies:" >>"${BUILD_INFO}"
 # 初始化表格
 echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
 echo "|------------|---------|--------|" >>"${BUILD_INFO}"
