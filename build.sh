@@ -14,13 +14,14 @@ set -euo pipefail
 # Change HOST to x86_64-w64-mingw32 to build 64-bit binary
 HOST=x86_64-w64-mingw32
 PREFIX=$PWD/$HOST
+BUILD_INFO="${PREFIX}/build_info.md"
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
 #echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 #echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https    
 
-echo "## (aria2c.exe)Build Info - ${CROSS_HOST} With ${SSL} and ${ZLIB}" >"${BUILD_INFO}"
+echo "## (aria2c.exe)Build Info - ${HOST} With zlib"
 echo "Building using these dependencies:" >>"${BUILD_INFO}"
 # 初始化表格
 echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
@@ -66,7 +67,7 @@ cd ..
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
 expat_latest_url=$(retry curl -s "https://api.github.com/repos/libexpat/libexpat/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.bz2$")) | .browser_download_url' | head -n 1)
-echo "libexpa最新版本是${expat_tag} ，下载地址是${expat_latest_url}"
+echo "libexpat最新版本是${expat_tag} ，下载地址是${expat_latest_url}"
 curl -L ${expat_latest_url} | tar xj
 #curl -L https://github.com/libexpat/libexpat/releases/download/R_2_6_3/expat-2.6.3.tar.bz2 | tar xj
 cd expat-*
@@ -77,6 +78,7 @@ cd expat-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
+echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 
 # 下载并编译 SQLite
