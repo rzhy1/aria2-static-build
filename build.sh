@@ -13,8 +13,8 @@
 set -euo pipefail
 # Change HOST to x86_64-w64-mingw32 to build 64-bit binary
 HOST=x86_64-w64-mingw32
-PREFIX=$PWD/$HOST
-BUILD_INFO="${PREFIX}/build_info.md"
+SELF_DIR="$(dirname "$(realpath "${0}")")"
+BUILD_INFO="${SELF_DIR}/build_info.md"
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
@@ -99,6 +99,7 @@ cd sqlite-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
+echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 
 # 下载并编译 zlib
