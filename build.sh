@@ -20,6 +20,12 @@ PREFIX=$PWD/$HOST
 #echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 #echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https    
 
+echo "## (aria2c.exe)Build Info - ${CROSS_HOST} With ${SSL} and ${ZLIB}" >"${BUILD_INFO}"
+echo "Building using these dependencies:" >>"${BUILD_INFO}"
+# 初始化表格
+echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
+echo "|------------|---------|--------|" >>"${BUILD_INFO}"
+
 retry() {
   local max_retries=5
   local sleep_seconds=3
@@ -53,6 +59,7 @@ cd gmp-*
     --enable-fat \
     CFLAGS="-mtune=generic -O2 -g0"
 make -j$(nproc) install
+echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 
 # 下载并编译 Expat
