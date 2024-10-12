@@ -143,8 +143,7 @@ else
   SSL=OpenSSL
 fi
 
-echo "## (aria2c1.exe)Build Info - ${CROSS_HOST} With ${SSL} and ${ZLIB}" >"${BUILD_INFO}"
-echo "Building using these dependencies:" >>"${BUILD_INFO}"
+echo "## Building aria2c1.exe using these dependencies:" >>"${BUILD_INFO}"
 # 初始化表格
 echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
 echo "|------------|---------|--------|" >>"${BUILD_INFO}"
