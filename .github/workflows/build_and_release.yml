@@ -118,11 +118,16 @@ jobs:
     runs-on: ubuntu-24.04
     needs: [static-build_zlib_and_libexpat, static-build_zlib_ng_and_libxml2]
     steps:
-      - name: 下载构建信息
+      - name: 下载构建信息1
         uses: actions/download-artifact@v4
         with:
-          name: build-info-job1
-          path: build-info-job1
+          name: build-info
+          path: build-info
+      - name: 下载构建信息2
+        uses: actions/download-artifact@v4
+        with:
+          name: build-info1
+          path: build-info1
       - name: 创建发布说明文件
         run: |
           mkdir -p ${{ github.workspace }}/release_notes
