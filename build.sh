@@ -203,7 +203,7 @@ autoreconf -i
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
-cp -fv "src/aria2c.exe" "${SELF_DIR}"
+mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
 ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
 aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
 echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
