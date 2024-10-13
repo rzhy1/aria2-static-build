@@ -106,7 +106,7 @@ jobs:
       - name: Combine build info
         run: |
           #追加模式：如果build_info.md已经存在，则追加内容；如果不存在，则创建文件并写入内容。
-          if [ -f "${{ github.workspace }}/build_info/build_info1.md" ]; then
+          if [ -f "${{ github.workspace }}/build_info1.md" ]; then
             cat build-info-from-job1/build_info.md >> ${{ github.workspace }}/build_info1.md
           else
             cat build-info-from-job1/build_info.md > ${{ github.workspace }}/build_info1.md
