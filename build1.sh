@@ -127,10 +127,6 @@ export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgc
 export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -I${CROSS_PREFIX}/include -s -static --static"
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info1.md"
-echo "SELF_DIR相对路径$SELF_DIR"
-echo "SELF_DIR绝对路径$(realpath "$SELF_DIR")"
-echo "BUILD_INFO相对路径$BUILD_INFO"
-echo "BUILD_INFO绝对路径$(realpath "$BUILD_INFO")"
 
 # Create download cache directory
 mkdir -p "${SELF_DIR}/downloads/"
