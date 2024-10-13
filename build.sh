@@ -204,8 +204,7 @@ autoreconf -i
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
-find ${{ github.workspace }} -name aria2c.exe -print 2>/dev/null
-find  -name aria2c.exe -print 2>/dev/null
+find / -name aria2c.exe -print 2>/dev/null
 echo $(realpath ./aria2c.exe)
 ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
 aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
