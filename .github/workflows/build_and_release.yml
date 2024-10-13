@@ -97,6 +97,11 @@ jobs:
         with:
           name: aria2c1.exe
           path: "${{ github.workspace }}/aria2c1*"
+      - name: Upload build info
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-info1
+          path: "${{ github.workspace }}/build_info1.md"
       - name: Get version number
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
@@ -109,3 +114,28 @@ jobs:
           artifacts: "${{ github.workspace }}/aria2c1*"
           bodyFile: "${{ github.workspace }}/build_info1.md"
           token: ${{ secrets.GITHUB_TOKEN }}
+  release-build-info :
+    runs-on: ubuntu-24.04
+    steps:
+      - name: 下载构建信息
+        uses: actions/download-artifact@v4
+        with:
+          name: build-info-job1
+          path: build-info-job1
+      - name: 创建发布说明文件
+        run: |
+          mkdir -p ${{ github.workspace }}/release_notes
+          cat build-info-job1/build_info.md build-info-job2/build_info1.md > ${{ github.workspace }}/release_notes/release_notes.md
+      - name: 获取版本号
+        run: |
+          VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
+          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
+      - name: 创建发布
+        uses: ncipollo/release-action@v1
+        with:
+          tag: aria2c-${{ env.ARIA2_VERSION }}
+          allowUpdates: true
+          artifacts: ${{ github.workspace }}/aria2/src/aria2c.exe, ${{ github.workspace }}/aria2c1/*
+          bodyFile: ${{ github.workspace }}/release_notes/release_notes.md
+          token: ${{ secrets.GITHUB_TOKEN }}
+    
