@@ -69,11 +69,11 @@ apt update
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 升级已安装的软件包⭐⭐⭐⭐⭐⭐"
 apt upgrade -y
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装软件包⭐⭐⭐⭐⭐⭐"
-sudo apt-get install -y --no-install-recommends \
+apt install -y --no-install-recommends \
   autoconf \
   automake \
   autopoint \
-  g++-mingw-w64 \
+  mingw-w64 \
   jq \
   libtool \
   make \
