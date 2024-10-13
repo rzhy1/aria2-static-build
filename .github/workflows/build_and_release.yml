@@ -105,16 +105,15 @@ jobs:
 
       - name: Combine build info
         run: |
-          mkdir -p ${{ github.workspace }}/build_info # 创建目录以避免错误
           #追加模式：如果build_info.md已经存在，则追加内容；如果不存在，则创建文件并写入内容。
           if [ -f "${{ github.workspace }}/build_info/build_info1.md" ]; then
-            cat build-info-from-job1/build_info.md >> ${{ github.workspace }}/build_info/build_info1.md
+            cat build-info-from-job1/build_info.md >> ${{ github.workspace }}/build_info1.md
           else
-            cat build-info-from-job1/build_info.md > ${{ github.workspace }}/build_info/build_info1.md
+            cat build-info-from-job1/build_info.md > ${{ github.workspace }}/build_info1.md
           fi
       - name: Show build_info1.md path and content
         run: |
-          FILE_PATH=$(realpath ${{ github.workspace }}/build_info/build_info1.md)
+          FILE_PATH=$(realpath ${{ github.workspace }}/build_info1.md)
           echo "Absolute path: $FILE_PATH"
           echo ""
           echo "Content:"
@@ -135,5 +134,5 @@ jobs:
           tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
           artifacts: "${{ github.workspace }}/aria2c1*"
-          bodyFile: "${{ github.workspace }}//build_info/build_info1.md"
+          bodyFile: "${{ github.workspace }}/build_info1.md"
           token: ${{ secrets.GITHUB_TOKEN }}
