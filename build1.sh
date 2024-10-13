@@ -417,31 +417,17 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 cma
 prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib⭐⭐⭐⭐⭐⭐"
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib、xz、libxml2、sqlite、c_ares、libssh2⭐⭐⭐⭐⭐⭐"
 prepare_zlib &
 prepare_xz &
-prepare_ssl &
 prepare_libxml2 &
 prepare_sqlite &
 prepare_c_ares &
-prepare_libssh2 &
+prepare_libssh2
 wait
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 xz⭐⭐⭐⭐⭐⭐"
-#prepare_xz
-#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ssl⭐⭐⭐⭐⭐⭐"
-#prepare_ssl
-#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libxml2⭐⭐⭐⭐⭐⭐"
-#prepare_libxml2
-#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 sqlite⭐⭐⭐⭐⭐⭐"
-#prepare_sqlite
-#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c_ares⭐⭐⭐⭐⭐⭐"
-#prepare_c_ares
-#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2⭐⭐⭐⭐⭐⭐"
-#prepare_libssh2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
 
 # get release
-cp -fv "${CROSS_PREFIX}/bin/"aria2* "${SELF_DIR}"
-mv -fv "${SELF_DIR}/"aria2c.exe "${SELF_DIR}/"aria2c1.exe 
+mv -fv "${CROSS_PREFIX}/bin/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
