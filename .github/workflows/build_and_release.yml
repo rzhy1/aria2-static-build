@@ -96,7 +96,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: aria2c1.exe
-          path: "${{ github.workspace }}/aria2c1*"
+          path: "${{ github.workspace }}/aria2c1.exe"
       - name: Upload build info
         uses: actions/upload-artifact@v4
         with:
@@ -122,16 +122,26 @@ jobs:
         uses: actions/download-artifact@v4
         with:
           name: build-info
-          path: build-info
+          path: release-folder
       - name: 下载构建信息2
         uses: actions/download-artifact@v4
         with:
           name: build-info1
-          path: build-info1
+          path: release-folder
+      - name: 下载aria2c.exe
+        uses: actions/download-artifact@v4
+        with:
+          name: aria2c.exe
+          path: release-folder
+      - name: 下载aria2c1.exe
+        uses: actions/download-artifact@v4
+        with:
+          name: aria2c1.exe
+          path: release-folder
       - name: 创建发布说明文件
         run: |
-          mkdir -p ${{ github.workspace }}/release_notes
-          cat build-info/build_info.md build-info1/build_info1.md > ${{ github.workspace }}/release_notes/release_notes.md
+          mkdir -p ${{ github.workspace }}/release-folder
+          cat build-info/build_info.md build-info1/build_info1.md > ${{ github.workspace }}/release-folder/release_notes.md
       - name: 获取版本号
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
@@ -141,7 +151,7 @@ jobs:
         with:
           tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
-          artifacts: ${{ github.workspace }}/aria2/src/aria2c.exe, ${{ github.workspace }}/aria2c1/*
-          bodyFile: ${{ github.workspace }}/release_notes/release_notes.md
+          artifacts: ${{ github.workspace }}/release-folder/aria2c.exe, ${{ github.workspace }}/release-folder/aria2c1.exe
+          bodyFile: ${{ github.workspace }}/release-folder/release_notes.md
           token: ${{ secrets.GITHUB_TOKEN }}
     
