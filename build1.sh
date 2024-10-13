@@ -269,48 +269,6 @@ prepare_xz() {
   
 }
 
-prepare_ssl() {
-  # Windows will use Wintls, not openssl
-  if [ x"${TARGET_HOST}" != xWindows ]; then
-    if [ x"${USE_LIBRESSL}" = x1 ]; then
-      # libressl
-      libressl_tag="$(retry wget -qO- --compression=auto https://www.libressl.org/index.html \| grep "'release is'" \| tail -1 \| sed -r "'s/.* (.+)<.*>$/\1/'")" libressl_latest_url="https://ftp.openbsd.org/pub/OpenBSD/LibreSSL/libressl-${libressl_tag}.tar.gz"
-      if [ ! -f "${DOWNLOADS_DIR}/libressl-${libressl_tag}.tar.gz" ]; then
-        retry wget -cT10 -O "${DOWNLOADS_DIR}/libressl-${libressl_tag}.tar.gz.part" "${libressl_latest_url}"
-        mv -fv "${DOWNLOADS_DIR}/libressl-${libressl_tag}.tar.gz.part" "${DOWNLOADS_DIR}/libressl-${libressl_tag}.tar.gz"
-      fi
-      mkdir -p "/usr/src/libressl-${libressl_tag}"
-      tar -zxf "${DOWNLOADS_DIR}/libressl-${libressl_tag}.tar.gz" --strip-components=1 -C "/usr/src/libressl-${libressl_tag}"
-      cd "/usr/src/libressl-${libressl_tag}"
-      if [ ! -f "./configure" ]; then
-        ./autogen.sh
-      fi
-      ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared --with-openssldir=/etc/ssl
-      make -j$(nproc)
-      make install_sw
-      libressl_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/openssl.pc" | awk '{print $2}')"
-      echo "| libressl | ${libressl_ver} | ${libressl_latest_url:-cached libressl} |" >>"${BUILD_INFO}"
-    else
-      # openssl
-      openssl_filename="$(retry wget -qO- --compression=auto https://www.openssl.org/source/ \| grep -o "'href=\"openssl-3.2.*tar.gz\"'" \| grep -o "'[^\"]*.tar.gz'" \| head -1)"
-      openssl_ver="$(echo "${openssl_filename}" | sed -r 's/openssl-(.+)\.tar\.gz/\1/')"
-      openssl_latest_url="https://github.com/openssl/openssl/archive/refs/tags/${openssl_filename}"
-      if [ ! -f "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz" ]; then
-        retry wget -cT10 -O "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz.part" "${openssl_latest_url}"
-        mv -fv "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz.part" "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz"
-      fi
-      mkdir -p "/usr/src/openssl-${openssl_ver}"
-      tar -zxf "${DOWNLOADS_DIR}/openssl-${openssl_ver}.tar.gz" --strip-components=1 -C "/usr/src/openssl-${openssl_ver}"
-      cd "/usr/src/openssl-${openssl_ver}"
-      ./Configure -static --cross-compile-prefix="${CROSS_HOST}-" --prefix="${CROSS_PREFIX}" "${OPENSSL_COMPILER}" --openssldir=/etc/ssl
-      make -j$(nproc)
-      make install_sw
-      openssl_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/openssl.pc" | awk '{print $2}')"
-      echo "| openssl | ${openssl_ver} | ${openssl_latest_url:-cached openssl} |" >>"${BUILD_INFO}"
-    fi
-  fi
-}
-
 prepare_libxml2() {
   libxml2_latest_url="$(retry wget -qO- --compression=auto 'https://gitlab.gnome.org/api/graphql' --header="'Content-Type: application/json'" --post-data="'{\"query\":\"query {project(fullPath:\\\"GNOME/libxml2\\\"){releases(first:1,sort:RELEASED_AT_DESC){nodes{assets{links{nodes{directAssetUrl}}}}}}}\"}'" \| jq -r "'.data.project.releases.nodes[0].assets.links.nodes[0].directAssetUrl'")"
   libxml2_tag="$(echo "${libxml2_latest_url}" | sed -r 's/.*libxml2-(.+).tar.*/\1/')"
@@ -460,19 +418,26 @@ prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib⭐⭐⭐⭐⭐⭐"
-prepare_zlib
+prepare_zlib &
+prepare_xz &
+prepare_ssl &
+prepare_libxml2 &
+prepare_sqlite &
+prepare_c_ares &
+prepare_libssh2 &
+wait
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 xz⭐⭐⭐⭐⭐⭐"
-prepare_xz
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ssl⭐⭐⭐⭐⭐⭐"
-prepare_ssl
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libxml2⭐⭐⭐⭐⭐⭐"
-prepare_libxml2
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 sqlite⭐⭐⭐⭐⭐⭐"
-prepare_sqlite
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c_ares⭐⭐⭐⭐⭐⭐"
-prepare_c_ares
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2⭐⭐⭐⭐⭐⭐"
-prepare_libssh2
+#prepare_xz
+#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ssl⭐⭐⭐⭐⭐⭐"
+#prepare_ssl
+#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libxml2⭐⭐⭐⭐⭐⭐"
+#prepare_libxml2
+#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 sqlite⭐⭐⭐⭐⭐⭐"
+#prepare_sqlite
+#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c_ares⭐⭐⭐⭐⭐⭐"
+#prepare_c_ares
+#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2⭐⭐⭐⭐⭐⭐"
+#prepare_libssh2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
