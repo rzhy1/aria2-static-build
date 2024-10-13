@@ -131,7 +131,7 @@ jobs:
       - name: 创建发布说明文件
         run: |
           mkdir -p ${{ github.workspace }}/release_notes
-          cat build-info-job1/build_info.md build-info-job2/build_info1.md > ${{ github.workspace }}/release_notes/release_notes.md
+          cat build-info/build_info.md build-info1/build_info1.md > ${{ github.workspace }}/release_notes/release_notes.md
       - name: 获取版本号
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
