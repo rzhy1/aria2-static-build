@@ -56,18 +56,6 @@ jobs:
         with:
           name: build-info
           path: "${{ github.workspace }}/build_info.md"
-      - name: Get version number
-        run: |
-          VERSION=$(curl -s https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
-          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
-      - name: Create Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: aria2c-${{ env.ARIA2_VERSION }}
-          allowUpdates: true
-          artifacts: "${{ github.workspace }}/aria2c.exe"
-          bodyFile: "${{ github.workspace }}/build_info.md"
-          token: ${{ secrets.GITHUB_TOKEN }}
   static-build_zlib_ng_and_libxml2:
     runs-on: ubuntu-24.04
     container: "rzhy/ubuntu:x86_64-w64-mingw32"
@@ -101,18 +89,6 @@ jobs:
         with:
           name: build-info1
           path: "${{ github.workspace }}/build_info1.md"
-      - name: Get version number
-        run: |
-          VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
-          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
-      - name: Create Release
-        uses: ncipollo/release-action@v1
-        with:
-          tag: aria2c-${{ env.ARIA2_VERSION }}
-          allowUpdates: true
-          artifacts: "${{ github.workspace }}/aria2c1.exe"
-          bodyFile: "${{ github.workspace }}/build_info1.md"
-          token: ${{ secrets.GITHUB_TOKEN }}
   release-build-info :
     runs-on: ubuntu-24.04
     needs: [static-build_zlib_and_libexpat, static-build_zlib_ng_and_libxml2]
