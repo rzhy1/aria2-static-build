@@ -50,8 +50,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: aria2c.exe
-          path: |
-            "${{ github.workspace }}/aria2c.exe"
+          path: "${{ github.workspace }}/aria2c.exe"
       - name: Upload build info
         uses: actions/upload-artifact@v4
         with:
