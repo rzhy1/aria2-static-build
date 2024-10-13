@@ -16,6 +16,8 @@ HOST=x86_64-w64-mingw32
 PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
+echo "相对路径$BUILD_INFO"
+echo "绝对路径$(realpath "$BUILD_INFO")"
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
