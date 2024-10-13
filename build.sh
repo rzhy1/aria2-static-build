@@ -209,10 +209,8 @@ ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
 aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
 echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
-WORKSPACE_DIR=${WORKSPACE:-.}
-
 # 获取 aria2c.exe 的完整路径
-ARIA2C_PATH=$(realpath "$WORKSPACE_DIR/aria2/src/aria2c.exe")
+ARIA2C_PATH=$(realpath "src/aria2c.exe")
 
 # 检查文件是否存在
 if [ -f "$ARIA2C_PATH" ]; then
