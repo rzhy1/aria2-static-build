@@ -112,6 +112,19 @@ jobs:
           else
             cat build-info-from-job1/build_info.md > ${{ github.workspace }}/build_info/build_info1.md
           fi
+      - name: Show build_info1.md path and content
+        run: |
+          FILE_PATH=$(realpath ${{ github.workspace }}/build_info/build_info1.md)
+          echo "Absolute path: $FILE_PATH"
+          echo ""
+          echo "Content:"
+          echo "--------------------"
+          if [ -f "$FILE_PATH" ]; then
+            cat "$FILE_PATH"
+          else
+            echo "File not found!"
+          fi
+          echo "--------------------"
       - name: Get version number
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
