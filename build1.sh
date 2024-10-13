@@ -73,7 +73,7 @@ apt install -y --no-install-recommends \
   autoconf \
   automake \
   autopoint \
-  x86_64-w64-mingw32-g++ \
+  mingw-w64-x86_64-g++ \
   jq \
   libtool \
   make \
