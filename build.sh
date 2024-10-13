@@ -16,8 +16,6 @@ HOST=x86_64-w64-mingw32
 PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
-echo "相对路径$BUILD_INFO"
-echo "绝对路径$(realpath "$BUILD_INFO")"
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
@@ -205,6 +203,7 @@ autoreconf -i
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
+mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
 ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
 aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
 echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
