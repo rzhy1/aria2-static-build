@@ -97,9 +97,6 @@ jobs:
         with:
           name: aria2c1.exe
           path: "${{ github.workspace }}/aria2c1*"
-      - name: Combine build info
-        run: |
-          cat build-info-from-job1/build_info.md >> ${{ github.workspace }}/build_info.md
       - name: Get version number
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
@@ -110,5 +107,5 @@ jobs:
           tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
           artifacts: "${{ github.workspace }}/aria2c1*"
-          bodyFile: "${{ github.workspace }}/build_info.md"
+          bodyFile: "${{ github.workspace }}/build_info1.md"
           token: ${{ secrets.GITHUB_TOKEN }}
