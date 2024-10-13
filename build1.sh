@@ -73,14 +73,14 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装软件包⭐�
 #  autoconf \
 #  automake \
 #  autopoint \
-#  g++ \
+#  x86_64-w64-mingw32-g++ \
 #  jq \
 #  libtool \
 #  make \
 #  pkgconf \
 #  wget \
 #  tcl \
-3  unzip
+#  unzip
 
 BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
