@@ -51,7 +51,7 @@ jobs:
         with:
           name: aria2c.exe
           path: |
-            "${{ github.workspace }}/aria2/aria2c.exe"
+            "${{ github.workspace }}/aria2c.exe"
       - name: Upload build info
         uses: actions/upload-artifact@v4
         with:
@@ -66,7 +66,7 @@ jobs:
         with:
           tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
-          artifacts: "${{ github.workspace }}aria2/aria2c.exe"
+          artifacts: "${{ github.workspace }}/aria2c.exe"
           bodyFile: "${{ github.workspace }}/build_info.md"
           token: ${{ secrets.GITHUB_TOKEN }}
   static-build_zlib_ng_and_libxml2:
