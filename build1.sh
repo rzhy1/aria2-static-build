@@ -69,18 +69,18 @@ apt update
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 升级已安装的软件包⭐⭐⭐⭐⭐⭐"
 apt upgrade -y
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装软件包⭐⭐⭐⭐⭐⭐"
-apt install -y --no-install-recommends \
-  autoconf \
-  automake \
-  autopoint \
-  g++ \
-  jq \
-  libtool \
-  make \
-  pkgconf \
-  wget \
-  tcl \
-  unzip
+#apt install -y --no-install-recommends \
+#  autoconf \
+#  automake \
+#  autopoint \
+#  g++ \
+#  jq \
+#  libtool \
+#  make \
+#  pkgconf \
+#  wget \
+#  tcl \
+3  unzip
 
 BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
