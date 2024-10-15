@@ -22,7 +22,7 @@ BUILD_INFO="${SELF_DIR}/build_info.md"
 #echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 #echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https    
 
-echo "## aria2c.exe dependencies:" >>"${BUILD_INFO}"
+echo "## aria2c.exe （zlib & libexpat） dependencies:" >>"${BUILD_INFO}"
 # 初始化表格
 echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
 echo "|------------|---------|--------|" >>"${BUILD_INFO}"
