@@ -143,7 +143,7 @@ else
   SSL=OpenSSL
 fi
 
-echo "## aria2c1.exe dependencies:" >>"${BUILD_INFO}"
+echo "## aria2c1.exe （zlib_ng & libxml2 & WinTLS ） dependencies:" >>"${BUILD_INFO}"
 # 初始化表格
 echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
 echo "|------------|---------|--------|" >>"${BUILD_INFO}"
