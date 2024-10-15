@@ -419,7 +419,7 @@ prepare_xz &
 prepare_libxml2 &
 prepare_sqlite &
 prepare_c_ares &
-prepare_libssh2
+prepare_libssh2 &
 wait
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
