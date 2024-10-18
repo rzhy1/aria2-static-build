@@ -171,7 +171,7 @@ PKG_CONFIG_PATH=/usr/local/$HOST/lib/pkgconfig
 ARIA2_VERSION=master
 ARIA2_REF=refs/heads/master
 curl -L -o version.json https://api.github.com/repos/aria2/aria2/git/$ARIA2_REF
-git clone -b $ARIA2_VERSION --depth 1 https://github.com/aria2/aria2.git
+git clone -j$(nproc) -b $ARIA2_VERSION --depth 1 https://github.com/aria2/aria2.git
 cd aria2
 sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
 sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
