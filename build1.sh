@@ -267,7 +267,7 @@ prepare_xz() {
 
 prepare_libxml2() {
   # 获取最新的 libxml2 版本
-  libxml2_latest_url="$(curl -s https://download.gnome.org/sources/libxml2/ | grep -oP 'href="\K[^"]*libxml2-\d+\.\d+\.tar\.gz' | sort -V | tail -n 1)"
+  libxml2_latest_url="$(wget -qO- https://download.gnome.org/sources/libxml2/ | grep -oP 'href="\K[^"]*libxml2-\d+\.\d+\.tar\.gz' | sort -V | tail -n 1)"
 
   # 提取版本和文件名
   libxml2_tag="$(echo "${libxml2_latest_url}" | sed -r 's/.*libxml2-(.+).tar.*/\1/')"
