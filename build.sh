@@ -169,6 +169,12 @@ cd libssh2-*
 ./configure \
     --disable-shared \
     --enable-static \
+    --enable-silent-rules \
+    --disable-examples-build \
+    --disable-docker-tests \
+    --disable-sshd-tests \
+    --disable-debug \
+    --disable-ossfuzzers \
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
