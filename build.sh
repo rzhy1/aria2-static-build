@@ -98,6 +98,13 @@ cd sqlite-*
 ./configure \
     --disable-shared \
     --enable-static \
+    --disable-debug \
+    --enable-silent-rules \
+    --enable-editline=no \
+    --enable-fts3=no --enable-fts4=no --enable-fts5=no \
+    --enable-rtree=no \
+    --enable-session=no \
+    --disable-dynamic-extensions \
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
