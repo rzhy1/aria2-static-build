@@ -174,7 +174,6 @@ cd libssh2-*
     --disable-docker-tests \
     --disable-sshd-tests \
     --disable-debug \
-    --disable-ossfuzzers \
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
