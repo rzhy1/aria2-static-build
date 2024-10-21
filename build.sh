@@ -147,6 +147,8 @@ cd c-ares-*
 ./configure \
     --disable-shared \
     --enable-static \
+    --disable-tests \
+    --enable-silent-rules \
     --without-random \
     --prefix=$PREFIX \
     --host=$HOST \
