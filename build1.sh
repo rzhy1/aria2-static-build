@@ -257,7 +257,7 @@ prepare_xz() {
   mkdir -p "/usr/src/xz-${xz_tag}"
   tar -Jxf "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz" --strip-components=1 -C "/usr/src/xz-${xz_tag}"
   cd "/usr/src/xz-${xz_tag}"
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared
+  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared --disable-doc --enable-debug=no --disable-nls
   make -j$(nproc)
   make install
   xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
@@ -297,7 +297,14 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared ${SQLITE_EXT_CONF}
+  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
+    --disable-debug \
+    --enable-silent-rules \
+    --enable-editline=no \
+    --enable-fts3=no --enable-fts4=no --enable-fts5=no \
+    --enable-rtree=no \
+    --enable-session=no \
+    --disable-dynamic-extensions
   make -j$(nproc)
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
@@ -325,7 +332,7 @@ prepare_c_ares() {
   if [ ! -f "./configure" ]; then
     autoreconf -i
   fi
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules --disable-tests
+  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules --disable-tests --without-random
   make -j$(nproc)
   make install
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
@@ -342,7 +349,11 @@ prepare_libssh2() {
   mkdir -p "/usr/src/libssh2-${libssh2_tag}"
   tar -zxf "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz" --strip-components=1 -C "/usr/src/libssh2-${libssh2_tag}"
   cd "/usr/src/libssh2-${libssh2_tag}"
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules
+  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules \
+    --disable-examples-build \
+    --disable-docker-tests \
+    --disable-sshd-tests \
+    --disable-debug
   make -j$(nproc)
   make install
   unset CFLAGS
