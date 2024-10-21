@@ -74,6 +74,9 @@ cd expat-*
 ./configure \
     --disable-shared \
     --enable-static \
+    --without-examples \
+    --without-tests \
+    --enable-silent-rules \
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
