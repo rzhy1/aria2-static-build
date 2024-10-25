@@ -16,7 +16,7 @@ on:
 
 jobs:
   static-build_zlib_and_libexpat:
-    runs-on: ubuntu-24.10
+    runs-on: ubuntu-24.04
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
           name: build-info
           path: "${{ github.workspace }}/build_info.md"
   static-build_zlib_ng_and_libxml2:
-    runs-on: ubuntu-24.10
+    runs-on: ubuntu-24.04
     container: "rzhy/ubuntu:x86_64-w64-mingw32"
     steps:
       - name: Checkout
@@ -90,7 +90,7 @@ jobs:
           name: build-info1
           path: "${{ github.workspace }}/build_info1.md"
   release-build-info :
-    runs-on: ubuntu-24.10
+    runs-on: ubuntu-24.04
     needs: [static-build_zlib_and_libexpat, static-build_zlib_ng_and_libxml2]
     steps:
       - name: 下载构建信息1
