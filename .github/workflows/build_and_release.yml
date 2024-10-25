@@ -93,8 +93,6 @@ jobs:
           path: "${{ github.workspace }}/build_info1.md"
   release-build-info :
     runs-on: ubuntu-24.04
-    container:
-      image: ubuntu:24.10
     needs: [static-build_zlib_and_libexpat, static-build_zlib_ng_and_libxml2]
     steps:
       - name: 下载构建信息1
