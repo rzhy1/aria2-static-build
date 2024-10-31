@@ -112,13 +112,15 @@ case "${TARGET_HOST}" in
   # echo "deb [signed-by=/usr/share/keyrings/winehq-archive.key] ${WINEHQ_URL} ${UBUNTU_CODENAME} main" >/etc/apt/sources.list.d/winehq.list
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - apt update信息⭐⭐⭐⭐⭐⭐"
   #apt update
-  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - apt install -y wine mingw-w64信息⭐⭐⭐⭐⭐⭐"
-  #apt install -y wine mingw-w64
+  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装gcc-14 g++-14⭐⭐⭐⭐⭐⭐"
+  apt install -y gcc-14 g++-14
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息x86_64-w64-mingw32-gcc --version⭐⭐⭐⭐⭐⭐"
   x86_64-w64-mingw32-gcc --version
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息apt list --installed | grep gcc-mingw-w64⭐⭐⭐⭐⭐⭐"
   apt list --installed | grep gcc-mingw-w64
-  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息结束⭐⭐⭐⭐⭐⭐"
+  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 设置gcc和g++使用gcc-14⭐⭐⭐⭐⭐⭐
+  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 60
+  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 60
   export WINEPREFIX=/tmp/
   RUNNER_CHECKER="wine"
   ;;
