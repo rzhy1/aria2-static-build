@@ -110,7 +110,9 @@ case "${TARGET_HOST}" in
   #   WINEHQ_URL="http://dl.winehq.org/wine-builds/ubuntu/"
   # fi
   # echo "deb [signed-by=/usr/share/keyrings/winehq-archive.key] ${WINEHQ_URL} ${UBUNTU_CODENAME} main" >/etc/apt/sources.list.d/winehq.list
+  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - apt update信息⭐⭐⭐⭐⭐⭐"
   apt update
+  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - apt install -y wine mingw-w64信息⭐⭐⭐⭐⭐⭐"
   apt install -y wine mingw-w64
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息x86_64-w64-mingw32-gcc --version⭐⭐⭐⭐⭐⭐"
   x86_64-w64-mingw32-gcc --version
