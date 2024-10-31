@@ -83,7 +83,7 @@ apt upgrade -y
 #  tcl \
 #  unzip
 
-BUILD_ARCH="$(gcc -dumpmachine)"
+BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
 TARGET_HOST="${CROSS_HOST#*-}"
 case "${TARGET_ARCH}" in
