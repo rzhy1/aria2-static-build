@@ -111,14 +111,14 @@ case "${TARGET_HOST}" in
   # fi
   # echo "deb [signed-by=/usr/share/keyrings/winehq-archive.key] ${WINEHQ_URL} ${UBUNTU_CODENAME} main" >/etc/apt/sources.list.d/winehq.list
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - apt update信息⭐⭐⭐⭐⭐⭐"
-  apt update
+  #apt update
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - apt install -y wine mingw-w64信息⭐⭐⭐⭐⭐⭐"
-  apt install -y wine mingw-w64
+  #apt install -y wine mingw-w64
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息x86_64-w64-mingw32-gcc --version⭐⭐⭐⭐⭐⭐"
   x86_64-w64-mingw32-gcc --version
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息apt list --installed | grep gcc-mingw-w64⭐⭐⭐⭐⭐⭐"
   apt list --installed | grep gcc-mingw-w64
-  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息a结束⭐⭐⭐⭐⭐⭐"
+  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息结束⭐⭐⭐⭐⭐⭐"
   export WINEPREFIX=/tmp/
   RUNNER_CHECKER="wine"
   ;;
