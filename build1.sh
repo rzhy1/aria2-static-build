@@ -79,6 +79,7 @@ apt install -y --no-install-recommends \
   pkgconf \
   wget \
   tcl \
+  g++ \
   unzip
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
