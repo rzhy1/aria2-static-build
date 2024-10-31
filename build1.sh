@@ -79,10 +79,7 @@ apt install -y --no-install-recommends \
   pkgconf \
   wget \
   tcl \
-  gcc-14 \
-  g++-14 \
   unzip
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - g++版本⭐⭐⭐⭐⭐⭐"
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
