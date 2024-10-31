@@ -81,7 +81,7 @@ apt install -y --no-install-recommends \
   tcl \
   unzip
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - g++版本⭐⭐⭐⭐⭐⭐"
-g++ --version
+x86_64-w64-mingw32-g++ --version
 which g++
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
