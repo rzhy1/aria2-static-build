@@ -113,14 +113,12 @@ case "${TARGET_HOST}" in
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - apt update信息⭐⭐⭐⭐⭐⭐"
   #apt update
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装gcc-14 g++-14⭐⭐⭐⭐⭐⭐"
-  apt install -y gcc-14 g++-14
+  #apt install -y gcc-14 g++-14
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息x86_64-w64-mingw32-gcc --version⭐⭐⭐⭐⭐⭐"
   x86_64-w64-mingw32-gcc --version
   echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息apt list --installed | grep gcc-mingw-w64⭐⭐⭐⭐⭐⭐"
   apt list --installed | grep gcc-mingw-w64
-  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 设置gcc和g++使用gcc-14⭐⭐⭐⭐⭐⭐"
-  update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-14 60
-  update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-14 60
+  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 查询结束⭐⭐⭐⭐⭐⭐"
   export WINEPREFIX=/tmp/
   RUNNER_CHECKER="wine"
   ;;
