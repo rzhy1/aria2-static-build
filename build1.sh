@@ -68,11 +68,6 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 更新软件包索�
 apt update
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 升级已安装的软件包⭐⭐⭐⭐⭐⭐"
 apt upgrade -y
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息x86_64-w64-mingw32-gcc --version⭐⭐⭐⭐⭐⭐"
-x86_64-w64-mingw32-gcc --version
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息apt list --installed | grep gcc-mingw-w64⭐⭐⭐⭐⭐⭐"
-apt list --installed | grep gcc-mingw-w64
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息apt list --installed | grep gcc-mingw-w64⭐⭐⭐⭐⭐⭐"
 
 #echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装软件包⭐⭐⭐⭐⭐⭐"
 #apt install -y --no-install-recommends \
@@ -117,6 +112,11 @@ case "${TARGET_HOST}" in
   # echo "deb [signed-by=/usr/share/keyrings/winehq-archive.key] ${WINEHQ_URL} ${UBUNTU_CODENAME} main" >/etc/apt/sources.list.d/winehq.list
   apt update
   apt install -y wine mingw-w64
+  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息x86_64-w64-mingw32-gcc --version⭐⭐⭐⭐⭐⭐"
+  x86_64-w64-mingw32-gcc --version
+  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息apt list --installed | grep gcc-mingw-w64⭐⭐⭐⭐⭐⭐"
+  apt list --installed | grep gcc-mingw-w64
+  echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息a结束⭐⭐⭐⭐⭐⭐"
   export WINEPREFIX=/tmp/
   RUNNER_CHECKER="wine"
   ;;
