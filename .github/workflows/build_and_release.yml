@@ -16,7 +16,7 @@ on:
 
 jobs:
   static-build_zlib_and_libexpat:
-    runs-on: ubuntu-24.10
+    runs-on: ubuntu-24.04
     container:
       image: ubuntu:rolling
     steps:
