@@ -70,17 +70,16 @@ apt upgrade -y
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装软件包⭐⭐⭐⭐⭐⭐"
 apt install -y --no-install-recommends \
-  automake
-#  autoconf
-#  autopoint \
-#  mingw-w64 \
-#  jq \
-#  libtool \
-#  make \
-#  pkgconf \
-#  wget \
-#  tcl \
-#  unzip
+  automake \
+  autoconf \
+  autopoint \
+  jq \
+  libtool \
+  make \
+  pkgconf \
+  wget \
+  tcl \
+  unzip
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
