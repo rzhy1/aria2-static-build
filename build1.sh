@@ -68,6 +68,14 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 更新软件包索�
 apt update
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 升级已安装的软件包⭐⭐⭐⭐⭐⭐"
 apt upgrade -y
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息gcc-mingw-w64 --version⭐⭐⭐⭐⭐⭐"
+gcc-mingw-w64 --version
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息x86_64-w64-mingw32-gcc --version⭐⭐⭐⭐⭐⭐"
+x86_64-w64-mingw32-gcc --version
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息apt list --installed | grep gcc-mingw-w64⭐⭐⭐⭐⭐⭐"
+apt list --installed | grep gcc-mingw-w64
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 版本信息apt list --installed | grep gcc-mingw-w64⭐⭐⭐⭐⭐⭐"
+
 #echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装软件包⭐⭐⭐⭐⭐⭐"
 #apt install -y --no-install-recommends \
 #  autoconf \
