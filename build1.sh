@@ -70,8 +70,8 @@ apt upgrade -y
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装软件包⭐⭐⭐⭐⭐⭐"
 apt install -y --no-install-recommends \
-#  autoconf
   automake
+#  autoconf
 #  autopoint \
 #  mingw-w64 \
 #  jq \
