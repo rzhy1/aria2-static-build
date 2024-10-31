@@ -63,7 +63,8 @@ export DEBIAN_FRONTEND=noninteractive
 rm -f /etc/apt/apt.conf.d/*
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
-
+echo "检查 x86_64-w64-mingw32-gcc 是否可用:"
+x86_64-w64-mingw32-gcc --version || { echo "未找到 x86_64-w64-mingw32-gcc"; exit 1; }
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 更新软件包索引⭐⭐⭐⭐⭐⭐"
 apt update
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 升级已安装的软件包⭐⭐⭐⭐⭐⭐"
