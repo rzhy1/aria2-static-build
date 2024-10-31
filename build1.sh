@@ -6,8 +6,6 @@
 # Artifacts will copy to the same directory.
 
 set -o pipefail
-export CC=x86_64-w64-mingw32-gcc
-export CXX=x86_64-w64-mingw32-g++
 
 # value from: https://musl.cc/ (without -cross or -native)
 # export CROSS_HOST="${CROSS_HOST:-arm-linux-musleabi}"
@@ -81,6 +79,8 @@ apt install -y --no-install-recommends \
   pkgconf \
   wget \
   tcl \
+  gcc 14 \
+  g++ 14 \
   unzip
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - g++版本⭐⭐⭐⭐⭐⭐"
 
