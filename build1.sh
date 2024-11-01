@@ -74,12 +74,12 @@ apt install -y --no-install-recommends \
   autoconf \
   autopoint \
   jq \
+  mingw-w64 \
   libtool \
   make \
   pkgconf \
   wget \
   tcl \
-  g++ \
   unzip
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
