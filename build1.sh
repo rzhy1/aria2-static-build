@@ -79,6 +79,7 @@ apt install -y --no-install-recommends \
   make \
   pkgconf \
   wget \
+  curl \
   tcl \
   unzip
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并覆盖⭐⭐⭐⭐⭐⭐"
