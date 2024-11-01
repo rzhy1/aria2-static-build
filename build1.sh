@@ -84,12 +84,6 @@ apt install -y --no-install-recommends \
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并覆盖⭐⭐⭐⭐⭐⭐"
 #curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
 #unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "${CROSS_ROOT}"
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - x86_64-w64-mingw32-gcc --version⭐⭐⭐⭐⭐⭐"
-x86_64-w64-mingw32-gcc --version
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - x86_64-w64-mingw32-gcc --version⭐⭐⭐⭐⭐⭐"
-${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc --version
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - gcc-14.2.1 --version⭐⭐⭐⭐⭐⭐"
-${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc-14.2.1 --version
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
