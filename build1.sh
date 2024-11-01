@@ -306,12 +306,10 @@ prepare_sqlite() {
   fi
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
-    --enable-silent-rules \
     --enable-editline=no \
     --enable-fts3=no --enable-fts4=no --enable-fts5=no \
     --enable-rtree=no \
-    --enable-session=no \
-    --disable-dynamic-extensions
+    --enable-session=no
   make -j$(nproc)
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
