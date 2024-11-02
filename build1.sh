@@ -3,7 +3,10 @@
 # This scrip is for static cross compiling
 # Please run this scrip in docker image: "rzhy/ubuntu:x86_64-w64-mingw32" or "ubuntu:rolling"
 # Artifacts will copy to the same directory.
-
+export CROSS_HOST="x86_64-w64-mingw32"
+export CROSS_ROOT="/cross_root"
+export PATH="${CROSS_ROOT}/bin:${PATH}"
+export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 set -o pipefail
 
 case "${CROSS_HOST}" in
@@ -29,7 +32,6 @@ s390x-linux*)
   export OPENSSL_COMPILER=gcc
   ;;
 esac
-# export CROSS_ROOT="${CROSS_ROOT:-/cross_root}"
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 # 确保路径存在
 if [ -d "${CROSS_ROOT}/bin" ]; then
@@ -170,7 +172,6 @@ ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - which x86_64-w64-mingw32-gcc⭐⭐⭐⭐⭐⭐"
 which x86_64-w64-mingw32-gcc
 
-export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
 export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -I${CROSS_PREFIX}/include -s -static --static"
 SELF_DIR="$(dirname "$(realpath "${0}")")"
