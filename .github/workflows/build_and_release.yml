@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-24.04
     #container: "rzhy/ubuntu:x86_64-w64-mingw32"
     container:
-      image: ubuntu:rolling
+      image: ubuntu:latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
