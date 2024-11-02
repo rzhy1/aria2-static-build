@@ -125,6 +125,8 @@ esac
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updated PATH⭐⭐⭐⭐⭐⭐"
 echo "Updated PATH: $PATH"
+echo "Current Directory: $(pwd)"
+echo "CROSS_ROOT exists: $(if [ -d "${CROSS_ROOT}" ]; then echo "yes"; else echo "no"; fi)"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - ls -al "${CROSS_ROOT}/bin"⭐⭐⭐⭐⭐⭐"
 ls -al "${CROSS_ROOT}/bin"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc⭐⭐⭐⭐⭐⭐"
