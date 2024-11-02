@@ -156,7 +156,6 @@ esac
 case "${TARGET_HOST}" in
 *"mingw"*)
   TARGET_HOST=Windows
-  rm -fr "${CROSS_ROOT}"
   hash -r
   # if [ ! -f "/usr/share/keyrings/winehq-archive.key" ]; then
   #   rm -f /usr/share/keyrings/winehq-archive.key.part
