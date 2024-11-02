@@ -9,29 +9,6 @@ export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 set -o pipefail
 
-case "${CROSS_HOST}" in
-arm-linux*)
-  export OPENSSL_COMPILER=linux-armv4
-  ;;
-aarch64-linux*)
-  export OPENSSL_COMPILER=linux-aarch64
-  ;;
-mips-linux* | mipsel-linux*)
-  export OPENSSL_COMPILER=linux-mips32
-  ;;
-mips64-linux*)
-  export OPENSSL_COMPILER=linux64-mips64
-  ;;
-x86_64-linux*)
-  export OPENSSL_COMPILER=linux-x86_64
-  ;;
-s390x-linux*)
-  export OPENSSL_COMPILER=linux64-s390x
-  ;;
-*)
-  export OPENSSL_COMPILER=gcc
-  ;;
-esac
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 # 确保路径存在
 if [ -d "${CROSS_ROOT}/bin" ]; then
@@ -57,24 +34,10 @@ retry() {
   echo "execute '$@' failed" >&2
   return 1
 }
-# 确保路径存在
-if [ -d "${CROSS_ROOT}/bin" ]; then
-    echo "列出3 ${CROSS_ROOT}/bin:"
-    ls -al "${CROSS_ROOT}/bin"
-else
-    echo "文件夹 ${CROSS_ROOT}/bin 不存在3."
-fi
 source /etc/os-release
 dpkg --add-architecture i386
 
 export DEBIAN_FRONTEND=noninteractive
-# 确保路径存在
-if [ -d "${CROSS_ROOT}/bin" ]; then
-    echo "列出4 ${CROSS_ROOT}/bin:"
-    ls -al "${CROSS_ROOT}/bin"
-else
-    echo "文件夹 ${CROSS_ROOT}/bin 不存在4."
-fi
 # keep debs in container for store cache in docker volume
 rm -f /etc/apt/apt.conf.d/*
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
@@ -98,24 +61,10 @@ apt install -y --no-install-recommends \
   tcl \
   ca-certificates \
   unzip
-# 确保路径存在
-if [ -d "${CROSS_ROOT}/bin" ]; then
-    echo "列出5 ${CROSS_ROOT}/bin:"
-    ls -al "${CROSS_ROOT}/bin"
-else
-    echo "文件夹 ${CROSS_ROOT}/bin 不存在5."
-fi
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并覆盖⭐⭐⭐⭐⭐⭐"
 mkdir -p "${CROSS_ROOT}"
 curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
 unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "${CROSS_ROOT}"
-# 确保路径存在
-if [ -d "${CROSS_ROOT}/bin" ]; then
-    echo "列出6 ${CROSS_ROOT}/bin:"
-    ls -al "${CROSS_ROOT}/bin"
-else
-    echo "文件夹 ${CROSS_ROOT}/bin 不存在6."
-fi
 BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
 TARGET_HOST="${CROSS_HOST#*-}"
@@ -151,27 +100,6 @@ case "${TARGET_HOST}" in
   RUNNER_CHECKER="qemu-${TARGET_ARCH}-static"
   ;;
 esac
-# 确保路径存在
-if [ -d "${CROSS_ROOT}/bin" ]; then
-    echo "列出7 ${CROSS_ROOT}/bin:"
-    ls -al "${CROSS_ROOT}/bin"
-else
-    echo "文件夹 ${CROSS_ROOT}/bin 不存在7."
-fi
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updated PATH⭐⭐⭐⭐⭐⭐"
-echo "Updated PATH: $PATH"
-echo "Current Directory: $(pwd)"
-cd /
-find / -name "libmqdscli.a" 2>/dev/null
-echo "CROSS_ROOT exists: $(if [ -d "${CROSS_ROOT}" ]; then echo "yes"; else echo "no"; fi)"
-echo "CROSS_ROOT in build1.sh: ${CROSS_ROOT}"
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - ls -al "${CROSS_ROOT}"⭐⭐⭐⭐⭐⭐"
-ls -al "${CROSS_ROOT}"
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc⭐⭐⭐⭐⭐⭐"
-ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - which x86_64-w64-mingw32-gcc⭐⭐⭐⭐⭐⭐"
-which x86_64-w64-mingw32-gcc
-
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
 export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -I${CROSS_PREFIX}/include -s -static --static"
 SELF_DIR="$(dirname "$(realpath "${0}")")"
@@ -215,14 +143,6 @@ prepare_cmake() {
   fi
   cmake --version
 }
-echo "当前的 BUILD_ARCH 值为: ${BUILD_ARCH}"
-echo "当前的 TARGET_ARCHH 值为: ${TARGET_ARCH}"
-echo "当前的 TARGET_HOST 值为: ${TARGET_HOST}"
-echo "当前的 TARGET_HOST 值为: ${TARGET_HOST}"
-echo "版本信息x86_64-w64-mingw32-gcc --version⭐⭐⭐⭐⭐⭐"
-x86_64-w64-mingw32-gcc --version
-which x86_64-w64-mingw32-gcc
-command -v x86_64-w64-mingw32-gcc
 prepare_ninja() {
   if ! which ninja &>/dev/null; then
     ninja_ver="$(retry wget -qO- --compression=auto https://ninja-build.org/ \| grep "'The last Ninja release is'" \| sed -r "'s@.*<b>(.+)</b>.*@\1@'" \| head -1)"
@@ -315,8 +235,7 @@ prepare_xz() {
   make -j$(nproc)
   make install
   xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
-  echo "| xz | ${xz_ver} | ${xz_latest_url:-cached xz} |" >>"${BUILD_INFO}"
-  
+  echo "| xz | ${xz_ver} | ${xz_latest_url:-cached xz} |" >>"${BUILD_INFO}" 
 }
 
 prepare_libxml2() {
@@ -351,9 +270,6 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  echo "当前的 BUILD_ARCH 值为: ${BUILD_ARCH}"
-  echo "当前的 TARGET_ARCHH 值为: ${TARGET_ARCH}"
-  echo "当前的 TARGET_HOST 值为: ${TARGET_HOST}"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
     --enable-editline=no \
@@ -467,14 +383,6 @@ build_aria2() {
   echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
 }
 
-test_build() {
-  # get release
-  cp -fv "${CROSS_PREFIX}/bin/"aria2* "${SELF_DIR}"
-  echo "============= ARIA2 TEST DOWNLOAD =============="
-  "${RUNNER_CHECKER}" "${CROSS_PREFIX}/bin/aria2c"* -t 10 --console-log-level=debug --http-accept-gzip=true https://github.com/ -d /tmp -o test
-  echo "================================================"
-}
-
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 cmake⭐⭐⭐⭐⭐⭐"
 prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
@@ -491,4 +399,5 @@ build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
 
 # get release
+${CROSS_ROOT}/bin/${CROSS_ROOT}-strip "${CROSS_PREFIX}/bin/aria2c.exe"
 mv -fv "${CROSS_PREFIX}/bin/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
