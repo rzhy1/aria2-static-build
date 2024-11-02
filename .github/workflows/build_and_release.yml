@@ -73,6 +73,15 @@ jobs:
       #      build-cache-x86_64-w64-mingw32-
       - name: Set up PATH for cross-compilation tools
         run: echo "${CROSS_ROOT}/bin" >> $GITHUB_PATH
+      - name: Check toolchain extraction
+        run: |
+          echo "PATH: $PATH"
+          ls -al "${CROSS_ROOT}/bin"
+      - name: Verify CROSS_ROOT and CROSS_HOST
+        run: |
+          echo "CROSS_ROOT: ${CROSS_ROOT}"
+          echo "CROSS_HOST: ${CROSS_HOST}"
+          ls -al ${CROSS_ROOT}/bin
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
