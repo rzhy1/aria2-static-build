@@ -34,26 +34,7 @@ export DEBIAN_FRONTEND=noninteractive
 rm -f /etc/apt/apt.conf.d/*
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 更新软件包索引⭐⭐⭐⭐⭐⭐"
-apt update
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 升级已安装的软件包⭐⭐⭐⭐⭐⭐"
-apt upgrade -y
 
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 安装软件包⭐⭐⭐⭐⭐⭐"
-apt install -y --no-install-recommends \
-  automake \
-  autoconf \
-  autopoint \
-  jq \
-  libtool \
-  mingw-w64 \
-  make \
-  pkgconf \
-  wget \
-  curl \
-  tcl \
-  ca-certificates \
-  unzip
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并覆盖⭐⭐⭐⭐⭐⭐"
 #curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
 #unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "${CROSS_ROOT}"
