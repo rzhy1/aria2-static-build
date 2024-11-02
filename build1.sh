@@ -9,6 +9,19 @@ if [ -d "${CROSS_ROOT}/bin" ]; then
 else
     echo "Directory ${CROSS_ROOT}/bin does not exist."
 fi
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updated PATH⭐⭐⭐⭐⭐⭐"
+echo "Updated PATH: $PATH"
+echo "Current Directory: $(pwd)"
+cd /
+find / -name "libmqdscli.a" 2>/dev/null
+echo "CROSS_ROOT exists: $(if [ -d "${CROSS_ROOT}" ]; then echo "yes"; else echo "no"; fi)"
+echo "CROSS_ROOT in build1.sh: ${CROSS_ROOT}"
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - ls -al "${CROSS_ROOT}"⭐⭐⭐⭐⭐⭐"
+ls -al "${CROSS_ROOT}"
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc⭐⭐⭐⭐⭐⭐"
+ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - which x86_64-w64-mingw32-gcc⭐⭐⭐⭐⭐⭐"
+which x86_64-w64-mingw32-gcc
 
 # This scrip is for static cross compiling
 # Please run this scrip in docker image: abcfy2/muslcc-toolchain-ubuntu:${CROSS_HOST}
