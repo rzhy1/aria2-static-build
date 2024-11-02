@@ -124,6 +124,10 @@ case "${TARGET_HOST}" in
 esac
 
 export PATH="${CROSS_ROOT}/bin:${PATH}"
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updated PATH⭐⭐⭐⭐⭐⭐"
+echo "Updated PATH: $PATH"
+which x86_64-w64-mingw32-gcc
+
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
 export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -I${CROSS_PREFIX}/include -s -static --static"
