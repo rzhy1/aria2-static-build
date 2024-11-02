@@ -175,6 +175,8 @@ echo "当前的 TARGET_HOST 值为: ${TARGET_HOST}"
 echo "当前的 TARGET_HOST 值为: ${TARGET_HOST}"
 echo "版本信息x86_64-w64-mingw32-gcc --version⭐⭐⭐⭐⭐⭐"
 x86_64-w64-mingw32-gcc --version
+which x86_64-w64-mingw32-gcc
+command -v x86_64-w64-mingw32-gcc
 prepare_ninja() {
   if ! which ninja &>/dev/null; then
     ninja_ver="$(retry wget -qO- --compression=auto https://ninja-build.org/ \| grep "'The last Ninja release is'" \| sed -r "'s@.*<b>(.+)</b>.*@\1@'" \| head -1)"
