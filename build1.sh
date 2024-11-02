@@ -9,7 +9,6 @@ export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export LD=lld
 lld --version
-x86_64-w64-mingw32-lld --version
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 retry() {
