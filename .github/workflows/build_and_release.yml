@@ -72,7 +72,7 @@ jobs:
           apt-get install -y --no-install-recommends \
               automake  autoconf autopoint jq libtool \
               mingw-w64 make pkgconf wget curl tcl \
-              ca-certificates unzip
+              ca-certificates unzip lld lld x86_64-w64-mingw32-lld
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
