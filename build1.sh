@@ -126,7 +126,7 @@ esac
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updated PATH⭐⭐⭐⭐⭐⭐"
 echo "Updated PATH: $PATH"
-ls -l /cross_root/bin/x86_64-w64-mingw32-gcc
+ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc
 which x86_64-w64-mingw32-gcc
 
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
