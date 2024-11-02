@@ -1,39 +1,11 @@
 #!/bin/bash -e
-echo "CROSS_ROOT: $CROSS_ROOT"
-echo "Current Directory: $(pwd)"
-
-# 确保路径存在
-if [ -d "${CROSS_ROOT}/bin" ]; then
-    echo "列出1 ${CROSS_ROOT}/bin:"
-    ls -al "${CROSS_ROOT}/bin"
-else
-    echo "文件夹 ${CROSS_ROOT}/bin 不存在1."
-fi
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updated PATH⭐⭐⭐⭐⭐⭐"
-echo "Updated PATH: $PATH"
-echo "Current Directory: $(pwd)"
-cd /
-find / -name "libmqdscli.a" 2>/dev/null
-echo "CROSS_ROOT exists: $(if [ -d "${CROSS_ROOT}" ]; then echo "yes"; else echo "no"; fi)"
-echo "CROSS_ROOT in build1.sh: ${CROSS_ROOT}"
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - ls -al "${CROSS_ROOT}"⭐⭐⭐⭐⭐⭐"
-ls -al "${CROSS_ROOT}"
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc⭐⭐⭐⭐⭐⭐"
-ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - which x86_64-w64-mingw32-gcc⭐⭐⭐⭐⭐⭐"
-which x86_64-w64-mingw32-gcc
-x86_64-w64-mingw32-gcc --version
 
 # This scrip is for static cross compiling
-# Please run this scrip in docker image: abcfy2/muslcc-toolchain-ubuntu:${CROSS_HOST}
-# E.g: docker run --rm -v `git rev-parse --show-toplevel`:/build abcfy2/muslcc-toolchain-ubuntu:arm-linux-musleabi /build/build.sh
+# Please run this scrip in docker image: "rzhy/ubuntu:x86_64-w64-mingw32" or "ubuntu:rolling"
 # Artifacts will copy to the same directory.
 
 set -o pipefail
 
-# value from: https://musl.cc/ (without -cross or -native)
-# export CROSS_HOST="${CROSS_HOST:-arm-linux-musleabi}"
-# value from openssl source: ./Configure LIST
 case "${CROSS_HOST}" in
 arm-linux*)
   export OPENSSL_COMPILER=linux-armv4
