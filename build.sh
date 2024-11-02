@@ -19,6 +19,7 @@ BUILD_INFO="${SELF_DIR}/build_info.md"
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 find / -name "libmqdscli.a" 2>/dev/null
+find / -name "x86_64-w64-mingw32-gcc" 2>/dev/null
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
