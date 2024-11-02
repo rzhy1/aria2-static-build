@@ -87,7 +87,7 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并覆盖⭐�
 #curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
 #unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "${CROSS_ROOT}"
 
-BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
+BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
 TARGET_HOST="${CROSS_HOST#*-}"
 echo "当前的 BUILD_ARCH 值为: ${BUILD_ARCH}"
