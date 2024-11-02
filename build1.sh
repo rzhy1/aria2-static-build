@@ -1,4 +1,14 @@
 #!/bin/bash -e
+echo "CROSS_ROOT: $CROSS_ROOT"
+echo "Current Directory: $(pwd)"
+
+# 确保路径存在
+if [ -d "${CROSS_ROOT}/bin" ]; then
+    echo "Listing ${CROSS_ROOT}/bin:"
+    ls -al "${CROSS_ROOT}/bin"
+else
+    echo "Directory ${CROSS_ROOT}/bin does not exist."
+fi
 
 # This scrip is for static cross compiling
 # Please run this scrip in docker image: abcfy2/muslcc-toolchain-ubuntu:${CROSS_HOST}
