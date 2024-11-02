@@ -123,10 +123,13 @@ case "${TARGET_HOST}" in
   ;;
 esac
 
-export PATH="${CROSS_ROOT}/bin:${PATH}"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updated PATH⭐⭐⭐⭐⭐⭐"
 echo "Updated PATH: $PATH"
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - ls ${CROSS_ROOT}/bin⭐⭐⭐⭐⭐⭐"
+ls ${CROSS_ROOT}/bin
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc⭐⭐⭐⭐⭐⭐"
 ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - which x86_64-w64-mingw32-gcc⭐⭐⭐⭐⭐⭐"
 which x86_64-w64-mingw32-gcc
 
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
