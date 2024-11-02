@@ -71,6 +71,8 @@ jobs:
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
+          CC: "ccache ${CROSS_HOST}-gcc"
+          CXX: "ccache ${CROSS_HOST}-g++"
         run: |
           if [ "${GITHUB_EVENT_NAME}" = release ]; then
             export ARIA2_VER="${GITHUB_REF#refs/*/}"
