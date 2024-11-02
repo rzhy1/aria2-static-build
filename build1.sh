@@ -8,15 +8,7 @@ export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 set -o pipefail
-
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
-# 确保路径存在
-if [ -d "${CROSS_ROOT}/bin" ]; then
-    echo "列出2 ${CROSS_ROOT}/bin:"
-    ls -al "${CROSS_ROOT}/bin"
-else
-    echo "文件夹 ${CROSS_ROOT}/bin 不存在2."
-fi
 retry() {
   # max retry 5 times
   try=5
@@ -388,12 +380,13 @@ prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib、xz、libxml2、sqlite、c_ares、libssh2⭐⭐⭐⭐⭐⭐"
-prepare_zlib
-prepare_xz
-prepare_libxml2
-prepare_sqlite
-prepare_c_ares
-prepare_libssh2
+prepare_zlib &
+prepare_xz &
+prepare_libxml2 &
+prepare_sqlite &
+prepare_c_ares &
+prepare_libssh2 &
+wait
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
