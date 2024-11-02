@@ -150,7 +150,7 @@ echo "## aria2c1.exe （zlib_ng & libxml2 & WinTLS ） dependencies:" >>"${BUILD
 # 初始化表格
 echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
 echo "|------------|---------|--------|" >>"${BUILD_INFO}"
-
+echo "当前的 TARGET_HOST 值为: ${TARGET_HOST}"
 prepare_cmake() {
   if ! which cmake &>/dev/null; then
     cmake_latest_ver="$(retry wget -qO- --compression=auto https://cmake.org/download/ \| grep "'Latest Release'" \| sed -r "'s/.*Latest Release\s*\((.+)\).*/\1/'" \| head -1)"
@@ -170,6 +170,7 @@ prepare_cmake() {
     tar -zxf "${DOWNLOADS_DIR}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz" -C /usr/local --strip-components 1
   fi
   cmake --version
+  echo "当前的 TARGET_HOST 值为: ${TARGET_HOST}"
 }
 
 prepare_ninja() {
@@ -184,6 +185,7 @@ prepare_ninja() {
     unzip -d /usr/local/bin "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip"
   fi
   echo "Ninja version $(ninja --version)"
+  echo "当前的 TARGET_HOST 值为: ${TARGET_HOST}"
 }
 
 prepare_zlib() {
@@ -242,6 +244,7 @@ prepare_zlib() {
     zlib_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc | awk '{print $2}'")"
     echo "| zlib | ${zlib_ver} | ${zlib_latest_url:-cached zlib} |" >>"${BUILD_INFO}" || exit
   fi
+  echo "当前的 TARGET_HOST 值为: ${TARGET_HOST}"
 }
 
 prepare_xz() {
@@ -284,6 +287,7 @@ prepare_libxml2() {
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
+  echo "当前的 TARGET_HOST 值为: ${TARGET_HOST}"
 }
 
 prepare_sqlite() {
@@ -300,6 +304,7 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
+  echo "当前的 TARGET_HOST 值为: ${TARGET_HOST}"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
     --enable-editline=no \
