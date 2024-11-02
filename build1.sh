@@ -180,7 +180,7 @@ prepare_zlib() {
     if [ x"${TARGET_HOST}" = xWindows ]; then
       make -f win32/Makefile.gcc BINARY_PATH="${CROSS_PREFIX}/bin" INCLUDE_PATH="${CROSS_PREFIX}/include" LIBRARY_PATH="${CROSS_PREFIX}/lib" SHARED_MODE=0 PREFIX="${CROSS_HOST}-" -j$(nproc) install
     else
-      CHOST="${CROSS_HOST}" ./configure --prefix="${CROSS_PREFIX}" --static --disable-checks
+      CHOST="${CROSS_HOST}" ./configure --prefix="${CROSS_PREFIX}" --static
       make -j$(nproc)
       make install
     fi
@@ -205,7 +205,7 @@ prepare_xz() {
   mkdir -p "/usr/src/xz-${xz_tag}"
   tar -Jxf "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz" --strip-components=1 -C "/usr/src/xz-${xz_tag}"
   cd "/usr/src/xz-${xz_tag}"
-  CFLAGS="-O2" CXXFLAGS="-O2" ./configure --disable-checks --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared --disable-doc --enable-debug=no --disable-nls
+  CFLAGS="-O2" CXXFLAGS="-O2" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared --disable-doc --enable-debug=no --disable-nls
   make -j$(nproc)
   make install
   xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
