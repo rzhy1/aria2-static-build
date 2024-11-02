@@ -4,10 +4,10 @@ echo "Current Directory: $(pwd)"
 
 # 确保路径存在
 if [ -d "${CROSS_ROOT}/bin" ]; then
-    echo "Listing ${CROSS_ROOT}/bin:"
+    echo "列出1 ${CROSS_ROOT}/bin:"
     ls -al "${CROSS_ROOT}/bin"
 else
-    echo "Directory ${CROSS_ROOT}/bin does not exist."
+    echo "文件夹 ${CROSS_ROOT}/bin 不存在1."
 fi
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - Updated PATH⭐⭐⭐⭐⭐⭐"
 echo "Updated PATH: $PATH"
@@ -22,6 +22,7 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - ls -l ${CROSS_ROOT}
 ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - which x86_64-w64-mingw32-gcc⭐⭐⭐⭐⭐⭐"
 which x86_64-w64-mingw32-gcc
+x86_64-w64-mingw32-gcc --version
 
 # This scrip is for static cross compiling
 # Please run this scrip in docker image: abcfy2/muslcc-toolchain-ubuntu:${CROSS_HOST}
@@ -58,7 +59,13 @@ s390x-linux*)
 esac
 # export CROSS_ROOT="${CROSS_ROOT:-/cross_root}"
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
-
+# 确保路径存在
+if [ -d "${CROSS_ROOT}/bin" ]; then
+    echo "列出2 ${CROSS_ROOT}/bin:"
+    ls -al "${CROSS_ROOT}/bin"
+else
+    echo "文件夹 ${CROSS_ROOT}/bin 不存在2."
+fi
 retry() {
   # max retry 5 times
   try=5
@@ -76,12 +83,24 @@ retry() {
   echo "execute '$@' failed" >&2
   return 1
 }
-
+# 确保路径存在
+if [ -d "${CROSS_ROOT}/bin" ]; then
+    echo "列出3 ${CROSS_ROOT}/bin:"
+    ls -al "${CROSS_ROOT}/bin"
+else
+    echo "文件夹 ${CROSS_ROOT}/bin 不存在3."
+fi
 source /etc/os-release
 dpkg --add-architecture i386
 
 export DEBIAN_FRONTEND=noninteractive
-
+# 确保路径存在
+if [ -d "${CROSS_ROOT}/bin" ]; then
+    echo "列出4 ${CROSS_ROOT}/bin:"
+    ls -al "${CROSS_ROOT}/bin"
+else
+    echo "文件夹 ${CROSS_ROOT}/bin 不存在4."
+fi
 # keep debs in container for store cache in docker volume
 rm -f /etc/apt/apt.conf.d/*
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
@@ -105,6 +124,13 @@ apt install -y --no-install-recommends \
   tcl \
   ca-certificates \
   unzip
+# 确保路径存在
+if [ -d "${CROSS_ROOT}/bin" ]; then
+    echo "列出5 ${CROSS_ROOT}/bin:"
+    ls -al "${CROSS_ROOT}/bin"
+else
+    echo "文件夹 ${CROSS_ROOT}/bin 不存在5."
+fi
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并覆盖⭐⭐⭐⭐⭐⭐"
 mkdir -p "${CROSS_ROOT}"
 curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
