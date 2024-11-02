@@ -205,7 +205,7 @@ prepare_xz() {
   mkdir -p "/usr/src/xz-${xz_tag}"
   tar -Jxf "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz" --strip-components=1 -C "/usr/src/xz-${xz_tag}"
   cd "/usr/src/xz-${xz_tag}"
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared --disable-doc --enable-debug=no --disable-nls
+  CFLAGS="-O0" CXXFLAGS="-O0" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared --disable-doc --enable-debug=no --disable-nls
   make -j$(nproc)
   make install
   xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
