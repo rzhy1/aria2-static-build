@@ -60,7 +60,7 @@ jobs:
           path: "${{ github.workspace }}/build_info.md"
   static-build_zlib_ng_and_libxml2:
     runs-on: ubuntu-24.04
-    #container: "rzhy/ubuntu:x86_64-w64-mingw32"
+    container: "rzhy/ubuntu:x86_64-w64-mingw32"
     #container:
     #  image: ubuntu:rolling
     steps:
