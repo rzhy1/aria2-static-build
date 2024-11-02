@@ -37,12 +37,10 @@ jobs:
               make binutils autoconf automake autotools-dev libtool \
               patch ca-certificates \
               pkg-config git wget curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
-              autopoint libcppunit-dev lzip jq ccache
+              autopoint libcppunit-dev lzip jq
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
-          CC: "ccache x86_64-w64-mingw32-gcc"
-          CXX: "ccache x86_64-w64-mingw32-g++"
         run: |
           if [ "${GITHUB_EVENT_NAME}" = release ]; then
             export ARIA2_VER="${GITHUB_REF#refs/*/}"
@@ -74,12 +72,10 @@ jobs:
           apt-get install -y --no-install-recommends \
               automake  autoconf autopoint jq libtool \
               mingw-w64 make pkgconf wget curl tcl \
-              ca-certificates unzip ccache
+              ca-certificates unzip
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
-          CC: "ccache x86_64-w64-mingw32-gcc"
-          CXX: "ccache x86_64-w64-mingw32-g++"
         run: |
           if [ "${GITHUB_EVENT_NAME}" = release ]; then
             export ARIA2_VER="${GITHUB_REF#refs/*/}"
