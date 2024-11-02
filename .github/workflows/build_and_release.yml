@@ -71,8 +71,6 @@ jobs:
       #    key: build-cache-x86_64-w64-mingw32-${{ github.sha }}
       #    restore-keys: |
       #      build-cache-x86_64-w64-mingw32-
-      - name: Set up PATH for cross-compilation tools
-        run: echo "${CROSS_ROOT}/bin" >> $GITHUB_PATH
       - name: Check toolchain extraction
         run: |
           echo "PATH: $PATH"
