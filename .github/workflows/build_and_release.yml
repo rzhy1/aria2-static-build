@@ -74,12 +74,9 @@ jobs:
       - name: Check toolchain extraction
         run: |
           echo "PATH: $PATH"
-          ls -al "${CROSS_ROOT}/bin"
-      - name: Verify CROSS_ROOT and CROSS_HOST
-        run: |
           echo "CROSS_ROOT: ${CROSS_ROOT}"
           echo "CROSS_HOST: ${CROSS_HOST}"
-          ls -al ${CROSS_ROOT}/bin
+          ls -al "${CROSS_ROOT}/bin"
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
