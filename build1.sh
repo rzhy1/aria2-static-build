@@ -225,7 +225,7 @@ prepare_libxml2() {
   mkdir -p "/usr/src/libxml2-${libxml2_tag}"
   tar -axf "${DOWNLOADS_DIR}/${libxml2_filename}" --strip-components=1 -C "/usr/src/libxml2-${libxml2_tag}"
   cd "/usr/src/libxml2-${libxml2_tag}"
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --without-python --without-icu --enable-static --disable-shared
+  CFLAGS="-g0 -O3" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --without-python --without-icu --enable-static --disable-shared
   make -j$(nproc)
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
@@ -246,7 +246,7 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
+  CFLAGS="-g0 -O3" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
     --enable-editline=no \
     --enable-fts3=no --enable-fts4=no --enable-fts5=no \
@@ -279,7 +279,7 @@ prepare_c_ares() {
   if [ ! -f "./configure" ]; then
     autoreconf -i
   fi
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules --disable-tests --without-random
+  CFLAGS="-g0 -O3" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules --disable-tests --without-random
   make -j$(nproc)
   make install
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
@@ -296,14 +296,14 @@ prepare_libssh2() {
   mkdir -p "/usr/src/libssh2-${libssh2_tag}"
   tar -zxf "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz" --strip-components=1 -C "/usr/src/libssh2-${libssh2_tag}"
   cd "/usr/src/libssh2-${libssh2_tag}"
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules \
+  CFLAGS="-g0 -O3" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules \
     --disable-examples-build \
     --disable-docker-tests \
     --disable-sshd-tests \
     --disable-debug
   make -j$(nproc)
   make install
-  unset CFLAGS
+  #unset CFLAGS
   libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
   echo "| libssh2 | ${libssh2_ver} | ${libssh2_latest_url:-cached libssh2} |" >>"${BUILD_INFO}"
 }
@@ -352,7 +352,7 @@ build_aria2() {
   # else
   #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF}
+  CFLAGS="-g0 -O3" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF}
   make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
