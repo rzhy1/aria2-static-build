@@ -224,7 +224,7 @@ prepare_libxml2() {
   mkdir -p "/usr/src/libxml2-${libxml2_tag}"
   tar -axf "${DOWNLOADS_DIR}/${libxml2_filename}" --strip-components=1 -C "/usr/src/libxml2-${libxml2_tag}"
   cd "/usr/src/libxml2-${libxml2_tag}"
-  CFLAGS="-O3 -g0 -flto" CXXFLAGS="-O3 -g0 -flto" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --without-python --without-icu --enable-static --disable-shared
+  CFLAGS="-mtune=generic -O3 -g0" CXXFLAGS="-mtune=generic -O3 -g0" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --without-python --without-icu --enable-static --disable-shared
   make -j$(nproc)
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
