@@ -245,7 +245,7 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  CFLAGS="-mtune=generic -O3 -g0 -flto" CXXFLAGS="-mtune=generic -O3 -g0 -flto" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
+  CFLAGS="-O2 -g0" CXXFLAGS="-O2 -g0" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
     --enable-editline=no \
     --enable-fts3=no --enable-fts4=no --enable-fts5=no \
@@ -278,7 +278,7 @@ prepare_c_ares() {
   if [ ! -f "./configure" ]; then
     autoreconf -i
   fi
-  CFLAGS="-mtune=generic -O3 -g0 -flto" CXXFLAGS="-mtune=generic -O3 -g0 -flto" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules --disable-tests --without-random
+  CFLAGS="-O2 -g0 -flto" CXXFLAGS="-O2 -g0 -flto" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules --disable-tests --without-random
   make -j$(nproc)
   make install
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
@@ -295,7 +295,7 @@ prepare_libssh2() {
   mkdir -p "/usr/src/libssh2-${libssh2_tag}"
   tar -zxf "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz" --strip-components=1 -C "/usr/src/libssh2-${libssh2_tag}"
   cd "/usr/src/libssh2-${libssh2_tag}"
-  CFLAGS="-mtune=generic -O3 -g0 -flto" CXXFLAGS="-mtune=generic -O3 -g0 -flto" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules \
+  CFLAGS="-O2 -g0 -flto" CXXFLAGS="-O2 -g0 -flto" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules \
     --disable-examples-build \
     --disable-docker-tests \
     --disable-sshd-tests \
@@ -351,7 +351,7 @@ build_aria2() {
   # else
   #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
-  CFLAGS="-march=tigerlake -O3 -g0 -flto" CXXFLAGS="-march=tigerlake -O3 -g0 -flto" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF}
+  CFLAGS="-O2 -g0 -flto" CXXFLAGS="-O2 -g0 -flto" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF}
   make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
