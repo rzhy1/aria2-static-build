@@ -69,9 +69,6 @@ cd gmp-*
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - LTO是否启用⭐⭐⭐⭐⭐⭐"
-x86_64-w64-mingw32-objdump -d $PREFIX/lib/libgmp.a | grep lto
-dumpbin /all libgmp.a  #  查看 libgmp.a 的所有信息
 
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
