@@ -17,8 +17,8 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并覆盖⭐⭐⭐⭐⭐⭐"
-curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
-unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
+#curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
+#unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 
@@ -56,14 +56,14 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
-CFLAGS="-g -O2 -ftime-report" ./configure \
+./configure \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
-    CFLAGS="-mtune=generic -O2 -g0"
+    CFLAGS="-mtune=generic -O2 -g0 -ftime-report"
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
