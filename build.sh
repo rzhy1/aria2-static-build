@@ -142,8 +142,8 @@ STRIP=$HOST-strip \
     --libdir=$PREFIX/lib \
     --includedir=$PREFIX/include \
     --static \
-     CFLAGS="-mtune=generic -O3 -g0" \
-     CXXFLAGS="-mtune=generic -O3 -g0"
+     CFLAGS="-O3 -g0" \
+     CXXFLAGS="-O3 -g0"
 make -j$(nproc) install
 echo "| zlib | ${zlib_tag} | ${zlib_latest_url} |" >>"${BUILD_INFO}"
 cd ..
