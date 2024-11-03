@@ -76,7 +76,7 @@ case "${TARGET_HOST}" in
   ;;
 esac
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -I${CROSS_PREFIX}/include -flto -s -static --static"
+export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -I${CROSS_PREFIX}/include -s -static --static"
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info1.md"
 
@@ -206,10 +206,7 @@ prepare_xz() {
   mkdir -p "/usr/src/xz-${xz_tag}"
   tar -Jxf "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz" --strip-components=1 -C "/usr/src/xz-${xz_tag}"
   cd "/usr/src/xz-${xz_tag}"
-  export CFLAGS="-O2 -g0 -flto=$(nproc)"
-  export CXXFLAGS="-O2 -g0 -flto=$(nproc)" # 建议 CXXFLAGS 也加上 -flto=$(nproc)，即使禁用了C++接口
-  export LDFLAGS="-flto -s" # 确保链接器也使用 LTO，-s选项按需添加
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared --disable-doc --enable-debug=no --disable-nls
+  CFLAGS="-O2 -g0" CXXFLAGS="-O2 -g0" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared --disable-doc --enable-debug=no --disable-nls
   make -j$(nproc)
   make install
   xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
@@ -227,10 +224,7 @@ prepare_libxml2() {
   mkdir -p "/usr/src/libxml2-${libxml2_tag}"
   tar -axf "${DOWNLOADS_DIR}/${libxml2_filename}" --strip-components=1 -C "/usr/src/libxml2-${libxml2_tag}"
   cd "/usr/src/libxml2-${libxml2_tag}"
-  export CFLAGS="-mtune=generic -O2 -g0 -flto=$(nproc)"
-  export CXXFLAGS="-mtune=generic -O2 -g0 -flto=$(nproc)" # 建议 CXXFLAGS 也加上 -flto=$(nproc)，即使禁用了C++接口
-  export LDFLAGS="-flto -s" # 确保链接器也使用 LTO，-s选项按需添加
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --without-python --without-icu --enable-static --disable-shared
+  CFLAGS="-mtune=generic -O3 -g0" CXXFLAGS="-mtune=generic -O3 -g0" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --without-python --without-icu --enable-static --disable-shared
   make -j$(nproc)
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
@@ -251,10 +245,7 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  export CFLAGS="-O2 -g0 -flto=$(nproc)"
-  export CXXFLAGS="-O2 -g0 -flto=$(nproc)" # 建议 CXXFLAGS 也加上 -flto=$(nproc)，即使禁用了C++接口
-  export LDFLAGS="-flto -s" # 确保链接器也使用 LTO，-s选项按需添加
-  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
+  CFLAGS="-O2 -g0" CXXFLAGS="-O2 -g0" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
     --enable-editline=no \
     --enable-fts3=no --enable-fts4=no --enable-fts5=no \
@@ -287,9 +278,6 @@ prepare_c_ares() {
   if [ ! -f "./configure" ]; then
     autoreconf -i
   fi
-  export CFLAGS="-O2 -g0 -flto=$(nproc)"
-  export CXXFLAGS="-O2 -g0 -flto=$(nproc)" # 建议 CXXFLAGS 也加上 -flto=$(nproc)，即使禁用了C++接口
-  export LDFLAGS="-flto -s" # 确保链接器也使用 LTO，-s选项按需添加
   ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules --disable-tests --without-random
   make -j$(nproc)
   make install
@@ -307,9 +295,6 @@ prepare_libssh2() {
   mkdir -p "/usr/src/libssh2-${libssh2_tag}"
   tar -zxf "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz" --strip-components=1 -C "/usr/src/libssh2-${libssh2_tag}"
   cd "/usr/src/libssh2-${libssh2_tag}"
-  export CFLAGS="-O2 -g0 -flto=$(nproc)"
-  export CXXFLAGS="-O2 -g0 -flto=$(nproc)" # 建议 CXXFLAGS 也加上 -flto=$(nproc)，即使禁用了C++接口
-  export LDFLAGS="-flto -s" # 确保链接器也使用 LTO，-s选项按需添加
   ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules \
     --disable-examples-build \
     --disable-docker-tests \
@@ -366,9 +351,8 @@ build_aria2() {
   # else
   #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
-  export CFLAGS="-O2 -g0 -flto=$(nproc)"
-  export CXXFLAGS="-O2 -g0 -flto=$(nproc)" # 建议 CXXFLAGS 也加上 -flto=$(nproc)，即使禁用了C++接口
-  export LDFLAGS="-flto -s" # 确保链接器也使用 LTO，-s选项按需添加
+  export CFLAGS="-O2 -g0 -flto=$(nproc) -ftime-report"
+  export CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
   ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF}
   make -j$(nproc)
   make install
