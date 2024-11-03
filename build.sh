@@ -191,7 +191,7 @@ cd libssh2-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-O3 -g0 -flto" \
+    CFLAGS="-O3 -g0 -flto -ftime-report" \
     CXXFLAGS="-O3 -g0"
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
@@ -233,7 +233,7 @@ autoreconf -i
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-O3 -g0 -flto" \
+    CFLAGS="-O3 -g0 -flto -ftime-report" \
     CXXFLAGS="-O3 -g0" 
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
