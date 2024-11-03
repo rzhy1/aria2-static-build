@@ -64,8 +64,7 @@ cd gmp-*
     --disable-cxx \
     --enable-fat \
      CFLAGS="-mtune=generic -O3 -g0 -flto" \
-     CXXFLAGS="-mtune=generic -O3 -g0 -flto" \
-     LDFLAGS="-flto -s"
+     CXXFLAGS="-mtune=generic -O3 -g0 -flto"
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
@@ -88,8 +87,7 @@ cd expat-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
      CFLAGS="-mtune=generic -O3 -g0 -flto" \
-     CXXFLAGS="-mtune=generic -O3 -g0 -flto" \ 
-     LDFLAGS="-flto -s"
+     CXXFLAGS="-mtune=generic -O3 -g0 -flto"
 make -j$(nproc) install
 echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -119,8 +117,7 @@ cd sqlite-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
      CFLAGS="-mtune=generic -O3 -g0 -flto" \
-     CXXFLAGS="-mtune=generic -O3 -g0 -flto" \
-     LDFLAGS="-flto -s"
+     CXXFLAGS="-mtune=generic -O3 -g0 -flto"
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -145,9 +142,8 @@ STRIP=$HOST-strip \
     --libdir=$PREFIX/lib \
     --includedir=$PREFIX/include \
     --static \
-     CFLAGS="-mtune=generic -O3 -g0 -flto" \
-     CXXFLAGS="-mtune=generic -O3 -g0 -flto" \
-     LDFLAGS="-flto -s"
+     CFLAGS=" -O3 -g0 -flto" \
+     CXXFLAGS=" -O3 -g0 -flto"
 make -j$(nproc) install
 echo "| zlib | ${zlib_tag} | ${zlib_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -197,8 +193,7 @@ cd libssh2-*
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
     CFLAGS="-mtune=generic -O3 -g0 -flto" \
-    CXXFLAGS="-mtune=generic -O3 -g0 -flto" \
-    LDFLAGS="-flto -s"
+    CXXFLAGS="-mtune=generic -O3 -g0 -flto"
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -236,7 +231,7 @@ autoreconf -i
     --with-cppunit-prefix=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-L$PREFIX/lib -flto -s" \
+    LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-march=tigerlake -O3 -g0 -flto" \
