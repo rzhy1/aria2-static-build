@@ -172,7 +172,6 @@ cd c-ares-*
     LIBS="-lws2_32" \
     CFLAGS="-mtune=generic -O3 -g0 -flto" \
     CXXFLAGS="-mtune=generic -O3 -g0 -flto" \
-    LDFLAGS="-flto -s"
 make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
