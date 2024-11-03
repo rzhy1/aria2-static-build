@@ -278,7 +278,7 @@ prepare_c_ares() {
   if [ ! -f "./configure" ]; then
     autoreconf -i
   fi
-  CFLAGS="-O2 -g0 -flto" CXXFLAGS="-O2 -g0" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules --disable-tests --without-random
+  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules --disable-tests --without-random
   make -j$(nproc)
   make install
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
@@ -302,7 +302,7 @@ prepare_libssh2() {
     --disable-debug
   make -j$(nproc)
   make install
-  #unset CFLAGS
+  unset CFLAGS
   libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
   echo "| libssh2 | ${libssh2_ver} | ${libssh2_latest_url:-cached libssh2} |" >>"${BUILD_INFO}"
 }
