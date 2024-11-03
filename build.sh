@@ -21,8 +21,6 @@ curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/bui
 unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
-find / -name "libmqdscli.a" 2>/dev/null
-find / -name "x86_64-w64-mingw32-gcc" 2>/dev/null
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
@@ -58,7 +56,7 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
-./configure \
+CFLAGS="-g -O2 -ftime-report" ./configure \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
@@ -78,7 +76,7 @@ echo "libexpat最新版本是${expat_tag} ，下载地址是${expat_latest_url}"
 curl -L ${expat_latest_url} | tar xj
 #curl -L https://github.com/libexpat/libexpat/releases/download/R_2_6_3/expat-2.6.3.tar.bz2 | tar xj
 cd expat-*
-./configure \
+CFLAGS="-g -O2 -ftime-report" ./configure \
     --disable-shared \
     --enable-static \
     --without-examples \
@@ -102,7 +100,7 @@ echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
 cd sqlite-*
-./configure \
+CFLAGS="-g -O2 -ftime-report" ./configure \
     --disable-shared \
     --enable-static \
     --disable-debug \
