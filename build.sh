@@ -166,7 +166,7 @@ cd c-ares-*
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
     CFLAGS="-O2 -g0 -flto" \
-    CXXFLAGS="-O2 -g0 -flto" \
+    CXXFLAGS="-O2 -g0" 
 make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -192,7 +192,7 @@ cd libssh2-*
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
     CFLAGS="-O3 -g0 -flto" \
-    CXXFLAGS="-O3 -g0 -flto"
+    CXXFLAGS="-O3 -g0"
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -234,7 +234,7 @@ autoreconf -i
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O3 -g0 -flto" \
-    CXXFLAGS="-O3 -g0 -flto" 
+    CXXFLAGS="-O3 -g0" 
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
