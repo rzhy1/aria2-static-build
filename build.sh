@@ -63,7 +63,9 @@ cd gmp-*
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
-    CFLAGS="-mtune=generic -O1 -g0"
+     CFLAGS="-mtune=generic -O3 -g0 -flto" 
+     CXXFLAGS="-mtune=generic -O3 -g0 -flto" 
+     LDFLAGS="-flto -s"
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
@@ -76,7 +78,7 @@ echo "libexpat最新版本是${expat_tag} ，下载地址是${expat_latest_url}"
 curl -L ${expat_latest_url} | tar xj
 #curl -L https://github.com/libexpat/libexpat/releases/download/R_2_6_3/expat-2.6.3.tar.bz2 | tar xj
 cd expat-*
-CFLAGS="-g0 -O1" ./configure \
+./configure \
     --disable-shared \
     --enable-static \
     --without-examples \
@@ -85,6 +87,9 @@ CFLAGS="-g0 -O1" ./configure \
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+    CFLAGS=" -O3 -g0 -flto" 
+    CXXFLAGS=" -O3 -g0 -flto" 
+    LDFLAGS="-flto -s"
 make -j$(nproc) install
 echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -100,7 +105,7 @@ echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
 cd sqlite-*
-CFLAGS="-g0 -O1" ./configure \
+./configure \
     --disable-shared \
     --enable-static \
     --disable-debug \
@@ -113,6 +118,9 @@ CFLAGS="-g0 -O1" ./configure \
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+    CFLAGS=" -O3 -g0 -flto" 
+    CXXFLAGS=" -O3 -g0 -flto" 
+    LDFLAGS="-flto -s"
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -132,11 +140,14 @@ AR=$HOST-ar \
 LD=$HOST-ld \
 RANLIB=$HOST-ranlib \
 STRIP=$HOST-strip \
-CFLAGS="-g0 -O1" ./configure \
+./configure \
     --prefix=$PREFIX \
     --libdir=$PREFIX/lib \
     --includedir=$PREFIX/include \
     --static
+    CFLAGS=" -O3 -g0 -flto" 
+    CXXFLAGS=" -O3 -g0 -flto" 
+    LDFLAGS="-flto -s"
 make -j$(nproc) install
 echo "| zlib | ${zlib_tag} | ${zlib_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -149,7 +160,7 @@ echo "cares最新版本是${cares_tag} ，下载地址是${cares_latest_url}"
 curl -L ${cares_latest_url} | tar xz
 #curl -L https://github.com/c-ares/c-ares/releases/download/v1.34.1/c-ares-1.34.1.tar.gz | tar xz
 cd c-ares-*
-CFLAGS="-g0 -O1" ./configure \
+./configure \
     --disable-shared \
     --enable-static \
     --disable-tests \
@@ -159,6 +170,9 @@ CFLAGS="-g0 -O1" ./configure \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32"
+    CFLAGS=" -O3 -g0 -flto" 
+    CXXFLAGS=" -O3 -g0 -flto" 
+    LDFLAGS="-flto -s"
 make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -171,7 +185,7 @@ echo "libssh2最新版本是${libssh2_tag} ，下载地址是${libssh2_latest_ur
 curl -L ${libssh2_latest_url} | tar xz
 #curl -L https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
 cd libssh2-*
-CFLAGS="-g0 -O1" ./configure \
+./configure \
     --disable-shared \
     --enable-static \
     --enable-silent-rules \
@@ -183,6 +197,9 @@ CFLAGS="-g0 -O1" ./configure \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32"
+    CFLAGS=" -O3 -g0 -flto" 
+    CXXFLAGS=" -O3 -g0 -flto" 
+    LDFLAGS="-flto -s"
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -201,7 +218,7 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
 autoreconf -i
-CFLAGS="-g0 -O1" ./configure \
+./configure \
     --host=$HOST \
     --prefix=$PREFIX \
     --without-included-gettext \
@@ -220,9 +237,11 @@ CFLAGS="-g0 -O1" ./configure \
     --with-cppunit-prefix=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-L$PREFIX/lib" \
+    LDFLAGS="-L$PREFIX/lib -flto -s" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+    CFLAGS=" -O3 -g0 -flto" 
+    CXXFLAGS=" -O3 -g0 -flto" 
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
