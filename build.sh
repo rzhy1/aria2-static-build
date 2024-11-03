@@ -17,8 +17,8 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并覆盖⭐⭐⭐⭐⭐⭐"
-#curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
-#unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
+curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
+unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 
@@ -63,7 +63,7 @@ cd gmp-*
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
-    CFLAGS="-mtune=generic -O2 -g0 -ftime-report"
+    CFLAGS="-mtune=generic -O3 -g0 -ftime-report"
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
@@ -100,7 +100,7 @@ echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
 cd sqlite-*
-CFLAGS="-g -O2 -ftime-report" ./configure \
+CFLAGS="-g0 -O3 -ftime-report" ./configure \
     --disable-shared \
     --enable-static \
     --disable-debug \
