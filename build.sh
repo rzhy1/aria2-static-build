@@ -63,8 +63,8 @@ cd gmp-*
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
-     CFLAGS="-mtune=generic -O3 -g0 -flto" \
-     CXXFLAGS="-mtune=generic -O3 -g0 -flto"
+     CFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)" \
+     CXXFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)"
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
@@ -86,8 +86,8 @@ cd expat-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-     CFLAGS="-mtune=generic -O3 -g0 -flto" \
-     CXXFLAGS="-mtune=generic -O3 -g0 -flto"
+     CFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)" \
+     CXXFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)"
 make -j$(nproc) install
 echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -165,8 +165,8 @@ cd c-ares-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-O2 -g0 -flto" \
-    CXXFLAGS="-O2 -g0" 
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"  
 make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -191,8 +191,8 @@ cd libssh2-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-O3 -g0 -flto -ftime-report" \
-    CXXFLAGS="-O3 -g0"
+    CFLAGS="-O3 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O3 -g0 -flto=$(nproc)"
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -233,8 +233,8 @@ autoreconf -i
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-O3 -g0 -flto -ftime-report" \
-    CXXFLAGS="-O3 -g0" 
+    CFLAGS="-O3 -g0 -flto=$(nproc) -ftime-report" \
+    CXXFLAGS="-O3 -g0 -flto=$(nproc)" 
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
