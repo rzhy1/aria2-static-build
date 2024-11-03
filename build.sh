@@ -63,7 +63,7 @@ cd gmp-*
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
-    CFLAGS="-mtune=generic -O3 -g0 -ftime-report"
+    CFLAGS="-mtune=generic -O3 -g0"
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
@@ -76,7 +76,7 @@ echo "libexpat最新版本是${expat_tag} ，下载地址是${expat_latest_url}"
 curl -L ${expat_latest_url} | tar xj
 #curl -L https://github.com/libexpat/libexpat/releases/download/R_2_6_3/expat-2.6.3.tar.bz2 | tar xj
 cd expat-*
-CFLAGS="-g -O2 -ftime-report" ./configure \
+CFLAGS="-g0 -O2" ./configure \
     --disable-shared \
     --enable-static \
     --without-examples \
@@ -100,7 +100,7 @@ echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
 cd sqlite-*
-CFLAGS="-g0 -O3 -ftime-report" ./configure \
+CFLAGS="-g0 -O2" ./configure \
     --disable-shared \
     --enable-static \
     --disable-debug \
