@@ -132,6 +132,7 @@ echo "zlib最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
 curl -L ${zlib_latest_url} | tar xz
 #curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
 cd zlib-*
+export CFLAGS="-O2 -g0"
 CC=$HOST-gcc \
 AR=$HOST-ar \
 LD=$HOST-ld \
@@ -141,9 +142,7 @@ STRIP=$HOST-strip \
     --prefix=$PREFIX \
     --libdir=$PREFIX/lib \
     --includedir=$PREFIX/include \
-    --static \
-     CFLAGS="-O2 -g0" \
-     CXXFLAGS="-O2 -g0"
+    --static
 make -j$(nproc) install
 echo "| zlib | ${zlib_tag} | ${zlib_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -166,8 +165,8 @@ cd c-ares-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-mtune=generic -O3 -g0 -flto" \
-    CXXFLAGS="-mtune=generic -O3 -g0 -flto" \
+    CFLAGS="-O2 -g0 -flto" \
+    CXXFLAGS="-O2 -g0 -flto" \
 make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -192,8 +191,8 @@ cd libssh2-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-mtune=generic -O3 -g0 -flto" \
-    CXXFLAGS="-mtune=generic -O3 -g0 -flto"
+    CFLAGS="-O3 -g0 -flto" \
+    CXXFLAGS="-O3 -g0 -flto"
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -234,8 +233,8 @@ autoreconf -i
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-march=tigerlake -O3 -g0 -flto" \
-    CXXFLAGS="-march=tigerlake -O3 -g0 -flto" 
+    CFLAGS="-O3 -g0 -flto" \
+    CXXFLAGS="-O3 -g0 -flto" 
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
