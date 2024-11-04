@@ -233,7 +233,7 @@ autoreconf -i
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-O3 -g0 -flto=$(nproc) -ftime-report" \
+    CFLAGS="-O3 -g0 -flto=$(nproc)" \
     CXXFLAGS="-O3 -g0 -flto=$(nproc)" 
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
