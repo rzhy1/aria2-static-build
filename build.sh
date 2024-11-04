@@ -165,8 +165,8 @@ cd c-ares-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)"  
+    CFLAGS="-O3 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O3 -g0 -flto=$(nproc)"  
 make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
