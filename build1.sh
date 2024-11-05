@@ -226,8 +226,8 @@ prepare_libxml2() {
   mkdir -p "/usr/src/libxml2-${libxml2_tag}"
   tar -axf "${DOWNLOADS_DIR}/${libxml2_filename}" --strip-components=1 -C "/usr/src/libxml2-${libxml2_tag}"
   cd "/usr/src/libxml2-${libxml2_tag}"
-  export CFLAGS="-O3 -g0 -flto=$(nproc)"
-  export CXXFLAGS="-O3 -g0 -flto=$(nproc)"
+  export CFLAGS="-O2 -g0"
+  export CXXFLAGS="-O2 -g0"
   ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --without-python --without-icu --enable-static --disable-shared
   make -j$(nproc)
   make install
@@ -249,8 +249,8 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  export CFLAGS="-O3 -g0 -flto=$(nproc)"
-  export CXXFLAGS="-O3 -g0 -flto=$(nproc)"
+  export CFLAGS="-O3 -g0"
+  export CXXFLAGS="-O3 -g0"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
     --enable-editline=no \
@@ -363,7 +363,7 @@ build_aria2() {
   fi
   export CFLAGS="-O3 -g0 -flto=$(nproc)"
   export CXXFLAGS="-O3 -g0 -flto=$(nproc)"
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF} CFLAGS="-O3 -g0 -flto=$(nproc)" CXXFLAGS="-O3 -g0 -flto=$(nproc)" 
+  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF} 
   make -j10
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
