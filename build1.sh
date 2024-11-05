@@ -306,8 +306,8 @@ prepare_c_ares() {
     --enable-silent-rules \
     --disable-tests \
     --without-random \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0"
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
   make install
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
