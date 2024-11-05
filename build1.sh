@@ -42,11 +42,7 @@ echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "fals
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
 #unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "${CROSS_ROOT}"
-TEMP_DIR="/tmp/mingw-w64-x86_64-toolchain"
-mkdir -p "$TEMP_DIR"
-unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip"  -d "$TEMP_DIR"
-rsync -av --delete "$TEMP_DIR/" "${CROSS_ROOT}/"
-rm -rf "$TEMP_DIR"
+unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
 
 BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
