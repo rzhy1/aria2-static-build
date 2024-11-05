@@ -197,8 +197,6 @@ prepare_xz() {
   # xz_archive_name="$(printf '%s' "${xz_release_info}" | jq -r '.assets[].name | select(endswith("tar.xz"))')"
   # xz_latest_url="https://github.com/tukaani-project/xz/releases/download/${xz_tag}/${xz_archive_name}"
   # Download from sourceforge
-  export CFLAGS="-O2 -g0"
-  export CXXFLAGS="-O2 -g0" 
   xz_tag="$(retry wget -qO- --compression=auto https://sourceforge.net/projects/lzmautils/files/ \| grep -i \'span class=\"sub-label\"\' \| head -1 \| sed -r "'s/.*xz-(.+)\.tar\.gz.*/\1/'")"
   xz_latest_url="https://sourceforge.net/projects/lzmautils/files/xz-${xz_tag}.tar.xz"
   if [ ! -f "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz" ]; then
@@ -208,7 +206,7 @@ prepare_xz() {
   mkdir -p "/usr/src/xz-${xz_tag}"
   tar -Jxf "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz" --strip-components=1 -C "/usr/src/xz-${xz_tag}"
   cd "/usr/src/xz-${xz_tag}"
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared --disable-doc --enable-debug=no --disable-nls
+  CFLAGS="-O2 -g0"  CXXFLAGS="-O2 -g0" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared --disable-doc --enable-debug=no --disable-nls
   make -j$(nproc)
   make install
   xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
@@ -226,9 +224,7 @@ prepare_libxml2() {
   mkdir -p "/usr/src/libxml2-${libxml2_tag}"
   tar -axf "${DOWNLOADS_DIR}/${libxml2_filename}" --strip-components=1 -C "/usr/src/libxml2-${libxml2_tag}"
   cd "/usr/src/libxml2-${libxml2_tag}"
-  export CFLAGS="-O2 -g0"
-  export CXXFLAGS="-O2 -g0"
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --without-python --without-icu --enable-static --disable-shared
+  CFLAGS="-O2 -g0"  CXXFLAGS="-O2 -g0" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --without-python --without-icu --enable-static --disable-shared
   make -j$(nproc)
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
@@ -249,14 +245,14 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  export CFLAGS="-O3 -g0"
-  export CXXFLAGS="-O3 -g0"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
     --enable-editline=no \
     --enable-fts3=no --enable-fts4=no --enable-fts5=no \
     --enable-rtree=no \
-    --enable-session=no
+    --enable-session=no \
+    CFLAGS="-O2 -g0" \
+    CXXFLAGS="-O2 -g0" 
   make -j$(nproc)
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
@@ -303,13 +299,13 @@ prepare_libssh2() {
   mkdir -p "/usr/src/libssh2-${libssh2_tag}"
   tar -zxf "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz" --strip-components=1 -C "/usr/src/libssh2-${libssh2_tag}"
   cd "/usr/src/libssh2-${libssh2_tag}"
-  export CFLAGS="-O3 -g0 -flto=$(nproc)"
-  export CXXFLAGS="-O3 -g0 -flto=$(nproc)"
   ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules \
     --disable-examples-build \
     --disable-docker-tests \
     --disable-sshd-tests \
-    --disable-debug
+    --disable-debug \
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
   make install
   #unset CFLAGS
@@ -361,9 +357,7 @@ build_aria2() {
   # else
   #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
-  export CFLAGS="-O3 -g0 -flto=$(nproc)"
-  export CXXFLAGS="-O3 -g0 -flto=$(nproc)"
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF} 
+  CFLAGS="-O2 -g0 -flto=$(nproc)" CXXFLAGS="-O2 -g0 -flto=$(nproc)"./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF} 
   make -j10
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
