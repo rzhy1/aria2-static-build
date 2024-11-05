@@ -280,8 +280,8 @@ prepare_c_ares() {
   if [ ! -f "./configure" ]; then
     autoreconf -i
   fi
-  export CFLAGS="-O3 -g0"
-  export CXXFLAGS="-O3 -g0"
+  export CFLAGS="-O2 -g0"
+  export CXXFLAGS="-O2 -g0"
   ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules --disable-tests --without-random
   make -j$(nproc)
   make install
