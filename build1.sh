@@ -392,7 +392,7 @@ build_aria2() {
     ${ARIA2_EXT_CONF} \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
     CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
-  make -j10
+  make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
   echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
