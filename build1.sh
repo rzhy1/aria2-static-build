@@ -10,9 +10,7 @@ export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 # export LD=ld.lld
 echo "lld的路径是： $(which ld.lld)"
 echo "ld的路径是： $(which ld)"
-echo "gcc版本是：$CC"
-echo "g++版本是：$CXX"
-echo "LD版本是：$LD"
+echo "x86_64-w64-mingw32-ld的路径是： $(which x86_64-w64-mingw32-ld)"
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 retry() {
