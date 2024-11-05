@@ -37,7 +37,7 @@ jobs:
               make binutils autoconf automake autotools-dev libtool \
               patch ca-certificates \
               pkg-config git wget curl dpkg-dev gcc-mingw-w64 g++-mingw-w64 \
-              autopoint libcppunit-dev lzip jq unzip
+              autopoint libcppunit-dev lzip jq unzip rsync
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
@@ -72,7 +72,7 @@ jobs:
           apt-get install -y --no-install-recommends \
               automake  autoconf autopoint jq libtool \
               mingw-w64 make pkgconf wget curl tcl \
-              ca-certificates unzip lld lld
+              ca-certificates unzip lld rsync
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
