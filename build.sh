@@ -10,6 +10,7 @@
 # commands:
 #
 # $ sudo docker run --rm -it -v /path/to/dest:/out aria2-mingw cp /aria2/src/aria2c.exe /out
+export LD=ld.lld
 set -euo pipefail
 # Change HOST to x86_64-w64-mingw32 to build 64-bit binary
 HOST=x86_64-w64-mingw32
