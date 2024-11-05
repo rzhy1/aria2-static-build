@@ -206,7 +206,17 @@ prepare_xz() {
   mkdir -p "/usr/src/xz-${xz_tag}"
   tar -Jxf "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz" --strip-components=1 -C "/usr/src/xz-${xz_tag}"
   cd "/usr/src/xz-${xz_tag}"
-  CFLAGS="-O2 -g0"  CXXFLAGS="-O2 -g0" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --enable-static --disable-shared --disable-doc --enable-debug=no --disable-nls
+  ./configure \
+    --host="${CROSS_HOST}" \
+    --prefix="${CROSS_PREFIX}" \
+    --enable-silent-rules \
+    --enable-static \
+    --disable-shared \
+    --disable-doc \
+    --enable-debug=no \
+    --disable-nls \
+    CFLAGS="-O2 -g0"  \
+    CXXFLAGS="-O2 -g0" 
   make -j$(nproc)
   make install
   xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
@@ -224,7 +234,16 @@ prepare_libxml2() {
   mkdir -p "/usr/src/libxml2-${libxml2_tag}"
   tar -axf "${DOWNLOADS_DIR}/${libxml2_filename}" --strip-components=1 -C "/usr/src/libxml2-${libxml2_tag}"
   cd "/usr/src/libxml2-${libxml2_tag}"
-  CFLAGS="-O2 -g0"  CXXFLAGS="-O2 -g0" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-silent-rules --without-python --without-icu --enable-static --disable-shared
+  ./configure \
+    --host="${CROSS_HOST}" \
+    --prefix="${CROSS_PREFIX}" \
+    --enable-silent-rules \
+    --without-python \
+    --without-icu \
+    --enable-static \
+    --disable-shared \
+    CFLAGS="-O2 -g0" \
+    CXXFLAGS="-O2 -g0"
   make -j$(nproc)
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
@@ -280,9 +299,14 @@ prepare_c_ares() {
   if [ ! -f "./configure" ]; then
     autoreconf -i
   fi
-  export CFLAGS="-O2 -g0"
-  export CXXFLAGS="-O2 -g0"
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules --disable-tests --without-random
+  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" \
+    --enable-static \
+    --disable-shared \
+    --enable-silent-rules \
+    --disable-tests \
+    --without-random \
+    CFLAGS="-O2 -g0" \
+    CXXFLAGS="-O2 -g0"
   make -j$(nproc)
   make install
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
@@ -357,7 +381,16 @@ build_aria2() {
   # else
   #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
-  CFLAGS="-O2 -g0 -flto=$(nproc)" CXXFLAGS="-O2 -g0 -flto=$(nproc)"./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules ARIA2_STATIC=yes ${ARIA2_EXT_CONF} 
+  ./configure \
+    --host="${CROSS_HOST}" \
+    --prefix="${CROSS_PREFIX}" \
+    --enable-static \
+    --disable-shared \
+    --enable-silent-rules \
+    ARIA2_STATIC=yes \
+    ${ARIA2_EXT_CONF} \
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
   make -j10
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
