@@ -56,15 +56,15 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
+export CFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)"
+export CXXFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)"
 ./configure \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
     --host=$HOST \
     --disable-cxx \
-    --enable-fat \
-     CFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)" \
-     CXXFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)"
+    --enable-fat
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
@@ -77,6 +77,8 @@ echo "libexpat最新版本是${expat_tag} ，下载地址是${expat_latest_url}"
 curl -L ${expat_latest_url} | tar xj
 #curl -L https://github.com/libexpat/libexpat/releases/download/R_2_6_3/expat-2.6.3.tar.bz2 | tar xj
 cd expat-*
+export CFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)"
+export CXXFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)"
 ./configure \
     --disable-shared \
     --enable-static \
@@ -85,9 +87,7 @@ cd expat-*
     --enable-silent-rules \
     --prefix=$PREFIX \
     --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-     CFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)" \
-     CXXFLAGS="-mtune=generic -O3 -g0 -flto=$(nproc)"
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -103,6 +103,8 @@ echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
 cd sqlite-*
+export CFLAGS="-O3 -g0 -flto=$(nproc)"
+export CXXFLAGS="-O3 -g0 -flto=$(nproc)"
 ./configure \
     --disable-shared \
     --enable-static \
@@ -115,9 +117,7 @@ cd sqlite-*
     --disable-dynamic-extensions \
     --prefix=$PREFIX \
     --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-     CFLAGS="-O3 -g0" \
-     CXXFLAGS="-O3 -g0"
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -133,6 +133,7 @@ curl -L ${zlib_latest_url} | tar xz
 #curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
 cd zlib-*
 export CFLAGS="-O2 -g0"
+export CXXFLAGS="-O2 -g0 "
 CC=$HOST-gcc \
 AR=$HOST-ar \
 LD=$HOST-ld \
@@ -155,6 +156,8 @@ echo "cares最新版本是${cares_tag} ，下载地址是${cares_latest_url}"
 curl -L ${cares_latest_url} | tar xz
 #curl -L https://github.com/c-ares/c-ares/releases/download/v1.34.1/c-ares-1.34.1.tar.gz | tar xz
 cd c-ares-*
+export CFLAGS="-O3 -g0 -flto=$(nproc)"
+export CXXFLAGS="-O3 -g0 -flto=$(nproc)"
 ./configure \
     --disable-shared \
     --enable-static \
@@ -164,9 +167,7 @@ cd c-ares-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    LIBS="-lws2_32" \
-    CFLAGS="-O3 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O3 -g0 -flto=$(nproc)"  
+    LIBS="-lws2_32"
 make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -179,6 +180,8 @@ echo "libssh2最新版本是${libssh2_tag} ，下载地址是${libssh2_latest_ur
 curl -L ${libssh2_latest_url} | tar xz
 #curl -L https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
 cd libssh2-*
+export CFLAGS="-O3 -g0 -flto=$(nproc)"
+export CXXFLAGS="-O3 -g0 -flto=$(nproc)"
 ./configure \
     --disable-shared \
     --enable-static \
@@ -190,9 +193,7 @@ cd libssh2-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    LIBS="-lws2_32" \
-    CFLAGS="-O3 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O3 -g0 -flto=$(nproc)"
+    LIBS="-lws2_32"
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -211,6 +212,8 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
 autoreconf -i
+export CFLAGS="-O3 -g0 -flto=$(nproc)"
+export CXXFLAGS="-O3 -g0 -flto=$(nproc)"
 ./configure \
     --host=$HOST \
     --prefix=$PREFIX \
@@ -232,9 +235,7 @@ autoreconf -i
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
-    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-O3 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O3 -g0 -flto=$(nproc)" 
+    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
