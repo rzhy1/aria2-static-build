@@ -8,9 +8,6 @@ export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export LD=ld.lld
-echo "lld的路径是： $(which ld.lld)"
-echo "ld的路径是： $(which ld)"
-echo "x86_64-w64-mingw32-ld的路径是： $(which x86_64-w64-mingw32-ld)"
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 retry() {
@@ -274,8 +271,8 @@ prepare_sqlite() {
     --enable-fts3=no --enable-fts4=no --enable-fts5=no \
     --enable-rtree=no \
     --enable-session=no \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0" 
+    CFLAGS="-O2 -g0  -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0  -flto=$(nproc)" 
   make -j$(nproc)
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
