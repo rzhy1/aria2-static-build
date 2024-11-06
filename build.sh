@@ -233,13 +233,15 @@ autoreconf -i
     --without-libgcrypt \
     --without-libnettle \
     --with-cppunit-prefix=$PREFIX \
+    --disable-checking \
+    --enable-checking=release \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-O2 -g3 -flto=$(nproc)  -ftime-report" \
-    CXXFLAGS="-O2 -g3 -flto=$(nproc)  -ftime-report"
+    CFLAGS="-O2 -g0 -flto=$(nproc)  -ftime-report" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)  -ftime-report"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
