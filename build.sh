@@ -64,8 +64,6 @@ cd gmp-*
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
-    --disable-checking \
-    --enable-checking=release \
     CFLAGS="-mtune=generic -O2 -g0 -flto=$(nproc)" \
     CXXFLAGS="-mtune=generic -O2 -g0 -flto=$(nproc)"
 make -j$(nproc) install
@@ -89,8 +87,6 @@ cd expat-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    --disable-checking \
-    --enable-checking=release \
     CFLAGS="-mtune=generic -O2 -g0 -flto=$(nproc)" \
     CXXFLAGS="-mtune=generic -O2 -g0 -flto=$(nproc)"
 make -j$(nproc) install
@@ -121,8 +117,6 @@ cd sqlite-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    --disable-checking \
-    --enable-checking=release \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
     CXXFLAGS="-O2 -g0 -flto=$(nproc)"
 make -j$(nproc) install
@@ -150,8 +144,6 @@ STRIP=$HOST-strip \
     --prefix=$PREFIX \
     --libdir=$PREFIX/lib \
     --includedir=$PREFIX/include \
-    --disable-checking \
-    --enable-checking=release \
     --static
 make -j$(nproc) install
 echo "| zlib | ${zlib_tag} | ${zlib_latest_url} |" >>"${BUILD_INFO}"
@@ -174,8 +166,6 @@ cd c-ares-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    --disable-checking \
-    --enable-checking=release \
     LIBS="-lws2_32" \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
     CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
@@ -202,8 +192,6 @@ cd libssh2-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    --disable-checking \
-    --enable-checking=release \
     LIBS="-lws2_32" \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
     CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
