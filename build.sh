@@ -217,6 +217,9 @@ autoreconf -i
     --host=$HOST \
     --prefix=$PREFIX \
     --without-included-gettext \
+    --disable-dependency-tracking \
+    --disable-libtool-lock \
+    --enable-silent-rules \
     --disable-nls \
     --with-libcares \
     --without-gnutls \
