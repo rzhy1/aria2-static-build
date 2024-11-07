@@ -20,9 +20,9 @@ BUILD_INFO="${SELF_DIR}/build_info.md"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64并覆盖⭐⭐⭐⭐⭐⭐"
 
 curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
-#unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
-mkdir -p /opt/mingw64
-unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/opt/mingw64/"
+unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
+#mkdir -p /opt/mingw64
+#unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/opt/mingw64/"
 
 #curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/musl-cross/musl-cross/releases/download/20241103/x86_64-w64-mingw32.tar.xz"
 #mkdir -p /opt/mingw64
