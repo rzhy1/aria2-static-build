@@ -22,6 +22,7 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版ming
 #unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
 curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/musl-cross/musl-cross/releases/download/20241103/x86_64-w64-mingw32.tar.xz"
 tar -xvxf "/tmp/x86_64-w64-mingw32.tar.xz" -C "/usr/" || { echo "解压失败"; exit 1; }
+find / -name "libcc1.so.0.0.0" 2>/dev/null
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 
