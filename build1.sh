@@ -388,6 +388,8 @@ build_aria2() {
     --enable-static \
     --disable-shared \
     --enable-silent-rules \
+    --disable-checking \
+    --enable-checking=release \
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF} \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
