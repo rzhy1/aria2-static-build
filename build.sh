@@ -21,7 +21,7 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版ming
 #curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
 #unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
 curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/musl-cross/musl-cross/releases/download/20241103/x86_64-w64-mingw32.tar.xz"
-tar -zxf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /usr/
+tar -xvxf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /usr/
 find / -name "libcc1.so.0.0.0" 2>/dev/null
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
