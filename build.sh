@@ -19,17 +19,16 @@ SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64并覆盖⭐⭐⭐⭐⭐⭐"
 
-curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
-unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
-#mkdir -p /opt/mingw64
-#unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/opt/mingw64/"
+# 最新版的mingw-w64-x86_64-toolchain，包含gcc15，编译过程较慢
+#curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
+#unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
 
-#curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/musl-cross/musl-cross/releases/download/20241103/x86_64-w64-mingw32.tar.xz"
-#mkdir -p /opt/mingw64
-#tar -xvxf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
+# 相对成熟的mingw-w64-x86_64-toolchain，包含gcc14，编译过程较快
+curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/musl-cross/musl-cross/releases/download/20241103/x86_64-w64-mingw32.tar.xz"
+mkdir -p /opt/mingw64
+tar -xvxf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
 export PATH="/opt/mingw64/bin:${PATH}"
 
-find / -name "libcc1.so.0.0.0" 2>/dev/null
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 
