@@ -26,7 +26,7 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版ming
 # 相对成熟的mingw-w64-x86_64-toolchain，包含gcc14，编译过程较快
 curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/musl-cross/musl-cross/releases/download/20241103/x86_64-w64-mingw32.tar.xz"
 mkdir -p /opt/mingw64
-tar -xvxf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
+tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
 export PATH="/opt/mingw64/bin:${PATH}"
 
 echo "x86_64-w64-mingw32-gcc版本是："
