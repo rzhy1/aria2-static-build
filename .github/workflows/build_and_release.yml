@@ -22,17 +22,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - uses: actions/cache@v4
-        id: cache
-        with:
-          path: |
-            downloads/
-            /__w/aria2-static-build/aria2-static-build/x86_64-w64-mingw32/
-          key: build-cache-${{ runner.os }}-x86_64-w64-mingw32-${{ hashFiles('**/Makefile', '**/*.c', '**/*.h', '**/*.sh') }}
-          restore-keys: |
-              build-cache-${{ runner.os }}-x86_64-w64-mingw32-
-              build-cache-${{ runner.os }}-
-              build-cache-
       - name: Install prerequisites
         run: |
           apt-get update
