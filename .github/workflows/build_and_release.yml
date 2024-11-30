@@ -29,7 +29,7 @@ jobs:
           apt-get install -y --no-install-recommends \
               make binutils autoconf automake autotools-dev libtool \
               patch ca-certificates \
-              pkg-config git wget curl dpkg-dev mingw-w64 \
+              pkg-config git wget curl dpkg-dev \
               autopoint libcppunit-dev lzip jq unzip lld rsync
       - name: Compile
         env:
