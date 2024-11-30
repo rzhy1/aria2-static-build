@@ -27,7 +27,7 @@ unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
 #curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
 #mkdir -p /opt/mingw64
 #tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
-#export PATH="/opt/mingw64/bin:${PATH}"
+export PATH="/opt/mingw64/bin:${PATH}"
 
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
@@ -242,6 +242,7 @@ autoreconf -i
     --without-libgcrypt \
     --without-libnettle \
     --with-cppunit-prefix=$PREFIX \
+     --disable-checking \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
