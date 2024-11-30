@@ -80,6 +80,8 @@ echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" 
 cd ..
 echo "⭐⭐⭐⭐⭐⭐查找⭐⭐⭐⭐⭐⭐"
 find / -name gmp.pc 2>/dev/null
+PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+echo "PKG_CONFIG_PATH路径是：${PKG_CONFIG_PATH}"
 pkg-config --cflags --libs gmp
 
 # 下载并编译 Expat
