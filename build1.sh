@@ -40,12 +40,12 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版ming
 
 # 最新版的mingw-w64-x86_64-toolchain，包含gcc15，编译过程较慢
 curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
-#unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
+unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
 
 # 相对成熟的mingw-w64-x86_64-toolchain，包含gcc14，编译过程较快
-curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
-mkdir -p ${CROSS_ROOT}
-tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
+#curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
+#mkdir -p ${CROSS_ROOT}
+#tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 
 BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
