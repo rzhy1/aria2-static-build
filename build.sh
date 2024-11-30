@@ -80,7 +80,8 @@ echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" 
 cd ..
 echo "⭐⭐⭐⭐⭐⭐查找⭐⭐⭐⭐⭐⭐"
 find / -name gmp.pc 2>/dev/null
-find / -name libgmp.pc 2>/dev/null
+pkg-config --cflags --libs gmp
+
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
@@ -212,7 +213,6 @@ cd ..
 
 # 下载并编译 aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
-PKG_CONFIG_PATH=/usr/local/$HOST/lib/pkgconfig
 ARIA2_VERSION=master
 ARIA2_REF=refs/heads/master
 curl -L -o version.json https://api.github.com/repos/aria2/aria2/git/$ARIA2_REF
