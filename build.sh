@@ -255,7 +255,7 @@ autoreconf -i
     --with-cppunit-prefix=$PREFIX \
     --disable-checking \
     ARIA2_STATIC=yes \
-    LIBGMP_LIBS=LIBS="-L$PREFIX/lib -lgmp" \
+    LIBGMP_LIBS="-L$PREFIX/lib -lgmp" \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
