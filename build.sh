@@ -23,8 +23,6 @@ if [ "$USE_GCC15" -eq 1 ]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
     unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
-    apt-get update 
-    apt-get install -y --no-install-recommends libgmp-dev
 else
     echo "使用相对成熟的 mingw-w64-x86_64-toolchain (GCC 14)..."
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz"  "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
@@ -73,7 +71,6 @@ cd gmp-*
 ./configure \
     --disable-shared \
     --enable-static \
-    --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     --disable-cxx \
@@ -249,7 +246,6 @@ autoreconf -i
     --with-cppunit-prefix=$PREFIX \
     --disable-checking \
     ARIA2_STATIC=yes \
-    LIBGMP_LIBS="-lgmp" \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
