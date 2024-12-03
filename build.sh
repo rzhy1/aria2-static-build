@@ -65,7 +65,6 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
-echo --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 ./configure \
     --disable-shared \
     --enable-static \
@@ -80,7 +79,7 @@ make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 echo "查找"
-find / -name "libgmp.pc" 2>/dev/null
+find / -name "gmp.pc" 2>/dev/null
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
@@ -89,7 +88,6 @@ echo "libexpat最新版本是${expat_tag} ，下载地址是${expat_latest_url}"
 curl -L ${expat_latest_url} | tar xj
 #curl -L https://github.com/libexpat/libexpat/releases/download/R_2_6_3/expat-2.6.3.tar.bz2 | tar xj
 cd expat-*
-echo --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 ./configure \
     --disable-shared \
     --enable-static \
@@ -116,7 +114,6 @@ echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
 cd sqlite-*
-echo --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 ./configure \
     --disable-shared \
     --enable-static \
@@ -146,7 +143,6 @@ echo "zlib最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
 curl -L ${zlib_latest_url} | tar xz
 #curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
 cd zlib-*
-echo --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 CFLAGS="-O2 -g0" \
 CXXFLAGS="-O2 -g0 " \
 CC=$HOST-gcc \
@@ -171,7 +167,6 @@ echo "cares最新版本是${cares_tag} ，下载地址是${cares_latest_url}"
 curl -L ${cares_latest_url} | tar xz
 #curl -L https://github.com/c-ares/c-ares/releases/download/v1.34.1/c-ares-1.34.1.tar.gz | tar xz
 cd c-ares-*
-echo --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 ./configure \
     --disable-shared \
     --enable-static \
@@ -196,7 +191,6 @@ echo "libssh2最新版本是${libssh2_tag} ，下载地址是${libssh2_latest_ur
 curl -L ${libssh2_latest_url} | tar xz
 #curl -L https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
 cd libssh2-*
-echo --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 ./configure \
     --disable-shared \
     --enable-static \
@@ -228,7 +222,6 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
 autoreconf -i
-echo --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 ./configure \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
