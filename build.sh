@@ -81,8 +81,8 @@ cd ..
 echo "查找"
 find / -name "gmp.pc" 2>/dev/null
 cat ${PREFIX}/lib/pkgconfig/gmp.pc
-pkg-config --cflags gmp
-pkg-config --libs gmp
+#pkg-config --cflags gmp
+#pkg-config --libs gmp
 dpkg -l | grep libgmp
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
