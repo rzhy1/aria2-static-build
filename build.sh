@@ -78,7 +78,16 @@ cd gmp-*
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
-
+export CPPFLAGS="-I$PREFIX/include" 
+export LDFLAGS="-L$PREFIX/lib" 
+export PKG_CONFIG="/usr/bin/pkg-config" 
+export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" 
+echo "111"
+pkg-config --cflags gmp
+echo "222"
+pkg-config --libs gmp
+echo "333"
+dpkg -l | grep libgmp
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
@@ -241,7 +250,7 @@ autoreconf -i
     --without-libgcrypt \
     --without-libnettle \
     --with-cppunit-prefix=$PREFIX \
-     --disable-checking \
+    --disable-checking \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
