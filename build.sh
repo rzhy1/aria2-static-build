@@ -80,6 +80,7 @@ echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" 
 cd ..
 echo "查找"
 find / -name "gmp.pc" 2>/dev/null
+cat ${$PREFIX}/lib/pkgconfig/gmp.pc
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
