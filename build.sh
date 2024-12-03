@@ -23,7 +23,8 @@ if [ "$USE_GCC15" -eq 1 ]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.zip" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.zip"
     unzip -o "/tmp/mingw-w64-x86_64-toolchain.zip" -d "/usr/"
-    export PATH="/usr/mingw-w64-x86_64/bin:${PATH}"
+    sudo apt-get update 
+    sudo apt-get install -y --no-install-recommends libgmp
 else
     echo "使用相对成熟的 mingw-w64-x86_64-toolchain (GCC 14)..."
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz"  "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
@@ -82,13 +83,6 @@ cd gmp-*
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
-echo "查找"
-find / -name "gmp.pc" 2>/dev/null
-find / -name "libgmp.pc" 2>/dev/null
-#pkg-config --cflags gmp
-#pkg-config --libs gmp
-dpkg -l | grep libgmp
-dpkg-query -L libgmp10
 
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
