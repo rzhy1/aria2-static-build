@@ -84,6 +84,8 @@ find / -name "libgmp.pc" 2>/dev/null
 #pkg-config --cflags gmp
 #pkg-config --libs gmp
 dpkg -l | grep libgmp
+dpkg-query -L libgmp10
+
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
