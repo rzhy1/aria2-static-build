@@ -80,7 +80,7 @@ echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" 
 cd ..
 echo "查找"
 find / -name "gmp.pc" 2>/dev/null
-cat ${PREFIX}/lib/pkgconfig/gmp.pc
+find / -name "libgmp.pc" 2>/dev/null
 #pkg-config --cflags gmp
 #pkg-config --libs gmp
 dpkg -l | grep libgmp
