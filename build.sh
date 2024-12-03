@@ -78,10 +78,7 @@ cd gmp-*
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
-export CPPFLAGS="-I$PREFIX/include" 
-export LDFLAGS="-L$PREFIX/lib" 
-export PKG_CONFIG="/usr/bin/pkg-config" 
-export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" 
+
 echo "111"
 pkg-config --cflags gmp
 echo "222"
@@ -219,6 +216,10 @@ cd ..
 
 # 下载并编译 aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
+export CPPFLAGS="-I$PREFIX/include" 
+export LDFLAGS="-L$PREFIX/lib" 
+export PKG_CONFIG="/usr/bin/pkg-config" 
+export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" 
 ARIA2_VERSION=master
 ARIA2_REF=refs/heads/master
 curl -L -o version.json https://api.github.com/repos/aria2/aria2/git/$ARIA2_REF
