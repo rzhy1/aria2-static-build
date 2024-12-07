@@ -251,7 +251,7 @@ autoreconf -i
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CFLAGS="-I$PREFIX/include -O2 -g0 -flto=$(nproc)" \
     CXXFLAGS="-O2 -g0 -flto=$(nproc) "
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
