@@ -240,7 +240,7 @@ autoreconf -i
     --with-libexpat \
     --without-libxml2 \
     --with-libz \
-    --with-libgmp=$PREFIX/gmp-6.3.0 \
+    --with-libgmp \
     --with-libssh2 \
     --without-libgcrypt \
     --without-libnettle \
