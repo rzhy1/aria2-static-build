@@ -78,15 +78,25 @@ cd gmp-*
     --enable-fat \
     CFLAGS="-mtune=generic -O2 -g0" \
     CXXFLAGS="-mtune=generic -O2 -g0"
+./configure \
+    --disable-shared \
+    --enable-static \
+    --host=$HOST \
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
+    --disable-cxx \
+    --enable-fat \
+    CFLAGS="-mtune=generic -O2 -g0" \
+    CXXFLAGS="-mtune=generic -O2 -g0"
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
+find /  -name "*gmp*"
 cp $PREFIX/lib/libgmp.a /usr/lib/x86_64-linux-gnu/
 cp $PREFIX/lib/libgmp.la /usr/lib/x86_64-linux-gnu/
 cp $PREFIX/include/gmp.h /usr/include/
 cp $PREFIX/lib/pkgconfig/gmp.pc /usr/lib/x86_64-linux-gnu/pkgconfig/
 ldconfig
-
+find /  -name "*gmp*"
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
