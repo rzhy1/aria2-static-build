@@ -81,8 +81,12 @@ cd gmp-*
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
-find / -name libgmp.* 2>/dev/null
-find / -name *gmp.* 2>/dev/null
+cp $PREFIX/lib/libgmp.a /usr/lib/x86_64-linux-gnu/
+cp $PREFIX/lib/libgmp.la /usr/lib/x86_64-linux-gnu/
+cp $PREFIX/include/gmp.h /usr/include/
+cp $PREFIX/lib/pkgconfig/gmp.pc /usr/lib/x86_64-linux-gnu/pkgconfig/
+ldconfig
+
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
