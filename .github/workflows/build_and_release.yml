@@ -35,13 +35,9 @@ jobs:
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
         run: |
-          if [ "${GITHUB_EVENT_NAME}" = release ]; then
-            export ARIA2_VER="${GITHUB_REF#refs/*/}"
-            echo "ARIA2_VER=${ARIA2_VER}" >> $GITHUB_ENV
-          fi
           chmod +x "${GITHUB_WORKSPACE}/build.sh"
           "${GITHUB_WORKSPACE}/build.sh"
-      - name: 获取版本号
+      - name: Get Version
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
@@ -54,16 +50,6 @@ jobs:
           name: aria2c-${{ env.ARIA2_VERSION }}
           body_path: "${{ github.workspace }}/build_info.md"
           append_body: true
-      #- name: Archive aria2c.exe
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: aria2c.exe
-      #    path: "${{ github.workspace }}/aria2c.exe"
-      #- name: Upload build info
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: build-info
-      #    path: "${{ github.workspace }}/build_info.md"
   static-build_zlib_ng_and_libxml2:
     runs-on: ubuntu-24.04
     #container: "rzhy/ubuntu:x86_64-w64-mingw32"
@@ -83,13 +69,9 @@ jobs:
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
         run: |
-          if [ "${GITHUB_EVENT_NAME}" = release ]; then
-            export ARIA2_VER="${GITHUB_REF#refs/*/}"
-            echo "ARIA2_VER=${ARIA2_VER}" >> $GITHUB_ENV
-          fi
           chmod +x "${GITHUB_WORKSPACE}/build1.sh"
           "${GITHUB_WORKSPACE}/build1.sh"
-      - name: 获取版本号
+      - name: Get Version
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
@@ -102,14 +84,4 @@ jobs:
           name: aria2c-${{ env.ARIA2_VERSION }}
           body_path: "${{ github.workspace }}/build_info1.md"
           append_body: true
-      #- name: Archive aria2c1.exe
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: aria2c1.exe
-      #    path: "${{ github.workspace }}/aria2c1.exe"
-      #- name: Upload build info
-      #  uses: actions/upload-artifact@v4
-      #  with:
-      #    name: build-info1
-      #    path: "${{ github.workspace }}/build_info1.md"
   
