@@ -45,14 +45,15 @@ jobs:
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
-      - name: 创建发布
-        uses: ncipollo/release-action@v1
+      - name: Release
+        if: github.event_name == 'push' || github.event_name == 'schedule'
+        uses: softprops/action-gh-release@v2
         with:
-          tag: aria2c-${{ env.ARIA2_VERSION }}
-          allowUpdates: true
-          artifacts: ${{ github.workspace }}/aria2c.exe
-          bodyFile: ${{ github.workspace }}/build_info.md
-          token: ${{ secrets.GITHUB_TOKEN }}
+          files: ${{ github.workspace }}/aria2c.exe
+          tag_name: aria2c-${{ env.ARIA2_VERSION }}
+          name: aria2c-${{ env.ARIA2_VERSION }}
+          body_path: "${{ github.workspace }}/build_info.md"
+          append_body: true
       #- name: Archive aria2c.exe
       #  uses: actions/upload-artifact@v4
       #  with:
@@ -92,14 +93,15 @@ jobs:
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
-      - name: 创建发布
-        uses: ncipollo/release-action@v1
+      - name: Release
+        if: github.event_name == 'push' || github.event_name == 'schedule'
+        uses: softprops/action-gh-release@v2
         with:
-          tag: aria2c-${{ env.ARIA2_VERSION }}
-          allowUpdates: true
-          artifacts: ${{ github.workspace }}/aria2c1.exe
-          bodyFile: ${{ github.workspace }}/build_info1.md
-          token: ${{ secrets.GITHUB_TOKEN }}
+          files: ${{ github.workspace }}/aria2c1.exe
+          tag_name: aria2c-${{ env.ARIA2_VERSION }}
+          name: aria2c-${{ env.ARIA2_VERSION }}
+          body_path: "${{ github.workspace }}/build_info1.md"
+          append_body: true
       #- name: Archive aria2c1.exe
       #  uses: actions/upload-artifact@v4
       #  with:
