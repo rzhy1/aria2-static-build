@@ -81,7 +81,7 @@ jobs:
   release-build-info :
     runs-on: ubuntu-24.04
     needs: [static-build_zlib_and_libexpat, static-build_zlib_ng_and_libxml2]
-    if: ${{ needs.static-build_zlib_and_libexpat.result == 'success' || needs.static-build_zlib_ng_and_libxml2.result == 'success' }}
+    if: always()
     steps:
       - name: 下载构建信息1
         uses: actions/download-artifact@v4
