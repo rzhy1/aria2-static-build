@@ -31,10 +31,6 @@ jobs:
               patch ca-certificates \
               pkg-config git wget curl dpkg-dev \
               autopoint libcppunit-dev lzip jq unzip lld rsync
-      - name: 创建发布说明文件
-        run: |
-          mkdir -p ${{ github.workspace }}/release-folder
-          cat release-folder/build_info.md release-folder/build_info1.md > ${{ github.workspace }}/release-folder/release_notes.md
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
