@@ -15,73 +15,60 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  static-build_zlib_and_libexpat:
+  prepare:
     runs-on: ubuntu-24.04
-    container:
-      image: ubuntu:rolling
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install prerequisites
         run: |
           apt-get update
-          # DEBIAN_FRONTEND=noninteractive sudo apt-get upgrade -y
           apt-get install -y --no-install-recommends \
               make binutils autoconf automake autotools-dev libtool \
               patch ca-certificates \
-              pkg-config git wget curl dpkg-dev \
+              pkgconf git wget curl dpkg-dev \
               autopoint libcppunit-dev lzip jq unzip lld rsync
-      - name: Compile
-        env:
-          CROSS_HOST: "x86_64-w64-mingw32"
-        run: |
-          chmod +x "${GITHUB_WORKSPACE}/build.sh"
-          "${GITHUB_WORKSPACE}/build.sh"
       - name: Get Version
+        id: version
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
-          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
-      - name: Release
-        if: github.event_name == 'push' || github.event_name == 'schedule'
-        uses: softprops/action-gh-release@v2
-        with:
-          files: ${{ github.workspace }}/aria2c.exe
-          tag_name: aria2c-${{ env.ARIA2_VERSION }}
-          name: aria2c-${{ env.ARIA2_VERSION }}
-          body_path: "${{ github.workspace }}/build_info.md"
-          append_body: false
-  static-build_zlib_ng_and_libxml2:
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+
+  build:
+    needs: prepare
+    strategy:
+      matrix:
+        job_name: [zlib_and_libexpat, zlib_ng_and_libxml2]
+        script: ["build.sh", "build1.sh"]
+        output_file: ["aria2c.exe", "aria2c1.exe"]
+        build_info: ["build_info.md", "build_info1.md"]
     runs-on: ubuntu-24.04
-    #container: "rzhy/ubuntu:x86_64-w64-mingw32"
     container:
       image: ubuntu:rolling
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install prerequisites
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends \
-              automake  autoconf autopoint jq libtool \
-              make pkgconf wget curl tcl \
-              ca-certificates unzip lld rsync
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
         run: |
-          chmod +x "${GITHUB_WORKSPACE}/build1.sh"
-          "${GITHUB_WORKSPACE}/build1.sh"
-      - name: Get Version
+          chmod +x "${GITHUB_WORKSPACE}/${{ matrix.script }}"
+          "${GITHUB_WORKSPACE}/${{ matrix.script }}"
+  release:
+    needs: build
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Merge release notes
         run: |
-          VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
-          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
+          mkdir -p release
+          cat ${{ github.workspace }}/*.md > release/merged_release_notes.md
       - name: Release
-        if: github.event_name == 'push' || github.event_name == 'schedule'
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ github.workspace }}/aria2c1.exe
+          files: |
+            ${{ github.workspace }}/aria2c.exe
+            ${{ github.workspace }}/aria2c1.exe
           tag_name: aria2c-${{ env.ARIA2_VERSION }}
           name: aria2c-${{ env.ARIA2_VERSION }}
-          body_path: "${{ github.workspace }}/build_info1.md"
+          body_path: ${{ github.workspace }}/release/merged_release_notes.md
           append_body: false
-  
