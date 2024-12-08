@@ -53,7 +53,7 @@ jobs:
           tag_name: aria2c-${{ env.ARIA2_VERSION }}
           name: aria2c-${{ env.ARIA2_VERSION }}
           body_path: "${{ github.workspace }}/build_info.md"
-          append_body: true
+          append_body: false
   static-build_zlib_ng_and_libxml2:
     runs-on: ubuntu-24.04
     #container: "rzhy/ubuntu:x86_64-w64-mingw32"
@@ -87,5 +87,5 @@ jobs:
           tag_name: aria2c-${{ env.ARIA2_VERSION }}
           name: aria2c-${{ env.ARIA2_VERSION }}
           body_path: "${{ github.workspace }}/build_info1.md"
-          append_body: true
+          append_body: false
   
