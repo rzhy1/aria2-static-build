@@ -37,6 +37,16 @@ jobs:
         run: |
           chmod +x "${GITHUB_WORKSPACE}/build.sh"
           "${GITHUB_WORKSPACE}/build.sh"
+      - name: Archive aria2c.exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: aria2c.exe
+          path: "${{ github.workspace }}/aria2c.exe"
+      - name: Upload build info
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-info
+          path: "${{ github.workspace }}/build_info.md"
   static-build_zlib_ng_and_libxml2:
     runs-on: ubuntu-24.04
     #container: "rzhy/ubuntu:x86_64-w64-mingw32"
@@ -58,27 +68,59 @@ jobs:
         run: |
           chmod +x "${GITHUB_WORKSPACE}/build1.sh"
           "${GITHUB_WORKSPACE}/build1.sh"
-
-  Release:
+      - name: Archive aria2c1.exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: aria2c1.exe
+          path: "${{ github.workspace }}/aria2c1.exe"
+      - name: Upload build info
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-info1
+          path: "${{ github.workspace }}/build_info1.md"
+  release-build-info :
     runs-on: ubuntu-24.04
     needs: [static-build_zlib_and_libexpat, static-build_zlib_ng_and_libxml2]
-    if: always()
+    if: ${{ needs.static-build_zlib_and_libexpat.result == 'success' || needs.static-build_zlib_ng_and_libxml2.result == 'success' }}
     steps:
-      - name: Merge release notes
+      - name: 下载构建信息1
+        uses: actions/download-artifact@v4
+        with:
+          name: build-info
+          path: release-folder
+        continue-on-error: true
+      - name: 下载构建信息2
+        uses: actions/download-artifact@v4
+        with:
+          name: build-info1
+          path: release-folder
+        continue-on-error: true
+      - name: 下载aria2c.exe
+        uses: actions/download-artifact@v4
+        with:
+          name: aria2c.exe
+          path: release-folder
+        continue-on-error: true
+      - name: 下载aria2c1.exe
+        uses: actions/download-artifact@v4
+        with:
+          name: aria2c1.exe
+          path: release-folder
+        continue-on-error: true
+      - name: 创建发布说明文件
         run: |
-          mkdir -p release
-          cat ${{ github.workspace }}/*.md > release/merged_release_notes.md
-      - name: Get Version
+          mkdir -p ${{ github.workspace }}/release-folder
+          cat release-folder/*.md > ${{ github.workspace }}/release-folder/release_notes.md
+      - name: 获取版本号
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
-      - name: Release
-        uses: softprops/action-gh-release@v2
+      - name: 创建发布
+        uses: ncipollo/release-action@v1
         with:
-          files: |
-            ${{ github.workspace }}/aria2c.exe
-            ${{ github.workspace }}/aria2c1.exe
-          tag_name: aria2c-${{ env.ARIA2_VERSION }}
-          name: aria2c-${{ env.ARIA2_VERSION }}
-          body_path: ${{ github.workspace }}/release/merged_release_notes.md
-          append_body: false
+          tag: aria2c-${{ env.ARIA2_VERSION }}
+          allowUpdates: true
+          artifacts: ${{ github.workspace }}/release-folder/aria2c.exe, ${{ github.workspace }}/release-folder/aria2c1.exe
+          bodyFile: ${{ github.workspace }}/release-folder/release_notes.md
+          token: ${{ secrets.GITHUB_TOKEN }}
+    
