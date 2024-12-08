@@ -41,6 +41,10 @@ jobs:
           fi
           chmod +x "${GITHUB_WORKSPACE}/build.sh"
           "${GITHUB_WORKSPACE}/build.sh"
+      - name: 获取版本号
+        run: |
+          VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
+          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
       - name: 创建发布
         uses: ncipollo/release-action@v1
         with:
@@ -84,6 +88,10 @@ jobs:
           fi
           chmod +x "${GITHUB_WORKSPACE}/build1.sh"
           "${GITHUB_WORKSPACE}/build1.sh"
+      - name: 获取版本号
+        run: |
+          VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
+          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
       - name: 创建发布
         uses: ncipollo/release-action@v1
         with:
