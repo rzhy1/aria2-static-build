@@ -59,10 +59,10 @@ jobs:
           chmod +x "${GITHUB_WORKSPACE}/build1.sh"
           "${GITHUB_WORKSPACE}/build1.sh"
 
-  release:
+  Release:
     runs-on: ubuntu-24.04
-	needs: [static-build_zlib_and_libexpat, static-build_zlib_ng_and_libxml2]
-	if: always()
+    needs: [static-build_zlib_and_libexpat, static-build_zlib_ng_and_libxml2]
+    if: always()
     steps:
       - name: Merge release notes
         run: |
