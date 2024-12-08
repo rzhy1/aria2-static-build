@@ -41,16 +41,24 @@ jobs:
           fi
           chmod +x "${GITHUB_WORKSPACE}/build.sh"
           "${GITHUB_WORKSPACE}/build.sh"
-      - name: Archive aria2c.exe
-        uses: actions/upload-artifact@v4
+      - name: 创建发布
+        uses: ncipollo/release-action@v1
         with:
-          name: aria2c.exe
-          path: "${{ github.workspace }}/aria2c.exe"
-      - name: Upload build info
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-info
-          path: "${{ github.workspace }}/build_info.md"
+          tag: aria2c-${{ env.ARIA2_VERSION }}
+          allowUpdates: true
+          artifacts: ${{ github.workspace }}/aria2c.exe
+          bodyFile: ${{ github.workspace }}/build_info.md
+          token: ${{ secrets.GITHUB_TOKEN }}
+      #- name: Archive aria2c.exe
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: aria2c.exe
+      #    path: "${{ github.workspace }}/aria2c.exe"
+      #- name: Upload build info
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: build-info
+      #    path: "${{ github.workspace }}/build_info.md"
   static-build_zlib_ng_and_libxml2:
     runs-on: ubuntu-24.04
     #container: "rzhy/ubuntu:x86_64-w64-mingw32"
@@ -76,54 +84,22 @@ jobs:
           fi
           chmod +x "${GITHUB_WORKSPACE}/build1.sh"
           "${GITHUB_WORKSPACE}/build1.sh"
-      - name: Archive aria2c1.exe
-        uses: actions/upload-artifact@v4
-        with:
-          name: aria2c1.exe
-          path: "${{ github.workspace }}/aria2c1.exe"
-      - name: Upload build info
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-info1
-          path: "${{ github.workspace }}/build_info1.md"
-  release-build-info :
-    runs-on: ubuntu-24.04
-    needs: [static-build_zlib_and_libexpat, static-build_zlib_ng_and_libxml2]
-    steps:
-      - name: 下载构建信息1
-        uses: actions/download-artifact@v4
-        with:
-          name: build-info
-          path: release-folder
-      - name: 下载构建信息2
-        uses: actions/download-artifact@v4
-        with:
-          name: build-info1
-          path: release-folder
-      - name: 下载aria2c.exe
-        uses: actions/download-artifact@v4
-        with:
-          name: aria2c.exe
-          path: release-folder
-      - name: 下载aria2c1.exe
-        uses: actions/download-artifact@v4
-        with:
-          name: aria2c1.exe
-          path: release-folder
-      - name: 创建发布说明文件
-        run: |
-          mkdir -p ${{ github.workspace }}/release-folder
-          cat release-folder/build_info.md release-folder/build_info1.md > ${{ github.workspace }}/release-folder/release_notes.md
-      - name: 获取版本号
-        run: |
-          VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
-          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
       - name: 创建发布
         uses: ncipollo/release-action@v1
         with:
           tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
-          artifacts: ${{ github.workspace }}/release-folder/aria2c.exe, ${{ github.workspace }}/release-folder/aria2c1.exe
-          bodyFile: ${{ github.workspace }}/release-folder/release_notes.md
+          artifacts: ${{ github.workspace }}/aria2c1.exe
+          bodyFile: ${{ github.workspace }}/build_info1.md
           token: ${{ secrets.GITHUB_TOKEN }}
-    
+      #- name: Archive aria2c1.exe
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: aria2c1.exe
+      #    path: "${{ github.workspace }}/aria2c1.exe"
+      #- name: Upload build info
+      #  uses: actions/upload-artifact@v4
+      #  with:
+      #    name: build-info1
+      #    path: "${{ github.workspace }}/build_info1.md"
+  
