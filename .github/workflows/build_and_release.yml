@@ -121,6 +121,6 @@ jobs:
           tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
           artifacts: /release-folder/*.exe
-          bodyFile: /release-folder/release_notes.md
+          bodyFile: ${{ github.workspace }}/release-folder/release_notes.md
           token: ${{ secrets.GITHUB_TOKEN }}
     
