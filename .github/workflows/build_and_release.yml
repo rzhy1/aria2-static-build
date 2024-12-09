@@ -120,7 +120,7 @@ jobs:
         with:
           tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
-          artifacts: ${{ github.workspace }}/release-folder/aria2c.exe, ${{ github.workspace }}/release-folder/aria2c1.exe
-          bodyFile: ${{ github.workspace }}/release-folder/release_notes.md
+          artifacts: /release-folder/*.exe
+          bodyFile: /release-folder/release_notes.md
           token: ${{ secrets.GITHUB_TOKEN }}
     
