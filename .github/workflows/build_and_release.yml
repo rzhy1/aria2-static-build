@@ -15,7 +15,7 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  static-build_zlib_and_libexpat:
+  aria2c_zlib_and_libexpat:
     runs-on: ubuntu-24.04
     container:
       image: ubuntu:rolling
@@ -37,17 +37,12 @@ jobs:
         run: |
           chmod +x "${GITHUB_WORKSPACE}/build.sh"
           "${GITHUB_WORKSPACE}/build.sh"
-      - name: Archive aria2c.exe
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: aria2c.exe
-          path: "${{ github.workspace }}/aria2c.exe"
-      - name: Upload build info
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-info
-          path: "${{ github.workspace }}/build_info.md"
-  static-build_zlib_ng_and_libxml2:
+          name: artifacts
+          path: ${{ github.workspace }}/aria2c.exe,${{ github.workspace }}/build_info.md
+  aria2c1_zlib_ng_and_libxml2:
     runs-on: ubuntu-24.04
     #container: "rzhy/ubuntu:x86_64-w64-mingw32"
     container:
@@ -68,46 +63,23 @@ jobs:
         run: |
           chmod +x "${GITHUB_WORKSPACE}/build1.sh"
           "${GITHUB_WORKSPACE}/build1.sh"
-      - name: Archive aria2c1.exe
+      - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: aria2c1.exe
-          path: "${{ github.workspace }}/aria2c1.exe"
-      - name: Upload build info
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-info1
-          path: "${{ github.workspace }}/build_info1.md"
+          name: artifacts
+          path: ${{ github.workspace }}/aria2c1.exe,${{ github.workspace }}/build_info1.md
   release-build-info :
     runs-on: ubuntu-24.04
-    needs: [static-build_zlib_and_libexpat, static-build_zlib_ng_and_libxml2]
+    needs: [aria2c_zlib_and_libexpat, aria2c1_zlib_ng_and_libxml2]
     if: always()
     steps:
-      - name: 下载构建信息1
+      - name: Download artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-info
+          name: artifacts
           path: release-folder
         continue-on-error: true
-      - name: 下载构建信息2
-        uses: actions/download-artifact@v4
-        with:
-          name: build-info1
-          path: release-folder
-        continue-on-error: true
-      - name: 下载aria2c.exe
-        uses: actions/download-artifact@v4
-        with:
-          name: aria2c.exe
-          path: release-folder
-        continue-on-error: true
-      - name: 下载aria2c1.exe
-        uses: actions/download-artifact@v4
-        with:
-          name: aria2c1.exe
-          path: release-folder
-        continue-on-error: true
-      - name: 创建发布说明文件
+      - name: Merge release notes
         run: |
           mkdir -p ${{ github.workspace }}/release-folder
           cat release-folder/*.md > ${{ github.workspace }}/release-folder/release_notes.md
