@@ -42,8 +42,8 @@ jobs:
         with:
           name: artifacts
           path: |
-            ${{ github.workspace }}/aria2c.exe
-            ${{ github.workspace }}/build_info.md
+            ${{ github.workspace }}/*.exe
+            ${{ github.workspace }}/*.md
   aria2c1_zlib_ng_and_libxml2:
     runs-on: ubuntu-24.04
     #container: "rzhy/ubuntu:x86_64-w64-mingw32"
@@ -70,8 +70,8 @@ jobs:
         with:
           name: artifacts1
           path: |
-            ${{ github.workspace }}/aria2c1.exe
             ${{ github.workspace }}/build_info1.md
+            ${{ github.workspace }}/aria2c1.exe
   release :
     runs-on: ubuntu-24.04
     needs: [aria2c_zlib_and_libexpat, aria2c1_zlib_ng_and_libxml2]
