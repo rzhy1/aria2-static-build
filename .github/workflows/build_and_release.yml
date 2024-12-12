@@ -75,7 +75,7 @@ jobs:
         continue-on-error: true
       - name: Create Release Notes File
         run: |
-          find release-folder -mindepth 2 -type f -execdir sh -c 'mv "$@" "../"' sh {} +
+          find release-folder -mindepth 2 -type f -execdir sh -c 'mv "$@" "../../"' sh {} +
           find release-folder -mindepth 2 -type d -exec rmdir {} +
           find release-folder -name "*.md" -exec cat {} + > ${{ github.workspace }}/release-folder/release_notes.md
       - name: Get Aria2 Version
