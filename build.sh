@@ -32,8 +32,8 @@ else
     export PATH="/opt/mingw64/bin:${PATH}"
 fi
 end_time=$(date +%s.%N)
-duration=$(echo "$end_time - $start_time" | bc)
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载mingw-w64结束（用时: ${duration}s）⭐⭐⭐⭐⭐⭐"
+duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载mingw-w64结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
 
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
