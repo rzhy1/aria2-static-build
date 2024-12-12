@@ -135,6 +135,8 @@ prepare_cmake() {
   local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
   echo "$duration" > "cmake_duration.txt"
   find / -name "cmake_duration.txt" 2>/dev/null
+  duration2=$(cat cmake_duration.txt)
+  echo $duration2
 }
 prepare_ninja() {
     start_time=$(date +%s.%N)
