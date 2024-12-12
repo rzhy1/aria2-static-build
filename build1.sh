@@ -210,7 +210,9 @@ prepare_zlib() {
   fi
   local end_time=$(date +%s.%N)
   duration4=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-  #echo "$duration" > "zlib_duration.txt"
+  echo "$duration4" > "zlib_duration.txt"
+  echo "duration4是：$duration4"
+  find / -name "zlib_duration.txt" 2>/dev/null
 }
 
 prepare_xz() {
