@@ -32,8 +32,7 @@ else
     export PATH="/opt/mingw64/bin:${PATH}"
 fi
 end_time=$(date +%s.%N)
-duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载mingw-w64结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
+duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
@@ -87,8 +86,7 @@ make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
-duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 GMP 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
+duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
@@ -114,8 +112,7 @@ make -j$(nproc) install
 echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
-duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 Expat 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
+duration3=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 # 下载并编译 SQLite
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
@@ -148,8 +145,7 @@ make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
-duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 SQLite 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
+duration4=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 # 下载并编译 zlib
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib⭐⭐⭐⭐⭐⭐"
@@ -178,8 +174,7 @@ make -j$(nproc) install
 echo "| zlib | ${zlib_tag} | ${zlib_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
-duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译zlib 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
+duration5=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 # 下载并编译 c-ares
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares⭐⭐⭐⭐⭐⭐"
@@ -206,8 +201,7 @@ make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
-duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 c-ares 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
+duration6=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 # 下载并编译 libssh2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2⭐⭐⭐⭐⭐⭐"
@@ -236,8 +230,7 @@ make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
-duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 libssh2 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
+duration7=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 # 下载并编译 aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
@@ -289,5 +282,12 @@ ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
 aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
 echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
 end_time=$(date +%s.%N)
-duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 aria2 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
+duration8=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+echo "下载mingw-w64结束用时: ${duration1}s"
+echo "编译 GMP 用时: ${duration2}s"
+echo "编译 Expat 用时: ${duration3}s"
+echo "编译 SQLite 用时: ${duration4}s"
+echo "编译 zlib 用时: ${duration5}s"
+echo "编译 c-ares 用时: ${duration6}s"
+echo "编译 libssh2 用时: ${duration7}s"
+echo "编译 aria2 用时: ${duration8}s"
