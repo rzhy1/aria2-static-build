@@ -42,7 +42,7 @@ jobs:
               make binutils autoconf automake autotools-dev libtool \
               patch ca-certificates \
               pkg-config git wget curl dpkg-dev \
-              autopoint libcppunit-dev lzip jq unzip lld rsync tcl
+              autopoint libcppunit-dev lzip jq zstd lld rsync tcl
 
       - name: Compile
         env:
