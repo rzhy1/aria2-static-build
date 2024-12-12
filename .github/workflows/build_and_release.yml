@@ -75,7 +75,8 @@ jobs:
         continue-on-error: true
       - name: Create Release Notes File
         run: |
-          mkdir -p ${{ github.workspace }}/release-folder
+          find release-folder -mindepth 2 -type f -execdir sh -c 'mv "$@" "../"' sh {} +
+          find release-folder -mindepth 2 -type d -exec rmdir {} +
           find release-folder -name "*.md" -exec cat {} + > ${{ github.workspace }}/release-folder/release_notes.md
       - name: Get Aria2 Version
         run: |
@@ -86,6 +87,6 @@ jobs:
         with:
           tag: aria2c-${{ env.ARIA2_VERSION }}
           allowUpdates: true
-          artifacts: ${{ github.workspace }}/release-folder/**/*.exe
+          artifacts: ${{ github.workspace }}/release-folder/*.exe
           bodyFile: ${{ github.workspace }}/release-folder/release_notes.md
           token: ${{ secrets.GITHUB_TOKEN }}
