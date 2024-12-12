@@ -112,15 +112,15 @@ echo "## aria2c1.exe （zlib_ng & libxml2 & WinTLS ） dependencies:" >>"${BUILD
 echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
 echo "|------------|---------|--------|" >>"${BUILD_INFO}"
 prepare_cmake() {
-  start_time=$(date +%s.%N)
+  local start_time=$(date +%s.%N)
   if ! which cmake &>/dev/null; then
-    cmake_latest_ver="$(retry wget -qO- --compression=auto https://cmake.org/download/ \| grep "'Latest Release'" \| sed -r "'s/.*Latest Release\s*\((.+)\).*/\1/'" \| head -1)"
-    cmake_binary_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz"
-    cmake_sha256_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-SHA-256.txt"
+    local cmake_latest_ver="$(retry wget -qO- --compression=auto https://cmake.org/download/ \| grep "'Latest Release'" \| sed -r "'s/.*Latest Release\s*\((.+)\).*/\1/'" \| head -1)"
+    local cmake_binary_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz"
+    local cmake_sha256_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-SHA-256.txt"
 
     if [ -f "${DOWNLOADS_DIR}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz" ]; then
       cd "${DOWNLOADS_DIR}"
-      cmake_sha256="$(retry wget -qO- --compression=auto "${cmake_sha256_url}")"
+      local cmake_sha256="$(retry wget -qO- --compression=auto "${cmake_sha256_url}")"
       if ! echo "${cmake_sha256}" | grep "cmake-${cmake_latest_ver}-linux-x86_64.tar.gz" | sha256sum -c; then
         rm -f "${DOWNLOADS_DIR}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz"
       fi
@@ -131,14 +131,15 @@ prepare_cmake() {
     tar -zxf "${DOWNLOADS_DIR}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz" -C /usr/local --strip-components 1
   fi
   cmake --version
-  end_time=$(date +%s.%N)
-  duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+   local end_time=$(date +%s.%N)
+  local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+   echo "$duration" > "cmake_duration.txt"
 }
 prepare_ninja() {
-  start_time=$(date +%s.%N)
+    local start_time=$(date +%s.%N)
   if ! which ninja &>/dev/null; then
-    ninja_ver="$(retry wget -qO- --compression=auto https://ninja-build.org/ \| grep "'The last Ninja release is'" \| sed -r "'s@.*<b>(.+)</b>.*@\1@'" \| head -1)"
-    ninja_binary_url="https://github.com/ninja-build/ninja/releases/download/${ninja_ver}/ninja-linux.zip"
+    local ninja_ver="$(retry wget -qO- --compression=auto https://ninja-build.org/ \| grep "'The last Ninja release is'" \| sed -r "'s@.*<b>(.+)</b>.*@\1@'" \| head -1)"
+    local ninja_binary_url="https://github.com/ninja-build/ninja/releases/download/${ninja_ver}/ninja-linux.zip"
     if [ ! -f "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip" ]; then
       rm -f "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip.part"
       retry wget -cT10 -O "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip.part" "${ninja_binary_url}"
@@ -147,16 +148,17 @@ prepare_ninja() {
     unzip -d /usr/local/bin "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip"
   fi
   echo "Ninja version $(ninja --version)"
-  end_time=$(date +%s.%N)
-  duration3=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+    local end_time=$(date +%s.%N)
+    local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+    echo "$duration" > "ninja_duration.txt"
 }
 
 prepare_zlib() {
-  start_time=$(date +%s.%N)
+    local start_time=$(date +%s.%N)
   if [ x"${USE_ZLIB_NG}" = x"1" ]; then
-    zlib_ng_latest_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/zlib-ng/zlib-ng/releases \| jq -r "'.[0].tag_name'")"
-    #zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${zlib_ng_latest_tag}.tar.gz"
-    zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz"
+    local zlib_ng_latest_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/zlib-ng/zlib-ng/releases \| jq -r "'.[0].tag_name'")"
+    #local zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${zlib_ng_latest_tag}.tar.gz"
+    local zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz"
     if [[ ! $zlib_ng_latest_url =~ master\.tar\.gz ]]; then
       retry wget -cT10 -O "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz.part" "${zlib_ng_latest_url}"
       mv -fv "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz.part" "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz"
@@ -184,13 +186,13 @@ prepare_zlib() {
       -DWITH_GTEST=OFF
     cmake --build build
     cmake --install build
-    zlib_ng_ver="${zlib_ng_latest_tag}($(grep '^Version:' ${CROSS_PREFIX}/lib/pkgconfig/zlib.pc | awk '{print $2}'))"
+    local zlib_ng_ver="${zlib_ng_latest_tag}($(grep '^Version:' ${CROSS_PREFIX}/lib/pkgconfig/zlib.pc | awk '{print $2}'))"
     echo "| zlib-ng | ${zlib_ng_ver} | ${zlib_ng_latest_url:-cached zlib-ng} |" >>"${BUILD_INFO}" || exit
     # Fix mingw build sharedlibdir lost issue
     sed -i 's@^sharedlibdir=.*@sharedlibdir=${libdir}@' "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
   else
-    zlib_tag="$(retry wget -qO- --compression=auto https://zlib.net/ \| grep -i "'<FONT.*FONT>'" \| sed -r "'s/.*zlib\s*([^<]+).*/\1/'" \| head -1)"
-    zlib_latest_url="https://zlib.net/zlib-${zlib_tag}.tar.xz"
+    local zlib_tag="$(retry wget -qO- --compression=auto https://zlib.net/ \| grep -i "'<FONT.*FONT>'" \| sed -r "'s/.*zlib\s*([^<]+).*/\1/'" \| head -1)"
+    local zlib_latest_url="https://zlib.net/zlib-${zlib_tag}.tar.xz"
     if [ ! -f "${DOWNLOADS_DIR}/zlib-${zlib_tag}.tar.gz" ]; then
       retry wget -cT10 -O "${DOWNLOADS_DIR}/zlib-${zlib_tag}.tar.gz.part" "${zlib_latest_url}"
       mv -fv "${DOWNLOADS_DIR}/zlib-${zlib_tag}.tar.gz.part" "${DOWNLOADS_DIR}/zlib-${zlib_tag}.tar.gz"
@@ -205,23 +207,24 @@ prepare_zlib() {
       make -j$(nproc)
       make install
     fi
-    zlib_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc | awk '{print $2}'")"
-    echo "| zlib | ${zlib_ver} | ${zlib_latest_url:-cached zlib} |" >>"${BUILD_INFO}" || exit
+    local zlib_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc | awk '{print $2}'")"
+    echo "| zlib | ${zlib_ver} | ${zlib_latest_url:-cached zlib} |" >>"${BUILD_INFO}"
   fi
-  end_time=$(date +%s.%N)
-  duration4=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+   local end_time=$(date +%s.%N)
+  local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "zlib_duration.txt"
 }
 
 prepare_xz() {
-  start_time=$(date +%s.%N)
+    local start_time=$(date +%s.%N)
   # Download from github release (now breakdown)
-  # xz_release_info="$(retry wget -qO- --compression=auto https://api.github.com/repos/tukaani-project/xz/releases \| jq -r "'[.[] | select(.prerelease == false)][0]'")"
-  # xz_tag="$(printf '%s' "${xz_release_info}" | jq -r '.tag_name')"
-  # xz_archive_name="$(printf '%s' "${xz_release_info}" | jq -r '.assets[].name | select(endswith("tar.xz"))')"
-  # xz_latest_url="https://github.com/tukaani-project/xz/releases/download/${xz_tag}/${xz_archive_name}"
+  # local xz_release_info="$(retry wget -qO- --compression=auto https://api.github.com/repos/tukaani-project/xz/releases \| jq -r "'[.[] | select(.prerelease == false)][0]'")"
+  # local xz_tag="$(printf '%s' "${xz_release_info}" | jq -r '.tag_name')"
+  # local xz_archive_name="$(printf '%s' "${xz_release_info}" | jq -r '.assets[].name | select(endswith("tar.xz"))')"
+  # local xz_latest_url="https://github.com/tukaani-project/xz/releases/download/${xz_tag}/${xz_archive_name}"
   # Download from sourceforge
-  xz_tag="$(retry wget -qO- --compression=auto https://sourceforge.net/projects/lzmautils/files/ \| grep -i \'span class=\"sub-label\"\' \| head -1 \| sed -r "'s/.*xz-(.+)\.tar\.gz.*/\1/'")"
-  xz_latest_url="https://sourceforge.net/projects/lzmautils/files/xz-${xz_tag}.tar.xz"
+  local xz_tag="$(retry wget -qO- --compression=auto https://sourceforge.net/projects/lzmautils/files/ \| grep -i \'span class=\"sub-label\"\' \| head -1 \| sed -r "'s/.*xz-(.+)\.tar\.gz.*/\1/'")"
+  local xz_latest_url="https://sourceforge.net/projects/lzmautils/files/xz-${xz_tag}.tar.xz"
   if [ ! -f "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz.part" "${xz_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz.part" "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz"
@@ -242,17 +245,18 @@ prepare_xz() {
     CXXFLAGS="-O2 -g0" 
   make -j$(nproc)
   make install
-  xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
+   local xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
   echo "| xz | ${xz_ver} | ${xz_latest_url:-cached xz} |" >>"${BUILD_INFO}" 
-  end_time=$(date +%s.%N)
-  duration5=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+   local end_time=$(date +%s.%N)
+  local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "xz_duration.txt"
 }
 
 prepare_libxml2() {
-  start_time=$(date +%s.%N)
-  libxml2_latest_url="$(retry wget -qO- --compression=auto 'https://gitlab.gnome.org/api/graphql' --header="'Content-Type: application/json'" --post-data="'{\"query\":\"query {project(fullPath:\\\"GNOME/libxml2\\\"){releases(first:1,sort:RELEASED_AT_DESC){nodes{assets{links{nodes{directAssetUrl}}}}}}}\"}'" \| jq -r "'.data.project.releases.nodes[0].assets.links.nodes[0].directAssetUrl'")"
-  libxml2_tag="$(echo "${libxml2_latest_url}" | sed -r 's/.*libxml2-(.+).tar.*/\1/')"
-  libxml2_filename="$(echo "${libxml2_latest_url}" | sed -r 's/.*(libxml2-(.+).tar.*)/\1/')"
+  local start_time=$(date +%s.%N)
+  local libxml2_latest_url="$(retry wget -qO- --compression=auto 'https://gitlab.gnome.org/api/graphql' --header="'Content-Type: application/json'" --post-data="'{\"query\":\"query {project(fullPath:\\\"GNOME/libxml2\\\"){releases(first:1,sort:RELEASED_AT_DESC){nodes{assets{links{nodes{directAssetUrl}}}}}}}\"}'" \| jq -r "'.data.project.releases.nodes[0].assets.links.nodes[0].directAssetUrl'")"
+  local libxml2_tag="$(echo "${libxml2_latest_url}" | sed -r 's/.*libxml2-(.+).tar.*/\1/')"
+  local libxml2_filename="$(echo "${libxml2_latest_url}" | sed -r 's/.*(libxml2-(.+).tar.*)/\1/')"
   if [ ! -f "${DOWNLOADS_DIR}/${libxml2_filename}" ]; then
     retry wget -c -O "${DOWNLOADS_DIR}/${libxml2_filename}.part" "${libxml2_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/${libxml2_filename}.part" "${DOWNLOADS_DIR}/${libxml2_filename}"
@@ -272,16 +276,17 @@ prepare_libxml2() {
     CXXFLAGS="-O2 -g0"
   make -j$(nproc)
   make install
-  libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
+  local libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
-  end_time=$(date +%s.%N)
-  duration6=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+    local end_time=$(date +%s.%N)
+ local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "libxml2_duration.txt"
 }
 
 prepare_sqlite() {
-  start_time=$(date +%s.%N)
-  sqlite_tag="$(retry wget -qO- --compression=auto https://www.sqlite.org/index.html \| sed -nr "'s/.*>Version (.+)<.*/\1/p'")"
-  sqlite_latest_url="https://github.com/sqlite/sqlite/archive/release.tar.gz"
+   local start_time=$(date +%s.%N)
+  local sqlite_tag="$(retry wget -qO- --compression=auto https://www.sqlite.org/index.html \| sed -nr "'s/.*>Version (.+)<.*/\1/p'")"
+  local sqlite_latest_url="https://github.com/sqlite/sqlite/archive/release.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
@@ -291,7 +296,7 @@ prepare_sqlite() {
   cd "/usr/src/sqlite-${sqlite_tag}"
   if [ x"${TARGET_HOST}" = x"Windows" ]; then
     ln -sf mksourceid.exe mksourceid
-    SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
+    local SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
@@ -303,17 +308,18 @@ prepare_sqlite() {
     CXXFLAGS="-O2 -g0  -flto=$(nproc)" 
   make -j$(nproc)
   make install
-  sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
+   local sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
-  end_time=$(date +%s.%N)
-  duration7=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+   local end_time=$(date +%s.%N)
+   local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "sqlite_duration.txt"
 }
 
 prepare_c_ares() {
-  start_time=$(date +%s.%N)
-  cares_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
-  #cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
-  cares_latest_url="https://github.com/c-ares/c-ares/archive/master.tar.gz"
+    local start_time=$(date +%s.%N)
+  local cares_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
+  #local cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
+    local cares_latest_url="https://github.com/c-ares/c-ares/archive/master.tar.gz"
   if [[ ! $cares_latest_url =~ master\.tar\.gz ]]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz.part" "${cares_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz.part" "${DOWNLOADS_DIR}/c-ares-${cares_tag}.tar.gz"
@@ -341,16 +347,17 @@ prepare_c_ares() {
     CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
   make install
-  cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
+  local cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
   echo "| c-ares | ${cares_ver} | ${cares_latest_url:-cached c-ares} |" >>"${BUILD_INFO}"
-  end_time=$(date +%s.%N)
-  duration8=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+   local end_time=$(date +%s.%N)
+    local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "c_ares_duration.txt"
 }
 
 prepare_libssh2() {
-  start_time=$(date +%s.%N)
-  libssh2_tag="$(retry wget -qO- --compression=auto https://libssh2.org/ \| sed -nr "'s@.*libssh2 ([^<]*).*released on.*@\1@p'")"
-  libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
+  local start_time=$(date +%s.%N)
+  local libssh2_tag="$(retry wget -qO- --compression=auto https://libssh2.org/ \| sed -nr "'s@.*libssh2 ([^<]*).*released on.*@\1@p'")"
+  local libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz.part" "${libssh2_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz.part" "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz"
@@ -368,22 +375,23 @@ prepare_libssh2() {
   make -j$(nproc)
   make install
   #unset CFLAGS
-  libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
+   local libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
   echo "| libssh2 | ${libssh2_ver} | ${libssh2_latest_url:-cached libssh2} |" >>"${BUILD_INFO}"
-  end_time=$(date +%s.%N)
-  duration9=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+    local end_time=$(date +%s.%N)
+   local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+   echo "$duration" > "libssh2_duration.txt"
 }
 
 build_aria2() {
-  start_time=$(date +%s.%N)
+    local start_time=$(date +%s.%N)
   if [ -n "${ARIA2_VER}" ]; then
-    aria2_tag="${ARIA2_VER}"
+    local aria2_tag="${ARIA2_VER}"
   else
-    aria2_tag=master
+    local aria2_tag=master
     # Check download cache whether expired
     if [ -f "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz" ]; then
-      cached_file_ts="$(stat -c '%Y' "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz")"
-      current_ts="$(date +%s)"
+      local cached_file_ts="$(stat -c '%Y' "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz")"
+      local current_ts="$(date +%s)"
       if [ "$((${current_ts} - "${cached_file_ts}"))" -gt 86400 ]; then
         echo "Delete expired aria2 archive file cache..."
         rm -f "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz"
@@ -392,9 +400,9 @@ build_aria2() {
   fi
 
   if [ -n "${ARIA2_VER}" ]; then
-    aria2_latest_url="https://github.com/aria2/aria2/releases/download/release-${ARIA2_VER}/aria2-${ARIA2_VER}.tar.gz"
+     local aria2_latest_url="https://github.com/aria2/aria2/releases/download/release-${ARIA2_VER}/aria2-${ARIA2_VER}.tar.gz"
   else
-    aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
+   local  aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
   fi
   echo "aria2_latest_url: $aria2_latest_url"  
 
@@ -415,7 +423,7 @@ build_aria2() {
     autoreconf -i
   fi
   if [ x"${TARGET_HOST}" = xwin ]; then
-    ARIA2_EXT_CONF='--without-openssl'
+    local ARIA2_EXT_CONF='--without-openssl'
   # else
   #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
@@ -430,13 +438,14 @@ build_aria2() {
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF} \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
   make install
-  ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
+   local ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
   echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
-  end_time=$(date +%s.%N)
-  duration10=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  local end_time=$(date +%s.%N)
+  local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+   echo "$duration" > "aria2_duration.txt"
 }
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 cmake⭐⭐⭐⭐⭐⭐"
@@ -454,6 +463,17 @@ wait
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
+
+duration2=$(cat cmake_duration.txt)
+duration3=$(cat ninja_duration.txt)
+duration4=$(cat zlib_duration.txt)
+duration5=$(cat xz_duration.txt)
+duration6=$(cat libxml2_duration.txt)
+duration7=$(cat sqlite_duration.txt)
+duration8=$(cat c_ares_duration.txt)
+duration9=$(cat libssh2_duration.txt)
+duration10=$(cat aria2_duration.txt)
+
 echo "下载mingw-w64用时: ${duration1}s"
 echo "编译 cmake 用时: ${duration2}s"
 echo "编译 ninja 用时: ${duration3}s"
