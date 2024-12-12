@@ -23,7 +23,7 @@ jobs:
           - name: "aria2c_zlib_and_libexpat"
             build_script: "build.sh"
             artifact_name: "aria2c.exe"
-            build_info_artifact: "build-info"
+            build_info_artifact: "build_info"
           - name: "aria2c1_zlib_ng_and_libxml2"
             build_script: "build1.sh"
             artifact_name: "aria2c1.exe"
