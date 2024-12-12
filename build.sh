@@ -18,6 +18,7 @@ SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 echo "$BUILD_INFO"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
+start_time=$(date +%s.%N)
 USE_GCC15=0
 if [ "$USE_GCC15" -eq 1 ]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
@@ -30,6 +31,9 @@ else
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
     export PATH="/opt/mingw64/bin:${PATH}"
 fi
+end_time=$(date +%s.%N)
+duration=$(echo "$end_time - $start_time" | bc)
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载mingw-w64结束（用时: ${duration}s）⭐⭐⭐⭐⭐⭐"
 
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
