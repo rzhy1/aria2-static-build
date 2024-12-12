@@ -132,11 +132,11 @@ prepare_cmake() {
   fi
   cmake --version
   local end_time=$(date +%s.%N)
-  local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-  echo "$duration" > "cmake_duration.txt"
-  find / -name "cmake_duration.txt" 2>/dev/null
-  duration2=$(cat cmake_duration.txt)
-  echo $duration2
+  local duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  #echo "$duration" > "cmake_duration.txt"
+  #find / -name "cmake_duration.txt" 2>/dev/null
+  #duration2=$(cat cmake_duration.txt)
+  echo "duration2是"$duration2
 }
 prepare_ninja() {
     start_time=$(date +%s.%N)
@@ -152,8 +152,9 @@ prepare_ninja() {
   fi
   echo "Ninja version $(ninja --version)"
   local end_time=$(date +%s.%N)
-  local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-  echo "$duration" > "ninja_duration.txt"
+  local duration3=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  #echo "$duration" > "ninja_duration.txt"
+  echo "duration3是"$duration3
 }
 
 prepare_zlib() {
