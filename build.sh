@@ -68,6 +68,7 @@ retry() {
 
 # 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
+start_time=$(date +%s.%N)
 gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9.]+\.tar\.(xz)"' | sort -rV | head -n 1 | sed -r 's/href="gmp-(.+)\.tar\..+"/\1/')"
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
@@ -85,9 +86,13 @@ cd gmp-*
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
+end_time=$(date +%s.%N)
+duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 GMP 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
 
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
+start_time=$(date +%s.%N)
 expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
 expat_latest_url=$(retry curl -s "https://api.github.com/repos/libexpat/libexpat/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.bz2$")) | .browser_download_url' | head -n 1)
 echo "libexpat最新版本是${expat_tag} ，下载地址是${expat_latest_url}"
@@ -108,9 +113,13 @@ cd expat-*
 make -j$(nproc) install
 echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
 cd ..
+end_time=$(date +%s.%N)
+duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 Expat 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
 
 # 下载并编译 SQLite
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
+start_time=$(date +%s.%N)
 sqlite_tag=$(retry curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
 download_page=$(curl -s "https://www.sqlite.org/download.html")
 csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
@@ -138,9 +147,13 @@ cd sqlite-*
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
+end_time=$(date +%s.%N)
+duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 SQLite 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
 
 # 下载并编译 zlib
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib⭐⭐⭐⭐⭐⭐"
+start_time=$(date +%s.%N)
 zlib_tag=$(retry curl -s https://api.github.com/repos/madler/zlib/releases/latest | jq -r '.name' | cut -d' ' -f2)
 zlib_latest_url=$(retry curl -s "https://api.github.com/repos/madler/zlib/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.gz$")) | .browser_download_url' | head -n 1)
 #zlib_tag="$(retry wget -qO- --compression=auto https://zlib.net/ \| grep -i "'<FONT.*FONT>'" \| sed -r "'s/.*zlib\s*([^<]+).*/\1/'" \| head -1)"
@@ -164,9 +177,13 @@ STRIP=$HOST-strip \
 make -j$(nproc) install
 echo "| zlib | ${zlib_tag} | ${zlib_latest_url} |" >>"${BUILD_INFO}"
 cd ..
+end_time=$(date +%s.%N)
+duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译zlib 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
 
 # 下载并编译 c-ares
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares⭐⭐⭐⭐⭐⭐"
+start_time=$(date +%s.%N)
 cares_tag=$(retry curl -s https://api.github.com/repos/c-ares/c-ares/releases/latest | jq -r '.tag_name | sub("^v"; "")')
 cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
 echo "cares最新版本是${cares_tag} ，下载地址是${cares_latest_url}"
@@ -188,9 +205,13 @@ cd c-ares-*
 make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
+end_time=$(date +%s.%N)
+duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 c-ares 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
 
 # 下载并编译 libssh2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2⭐⭐⭐⭐⭐⭐"
+start_time=$(date +%s.%N)
 libssh2_tag=$(retry curl -s https://libssh2.org/ | sed -nr 's@.*libssh2 ([^<]*).*released on.*@\1@p')
 libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
 echo "libssh2最新版本是${libssh2_tag} ，下载地址是${libssh2_latest_url}"
@@ -214,9 +235,13 @@ cd libssh2-*
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
+end_time=$(date +%s.%N)
+duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 libssh2 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
 
 # 下载并编译 aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
+start_time=$(date +%s.%N)
 ARIA2_VERSION=master
 ARIA2_REF=refs/heads/master
 curl -L -o version.json https://api.github.com/repos/aria2/aria2/git/$ARIA2_REF
@@ -263,4 +288,6 @@ mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
 ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
 aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
 echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
+end_time=$(date +%s.%N)
+duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译 aria2 结束⭐⭐⭐⭐⭐⭐用时: ${duration}s"
