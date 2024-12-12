@@ -71,14 +71,12 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-           path: release-folder
+           path: release-folder1
         continue-on-error: true
       - name: Create Release Notes File
         run: |
-          find ${{ github.workspace }}/release-folder -type f -exec realpath {} \;
-          find release-folder -mindepth 2 -type f -exec sh -c 'mv {} release-folder' \;
-          find release-folder -mindepth 2 -type d -exec rmdir {} +
-          find release-folder -name "*.md" -exec cat {} + > ${{ github.workspace }}/release-folder/release_notes.md
+          find release-folder1 -type f -exec sh -c 'mv {} release-folder' \;
+          cat release-folder/*.md > ${{ github.workspace }}/release-folder/release_notes.md
       - name: Get Aria2 Version
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
