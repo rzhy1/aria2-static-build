@@ -283,7 +283,7 @@ aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
 echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
 end_time=$(date +%s.%N)
 duration8=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-echo "下载mingw-w64结束用时: ${duration1}s"
+echo "下载mingw-w64用时: ${duration1}s"
 echo "编译 GMP 用时: ${duration2}s"
 echo "编译 Expat 用时: ${duration3}s"
 echo "编译 SQLite 用时: ${duration4}s"
