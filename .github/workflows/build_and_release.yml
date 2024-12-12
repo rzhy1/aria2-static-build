@@ -16,15 +16,16 @@ on:
 
 jobs:
   build:
+    name: Build ${{ matrix.name }}
     runs-on: ubuntu-24.04
     strategy:
       matrix:
         include:
-          - name: "aria2c_zlib_and_libexpat"
+          - name: "aria2c"
             build_script: "build.sh"
             artifact_name: "aria2c.exe"
             build_info_artifact: "build_info"
-          - name: "aria2c1_zlib_ng_and_libxml2"
+          - name: "aria2c1"
             build_script: "build1.sh"
             artifact_name: "aria2c1.exe"
             build_info_artifact: "build_info1"
