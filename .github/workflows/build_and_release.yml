@@ -15,107 +15,73 @@ on:
     - cron: "0 0 * * *"
 
 jobs:
-  static-build_zlib_and_libexpat:
+  build:
     runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        include:
+          - name: "static-build_zlib_and_libexpat"
+            build_script: "build.sh"
+            artifact_name: "aria2c.exe"
+            build_info_artifact: "build-info"
+          - name: "static-build_zlib_ng_and_libxml2"
+            build_script: "build1.sh"
+            artifact_name: "aria2c1.exe"
+            build_info_artifact: "build-info1"
     container:
       image: ubuntu:devel
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
       - name: Install prerequisites
         run: |
           apt-get update
-          # DEBIAN_FRONTEND=noninteractive sudo apt-get upgrade -y
           apt-get install -y --no-install-recommends \
               make binutils autoconf automake autotools-dev libtool \
               patch ca-certificates \
               pkg-config git wget curl dpkg-dev \
-              autopoint libcppunit-dev lzip jq unzip lld rsync
+              autopoint libcppunit-dev lzip jq unzip lld rsync tcl
+
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
         run: |
-          chmod +x "${GITHUB_WORKSPACE}/build.sh"
-          "${GITHUB_WORKSPACE}/build.sh"
-      - name: Archive aria2c.exe
+          chmod +x "${GITHUB_WORKSPACE}/${{ matrix.build_script }}"
+          "${GITHUB_WORKSPACE}/${{ matrix.build_script }}"
+
+      - name: Archive Executable
         uses: actions/upload-artifact@v4
         with:
-          name: aria2c.exe
-          path: "${{ github.workspace }}/aria2c.exe"
+          name: ${{ matrix.artifact_name }}
+          path: "${{ github.workspace }}/${{ matrix.artifact_name }}"
+
       - name: Upload build info
         uses: actions/upload-artifact@v4
         with:
-          name: build-info
-          path: "${{ github.workspace }}/build_info.md"
-  static-build_zlib_ng_and_libxml2:
+          name: ${{ matrix.build_info_artifact }}
+          path: "${{ github.workspace }}/${{ matrix.build_info_artifact }}.md"
+
+
+  release-build-info:
     runs-on: ubuntu-24.04
-    #container: "rzhy/ubuntu:x86_64-w64-mingw32"
-    container:
-      image: ubuntu:devel
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Install prerequisites
-        run: |
-          apt-get update
-          apt-get install -y --no-install-recommends \
-              automake  autoconf autopoint jq libtool \
-              make pkgconf wget curl tcl \
-              ca-certificates unzip lld rsync
-      - name: Compile
-        env:
-          CROSS_HOST: "x86_64-w64-mingw32"
-        run: |
-          chmod +x "${GITHUB_WORKSPACE}/build1.sh"
-          "${GITHUB_WORKSPACE}/build1.sh"
-      - name: Archive aria2c1.exe
-        uses: actions/upload-artifact@v4
-        with:
-          name: aria2c1.exe
-          path: "${{ github.workspace }}/aria2c1.exe"
-      - name: Upload build info
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-info1
-          path: "${{ github.workspace }}/build_info1.md"
-  release-build-info :
-    runs-on: ubuntu-24.04
-    needs: [static-build_zlib_and_libexpat, static-build_zlib_ng_and_libxml2]
+    needs: [build]
     if: always()
     steps:
-      - name: 下载构建信息1
+      - name: Download Artifacts
         uses: actions/download-artifact@v4
         with:
-          name: build-info
-          path: release-folder
+           path: release-folder
         continue-on-error: true
-      - name: 下载构建信息2
-        uses: actions/download-artifact@v4
-        with:
-          name: build-info1
-          path: release-folder
-        continue-on-error: true
-      - name: 下载aria2c.exe
-        uses: actions/download-artifact@v4
-        with:
-          name: aria2c.exe
-          path: release-folder
-        continue-on-error: true
-      - name: 下载aria2c1.exe
-        uses: actions/download-artifact@v4
-        with:
-          name: aria2c1.exe
-          path: release-folder
-        continue-on-error: true
-      - name: 创建发布说明文件
+      - name: Create Release Notes File
         run: |
           mkdir -p ${{ github.workspace }}/release-folder
-          cat release-folder/*.md > ${{ github.workspace }}/release-folder/release_notes.md
-      - name: 获取版本号
+          find release-folder -name "*.md" -exec cat {} + > ${{ github.workspace }}/release-folder/release_notes.md
+      - name: Get Aria2 Version
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
-      - name: 创建发布
+      - name: Create Release
         uses: ncipollo/release-action@v1
         with:
           tag: aria2c-${{ env.ARIA2_VERSION }}
@@ -123,4 +89,3 @@ jobs:
           artifacts: ${{ github.workspace }}/release-folder/*.exe
           bodyFile: ${{ github.workspace }}/release-folder/release_notes.md
           token: ${{ secrets.GITHUB_TOKEN }}
-    
