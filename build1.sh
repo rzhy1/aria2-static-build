@@ -36,7 +36,8 @@ rm -f /etc/apt/apt.conf.d/*
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64并覆盖⭐⭐⭐⭐⭐⭐"
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
+start_time=$(date +%s.%N)
 USE_GCC15=0
 if [ "$USE_GCC15" -eq 1 ]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
@@ -47,6 +48,8 @@ else
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
+end_time=$(date +%s.%N)
+duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 
@@ -109,6 +112,7 @@ echo "## aria2c1.exe （zlib_ng & libxml2 & WinTLS ） dependencies:" >>"${BUILD
 echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
 echo "|------------|---------|--------|" >>"${BUILD_INFO}"
 prepare_cmake() {
+  start_time=$(date +%s.%N)
   if ! which cmake &>/dev/null; then
     cmake_latest_ver="$(retry wget -qO- --compression=auto https://cmake.org/download/ \| grep "'Latest Release'" \| sed -r "'s/.*Latest Release\s*\((.+)\).*/\1/'" \| head -1)"
     cmake_binary_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz"
@@ -127,8 +131,11 @@ prepare_cmake() {
     tar -zxf "${DOWNLOADS_DIR}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz" -C /usr/local --strip-components 1
   fi
   cmake --version
+  end_time=$(date +%s.%N)
+  duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 }
 prepare_ninja() {
+  start_time=$(date +%s.%N)
   if ! which ninja &>/dev/null; then
     ninja_ver="$(retry wget -qO- --compression=auto https://ninja-build.org/ \| grep "'The last Ninja release is'" \| sed -r "'s@.*<b>(.+)</b>.*@\1@'" \| head -1)"
     ninja_binary_url="https://github.com/ninja-build/ninja/releases/download/${ninja_ver}/ninja-linux.zip"
@@ -140,9 +147,12 @@ prepare_ninja() {
     unzip -d /usr/local/bin "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip"
   fi
   echo "Ninja version $(ninja --version)"
+  end_time=$(date +%s.%N)
+  duration3=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 }
 
 prepare_zlib() {
+  start_time=$(date +%s.%N)
   if [ x"${USE_ZLIB_NG}" = x"1" ]; then
     zlib_ng_latest_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/zlib-ng/zlib-ng/releases \| jq -r "'.[0].tag_name'")"
     #zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${zlib_ng_latest_tag}.tar.gz"
@@ -198,9 +208,12 @@ prepare_zlib() {
     zlib_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc | awk '{print $2}'")"
     echo "| zlib | ${zlib_ver} | ${zlib_latest_url:-cached zlib} |" >>"${BUILD_INFO}" || exit
   fi
+  end_time=$(date +%s.%N)
+  duration4=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 }
 
 prepare_xz() {
+  start_time=$(date +%s.%N)
   # Download from github release (now breakdown)
   # xz_release_info="$(retry wget -qO- --compression=auto https://api.github.com/repos/tukaani-project/xz/releases \| jq -r "'[.[] | select(.prerelease == false)][0]'")"
   # xz_tag="$(printf '%s' "${xz_release_info}" | jq -r '.tag_name')"
@@ -231,9 +244,12 @@ prepare_xz() {
   make install
   xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
   echo "| xz | ${xz_ver} | ${xz_latest_url:-cached xz} |" >>"${BUILD_INFO}" 
+  end_time=$(date +%s.%N)
+  duration5=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 }
 
 prepare_libxml2() {
+  start_time=$(date +%s.%N)
   libxml2_latest_url="$(retry wget -qO- --compression=auto 'https://gitlab.gnome.org/api/graphql' --header="'Content-Type: application/json'" --post-data="'{\"query\":\"query {project(fullPath:\\\"GNOME/libxml2\\\"){releases(first:1,sort:RELEASED_AT_DESC){nodes{assets{links{nodes{directAssetUrl}}}}}}}\"}'" \| jq -r "'.data.project.releases.nodes[0].assets.links.nodes[0].directAssetUrl'")"
   libxml2_tag="$(echo "${libxml2_latest_url}" | sed -r 's/.*libxml2-(.+).tar.*/\1/')"
   libxml2_filename="$(echo "${libxml2_latest_url}" | sed -r 's/.*(libxml2-(.+).tar.*)/\1/')"
@@ -258,9 +274,12 @@ prepare_libxml2() {
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
+  end_time=$(date +%s.%N)
+  duration6=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 }
 
 prepare_sqlite() {
+  start_time=$(date +%s.%N)
   sqlite_tag="$(retry wget -qO- --compression=auto https://www.sqlite.org/index.html \| sed -nr "'s/.*>Version (.+)<.*/\1/p'")"
   sqlite_latest_url="https://github.com/sqlite/sqlite/archive/release.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
@@ -286,9 +305,12 @@ prepare_sqlite() {
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
+  end_time=$(date +%s.%N)
+  duration7=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 }
 
 prepare_c_ares() {
+  start_time=$(date +%s.%N)
   cares_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
   #cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
   cares_latest_url="https://github.com/c-ares/c-ares/archive/master.tar.gz"
@@ -321,9 +343,12 @@ prepare_c_ares() {
   make install
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
   echo "| c-ares | ${cares_ver} | ${cares_latest_url:-cached c-ares} |" >>"${BUILD_INFO}"
+  end_time=$(date +%s.%N)
+  duration8=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 }
 
 prepare_libssh2() {
+  start_time=$(date +%s.%N)
   libssh2_tag="$(retry wget -qO- --compression=auto https://libssh2.org/ \| sed -nr "'s@.*libssh2 ([^<]*).*released on.*@\1@p'")"
   libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz" ]; then
@@ -345,9 +370,12 @@ prepare_libssh2() {
   #unset CFLAGS
   libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
   echo "| libssh2 | ${libssh2_ver} | ${libssh2_latest_url:-cached libssh2} |" >>"${BUILD_INFO}"
+  end_time=$(date +%s.%N)
+  duration9=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 }
 
 build_aria2() {
+  start_time=$(date +%s.%N)
   if [ -n "${ARIA2_VER}" ]; then
     aria2_tag="${ARIA2_VER}"
   else
@@ -407,6 +435,8 @@ build_aria2() {
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
   echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
+  end_time=$(date +%s.%N)
+  duration10=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 }
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 cmake⭐⭐⭐⭐⭐⭐"
@@ -424,6 +454,16 @@ wait
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
+echo "下载mingw-w64用时: ${duration1}s"
+echo "编译 cmake 用时: ${duration2}s"
+echo "编译 ninja 用时: ${duration3}s"
+echo "编译 zlib 用时: ${duration4}s"
+echo "编译 xz 用时: ${duration5}s"
+echo "编译 libxml2 用时: ${duration6}s"
+echo "编译 sqlite 用时: ${duration7}s"
+echo "编译 c_ares 用时: ${duration8}s"
+echo "编译 libssh2 用时: ${duration9}s"
+echo "编译 aria2 用时: ${duration10}s"
 
 # get release
 ${CROSS_HOST}-strip "${CROSS_PREFIX}/bin/aria2c.exe"
