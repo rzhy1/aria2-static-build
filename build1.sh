@@ -212,6 +212,8 @@ prepare_zlib() {
   duration4=$(echo "$end_time4 - $start_time4" | bc | xargs printf "%.1f")
   echo "duration4是" $duration4
 }
+duration4=$(prepare_zlib)
+echo "函数外的 duration4 是 $duration4"
 
 prepare_xz() {
   start_time5=$(date +%s.%N)
