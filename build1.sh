@@ -455,7 +455,7 @@ wait
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
-
+echo "duration4是" $duration4
 echo "下载mingw-w64用时: ${duration1}s"
 echo "编译 cmake 用时: ${duration2}s"
 echo "编译 ninja 用时: ${duration3}s"
