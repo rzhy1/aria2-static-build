@@ -453,7 +453,7 @@ prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib、xz、libxml2、sqlite、c_ares、libssh2⭐⭐⭐⭐⭐⭐"
-prepare_zlib &
+prepare_zlib
 prepare_xz &
 prepare_libxml2 &
 prepare_sqlite &
