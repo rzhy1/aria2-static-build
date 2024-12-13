@@ -132,7 +132,8 @@ prepare_cmake() {
   fi
   cmake --version
   local end_time=$(date +%s.%N)
-  duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "${DOWNLOADS_DIR}/ninja_duration.txt"
 }
 prepare_ninja() {
     start_time=$(date +%s.%N)
@@ -148,7 +149,8 @@ prepare_ninja() {
   fi
   echo "Ninja version $(ninja --version)"
   local end_time=$(date +%s.%N)
-  duration3=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "${DOWNLOADS_DIR}/ninja_duration.txt"
 }
 
 prepare_zlib() {
@@ -210,8 +212,8 @@ prepare_zlib() {
   fi
   end_time4=$(date +%s.%N)
   duration4=$(echo "$end_time4 - $start_time4" | bc | xargs printf "%.1f")
-  echo "$duration4" > "zlib_duration.txt"
-  echo "duration4是：$duration4"
+  echo "$duration4" > "${DOWNLOADS_DIR}/zlib_duration.txt"
+  echo "duration4是：${DOWNLOADS_DIR}/$duration4"
   find / -name "zlib_duration.txt" 2>/dev/null
 }
 
@@ -248,8 +250,8 @@ prepare_xz() {
    xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
   echo "| xz | ${xz_ver} | ${xz_latest_url:-cached xz} |" >>"${BUILD_INFO}" 
   local end_time=$(date +%s.%N)
-  duration5=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-  #echo "$duration" > "xz_duration.txt"
+  duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "${DOWNLOADS_DIR}/xz_duration.txt"
 }
 
 prepare_libxml2() {
@@ -279,8 +281,8 @@ prepare_libxml2() {
   llibxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
   local end_time=$(date +%s.%N)
-  duration6=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-  #echo "$duration" > "libxml2_duration.txt"
+  duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "${DOWNLOADS_DIR}/libxml2_duration.txt"
 }
 
 prepare_sqlite() {
@@ -311,8 +313,8 @@ prepare_sqlite() {
    sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
   local end_time=$(date +%s.%N)
-  duration7=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-  #echo "$duration" > "sqlite_duration.txt"
+  duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "${DOWNLOADS_DIR}/sqlite_duration.txt"
 }
 
 prepare_c_ares() {
@@ -350,8 +352,8 @@ prepare_c_ares() {
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
   echo "| c-ares | ${cares_ver} | ${cares_latest_url:-cached c-ares} |" >>"${BUILD_INFO}"
   local end_time=$(date +%s.%N)
-  duration8=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-  #echo "$duration" > "c_ares_duration.txt"
+  duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "${DOWNLOADS_DIR}/c_ares_duration.txt"
 }
 
 prepare_libssh2() {
@@ -378,8 +380,8 @@ prepare_libssh2() {
   libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
   echo "| libssh2 | ${libssh2_ver} | ${libssh2_latest_url:-cached libssh2} |" >>"${BUILD_INFO}"
   local end_time=$(date +%s.%N)
-  duration9=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-  #echo "$duration" > "libssh2_duration.txt"
+  duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "${DOWNLOADS_DIR}/libssh2_duration.txt"
 }
 
 build_aria2() {
@@ -444,8 +446,8 @@ build_aria2() {
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
   echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
   local end_time=$(date +%s.%N)
-  duration10=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-  #echo "$duration" > "aria2_duration.txt"
+  duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  echo "$duration" > "${DOWNLOADS_DIR}/aria2_duration.txt"
 }
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 cmake⭐⭐⭐⭐⭐⭐"
@@ -453,7 +455,7 @@ prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib、xz、libxml2、sqlite、c_ares、libssh2⭐⭐⭐⭐⭐⭐"
-prepare_zlib
+prepare_zlib &
 prepare_xz &
 prepare_libxml2 &
 prepare_sqlite &
@@ -464,15 +466,15 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ari
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
 
-#duration2=$(cat cmake_duration.txt)
-#duration3=$(cat ninja_duration.txt)
-#duration4=$(cat zlib_duration.txt)
-#duration5=$(cat xz_duration.txt)
-#duration6=$(cat libxml2_duration.txt)
-#duration7=$(cat sqlite_duration.txt)
-#duration8=$(cat c_ares_duration.txt)
-#duration9=$(cat libssh2_duration.txt)
-#duration10=$(cat aria2_duration.txt)
+duration2=$(cat ${DOWNLOADS_DIR}/cmake_duration.txt)
+duration3=$(cat ${DOWNLOADS_DIR}/ninja_duration.txt)
+duration4=$(cat ${DOWNLOADS_DIR}/zlib_duration.txt)
+duration5=$(cat ${DOWNLOADS_DIR}/xz_duration.txt)
+duration6=$(cat ${DOWNLOADS_DIR}/libxml2_duration.txt)
+duration7=$(cat ${DOWNLOADS_DIR}/sqlite_duration.txt)
+duration8=$(cat ${DOWNLOADS_DIR}/c_ares_duration.txt)
+duration9=$(cat ${DOWNLOADS_DIR}/libssh2_duration.txt)
+duration10=$(cat ${DOWNLOADS_DIR}/aria2_duration.txt)
 
 echo "下载mingw-w64用时: ${duration1}s"
 echo "编译 cmake 用时: ${duration2}s"
