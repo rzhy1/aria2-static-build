@@ -210,6 +210,7 @@ prepare_zlib() {
   fi
   end_time4=$(date +%s.%N)
   duration4=$(echo "$end_time4 - $start_time4" | bc | xargs printf "%.1f")
+  echo "duration4是" $duration4
 }
 
 prepare_xz() {
@@ -272,7 +273,7 @@ prepare_libxml2() {
     CXXFLAGS="-O2 -g0"
   make -j$(nproc)
   make install
-  llibxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
+  libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
   end_time6=$(date +%s.%N)
   duration6=$(echo "$end_time6 - $start_time6" | bc | xargs printf "%.1f")
@@ -280,8 +281,8 @@ prepare_libxml2() {
 
 prepare_sqlite() {
   start_time7=$(date +%s.%N)
-  lsqlite_tag="$(retry wget -qO- --compression=auto https://www.sqlite.org/index.html \| sed -nr "'s/.*>Version (.+)<.*/\1/p'")"
-  lsqlite_latest_url="https://github.com/sqlite/sqlite/archive/release.tar.gz"
+  sqlite_tag="$(retry wget -qO- --compression=auto https://www.sqlite.org/index.html \| sed -nr "'s/.*>Version (.+)<.*/\1/p'")"
+  sqlite_latest_url="https://github.com/sqlite/sqlite/archive/release.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
