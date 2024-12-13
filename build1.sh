@@ -152,7 +152,7 @@ prepare_ninja() {
 }
 
 prepare_zlib() {
-  local start_time=$(date +%s.%N)
+  start_time4=$(date +%s.%N)
   if [ x"${USE_ZLIB_NG}" = x"1" ]; then
     zlib_ng_latest_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/zlib-ng/zlib-ng/releases \| jq -r "'.[0].tag_name'")"
     #zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${zlib_ng_latest_tag}.tar.gz"
@@ -208,8 +208,8 @@ prepare_zlib() {
     zlib_ver="$(grep Version: "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc | awk '{print $2}'")"
     echo "| zlib | ${zlib_ver} | ${zlib_latest_url:-cached zlib} |" >>"${BUILD_INFO}"
   fi
-  local end_time=$(date +%s.%N)
-  duration4=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+  end_time4=$(date +%s.%N)
+  duration4=$(echo "$end_time4 - $start_time4" | bc | xargs printf "%.1f")
   echo "$duration4" > "zlib_duration.txt"
   echo "duration4是：$duration4"
   find / -name "zlib_duration.txt" 2>/dev/null
