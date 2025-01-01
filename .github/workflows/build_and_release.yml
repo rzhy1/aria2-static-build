@@ -37,6 +37,17 @@ jobs:
         run: |
           chmod +x "${GITHUB_WORKSPACE}/build.sh"
           "${GITHUB_WORKSPACE}/build.sh"
+          
+      - name: Output config.log (Always)
+        if: always()
+        run: |
+          if [ -f aria2/config.log ]; then
+              echo "Config.log content:"
+              cat aria2/config.log
+          else
+              echo "config.log not found"
+          fi
+          
       - name: Archive aria2c.exe
         uses: actions/upload-artifact@v4
         with:
