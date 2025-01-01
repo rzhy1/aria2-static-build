@@ -167,7 +167,7 @@ prepare_zlib_ng() {
     echo "zlib_ng_ver是：${zlib_ng_ver}"
     echo "zlib_ng_latest_tag是${zlib_ng_latest_tag}"
     sed -i "s/^Version: .*/Version: ${zlib_ng_latest_tag}/" "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
-    sed -i "s/res += \"zlib\\\/\" ZLIB_VERSION \" \";/res += \"zlib_ng\\\/\" ZLIBNG_VERSION \" \";/" "${CROSS_PREFIX}/src/FeatureConfig.cc"
+    sed -i 's/res += "zlib\/" ZLIB_VERSION " ";/res += "zlib_ng\/" ZLIBNG_VERSION " ";/' "${CROSS_PREFIX}/src/FeatureConfig.cc"
     echo "| zlib-ng | ${zlib_ng_ver} | ${zlib_ng_latest_url:-cached zlib-ng} |" >>"${BUILD_INFO}" || exit
     # Fix mingw build sharedlibdir lost issue
     sed -i 's@^sharedlibdir=.*@sharedlibdir=${libdir}@' "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
