@@ -164,8 +164,6 @@ prepare_zlib_ng() {
     cmake --build build
     cmake --install build
     zlib_ng_ver="${zlib_ng_latest_tag}"
-    sed -i "s/^Version: .*/Version: ${zlib_ng_latest_tag}/" "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
-    sed -i 's/res += "zlib\/" ZLIB_VERSION " ";/res += "zlib_ng\/" ZLIBNG_VERSION " ";/' "${CROSS_PREFIX}/src/FeatureConfig.cc"
     echo "| zlib-ng | ${zlib_ng_ver} | ${zlib_ng_latest_url:-cached zlib-ng} |" >>"${BUILD_INFO}" || exit
     # Fix mingw build sharedlibdir lost issue
     sed -i 's@^sharedlibdir=.*@sharedlibdir=${libdir}@' "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
@@ -348,6 +346,7 @@ build_aria2() {
   mkdir -p "/usr/src/aria2-${aria2_tag}"
   tar -zxf "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz" --strip-components=1 -C "/usr/src/aria2-${aria2_tag}"
   cd "/usr/src/aria2-${aria2_tag}"
+  sed -i 's/res += "zlib\/" ZLIB_VERSION " ";/res += "zlib_ng\/" ZLIBNG_VERSION " ";/' "src/FeatureConfig.cc"
   sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
   sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
   sed -i 's/void sock_state_cb(void\* arg, int fd, int read, int write)/void sock_state_cb(void\* arg, ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
