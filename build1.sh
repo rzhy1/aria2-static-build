@@ -163,9 +163,7 @@ prepare_zlib_ng() {
       -DWITH_GTEST=OFF
     cmake --build build
     cmake --install build
-    zlib_ng_ver="${zlib_ng_latest_tag}($(grep '^Version:' ${CROSS_PREFIX}/lib/pkgconfig/zlib.pc | awk '{print $2}'))"
-    echo "zlib_ng_ver是：${zlib_ng_ver}"
-    echo "zlib_ng_latest_tag是${zlib_ng_latest_tag}"
+    zlib_ng_ver="${zlib_ng_latest_tag}"
     sed -i "s/^Version: .*/Version: ${zlib_ng_latest_tag}/" "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
     sed -i 's/res += "zlib\/" ZLIB_VERSION " ";/res += "zlib_ng\/" ZLIBNG_VERSION " ";/' "${CROSS_PREFIX}/src/FeatureConfig.cc"
     echo "| zlib-ng | ${zlib_ng_ver} | ${zlib_ng_latest_url:-cached zlib-ng} |" >>"${BUILD_INFO}" || exit
