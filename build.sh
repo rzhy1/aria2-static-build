@@ -86,6 +86,8 @@ cd gmp-*
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 if [ "$USE_GCC15" -eq 1 ]; then cp "$PREFIX/lib/libgmp.a" "/usr/x86_64-w64-mingw32/lib/"; fi
+echo “查看 libgmp.a 文件中是否有 __gmpz_init 符号”
+x86_64-w64-mingw32-nm -B /usr/x86_64-w64-mingw32/lib/libgmp.a | grep __gmpz_init
 cd ..
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
