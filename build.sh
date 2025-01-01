@@ -274,8 +274,8 @@ autoreconf -i
     --disable-checking \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-static -L/usr/x86_64-w64-mingw32/lib -Wl,-rpath,/usr/x86_64-w64-mingw32/lib /usr/x86_64-w64-mingw32/lib/libgmp.a" \
-    PKG_CONFIG="/usr/bin/pkg-config" \
+    LDFLAGS="-static -Wl,--whole-archive /usr/x86_64-w64-mingw32/lib/libgmp.a -Wl,--no-whole-archive -L/usr/x86_64-w64-mingw32/lib -Wl,-rpath,/usr/x86_64-w64-mingw32/lib" \
+    PKG_CONFIG="" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O2 -g0" \
     CXXFLAGS="-O2 -g0"
