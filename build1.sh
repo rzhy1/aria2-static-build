@@ -142,25 +142,14 @@ prepare_ninja() {
   echo "Ninja version $(ninja --version)"
 }
 
-prepare_zlib() {
-  if [ x"${USE_ZLIB_NG}" = x"1" ]; then
+prepare_zlib_ng() {
     zlib_ng_latest_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/zlib-ng/zlib-ng/releases \| jq -r "'.[0].tag_name'")"
-    #zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${zlib_ng_latest_tag}.tar.gz"
     zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz"
-    if [[ ! $zlib_ng_latest_url =~ master\.tar\.gz ]]; then
-      retry wget -cT10 -O "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz.part" "${zlib_ng_latest_url}"
-      mv -fv "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz.part" "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz"
-      mkdir -p "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
-      tar -zxf "${DOWNLOADS_DIR}/zlib-ng-${zlib_ng_latest_tag}.tar.gz" --strip-components=1 -C "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
-      cd "/usr/src/zlib-ng-${zlib_ng_latest_tag}"
-      echo "当前完整路径是: $PWD"
-    else
-      mkdir -p "/usr/src/zlib-ng"
-      cd "/usr/src/zlib-ng"
-      wget -q -O- https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz | tar xz
-      cd zlib-ng-develop
-      echo "当前完整路径是: $PWD"
-    fi   
+    mkdir -p "/usr/src/zlib-ng"
+    cd "/usr/src/zlib-ng"
+    wget -q -O- https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz | tar xz
+    cd zlib-ng-develop
+    echo "当前完整路径是: $PWD" 
     rm -fr build
     cmake -B build \
       -G Ninja \
@@ -175,6 +164,10 @@ prepare_zlib() {
     cmake --build build
     cmake --install build
     zlib_ng_ver="${zlib_ng_latest_tag}($(grep '^Version:' ${CROSS_PREFIX}/lib/pkgconfig/zlib.pc | awk '{print $2}'))"
+    echo "zlib_ng_ver是：${zlib_ng_ver}"
+    echo "zlib_ng_latest_tag是${zlib_ng_latest_tag}"
+    sed -i "s/^Version: .*/Version: ${zlib_ng_latest_tag}/" "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
+    sed -i "s/res += \"zlib\\\/\" ZLIB_VERSION \" \";/res += \"zlib_ng\\\/\" ZLIBNG_VERSION \" \";/" "${CROSS_PREFIX}/src/FeatureConfig.cc"
     echo "| zlib-ng | ${zlib_ng_ver} | ${zlib_ng_latest_url:-cached zlib-ng} |" >>"${BUILD_INFO}" || exit
     # Fix mingw build sharedlibdir lost issue
     sed -i 's@^sharedlibdir=.*@sharedlibdir=${libdir}@' "${CROSS_PREFIX}/lib/pkgconfig/zlib.pc"
@@ -414,7 +407,7 @@ prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib、xz、libxml2、sqlite、c_ares、libssh2⭐⭐⭐⭐⭐⭐"
-prepare_zlib
+prepare_zlib_ng
 prepare_xz &
 prepare_libxml2 &
 prepare_sqlite &
