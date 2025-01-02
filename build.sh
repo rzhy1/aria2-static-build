@@ -276,7 +276,7 @@ autoreconf -i
     --disable-checking \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-static  -L/usr/x86_64-w64-mingw32/lib -Wl,-rpath,/usr/x86_64-w64-mingw32/lib -l:libgmp.a" \
+    LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O2 -g0" \
