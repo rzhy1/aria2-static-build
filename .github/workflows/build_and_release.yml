@@ -30,7 +30,7 @@ jobs:
               make binutils autoconf automake autotools-dev libtool \
               patch ca-certificates \
               pkg-config git wget curl dpkg-dev \
-              autopoint libcppunit-dev lzip jq unzip zstd lld rsync bc
+              autopoint libcppunit-dev lzip jq unzip zstd lld rsync bc libgmp-dev
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
