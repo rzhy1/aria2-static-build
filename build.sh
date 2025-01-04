@@ -230,8 +230,8 @@ cd libssh2-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0" 
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -269,6 +269,8 @@ autoreconf -i
     --without-libxml2 \
     --with-libz \
     --with-libgmp=$PREFIX \
+    LIBGMP_CFLAGS="-I$PREFIX/include" \
+    LIBGMP_LIBS="-L$PREFIX/lib -lgmp"
     --with-libssh2 \
     --without-libgcrypt \
     --without-libnettle \
