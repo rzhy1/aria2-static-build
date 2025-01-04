@@ -100,7 +100,7 @@ if [ "$USE_GCC15" -eq 1 ]; then
     ls $PREFIX/lib
     ls -l $PREFIX/lib/pkgconfig/gmp.pc
     pkg-config --variable pc_path pkg-config
-    pkg-config --exists gmp  # 强制刷新缓存
+    pkg-config --exists gmp && echo "GMP found" || echo "GMP not found"
     pkg-config --libs gmp
     pkg-config --cflags gmp
 fi
