@@ -85,8 +85,10 @@ cd gmp-*
     CFLAGS="-mtune=generic -O2 -g0" \
     CXXFLAGS="-mtune=generic -O2 -g0"
 make -j$(nproc) install
-cp $PREFIX/include/gmp.h $PREFIX/include/libgmp.h
-cp $PREFIX/lib/pkgconfig/gmp.pc $PREFIX/lib/pkgconfig/libgmp.pc
+#cp $PREFIX/include/gmp.h $PREFIX/include/libgmp.h
+#cp $PREFIX/lib/pkgconfig/gmp.pc $PREFIX/lib/pkgconfig/libgmp.pc
+ln -s $PREFIX/lib/pkgconfig/gmp.pc $PREFIX/lib/pkgconfig/libgmp.pc
+ln -s $PREFIX/include/gmp.h $PREFIX/include/libgmp.h
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
