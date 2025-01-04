@@ -91,6 +91,7 @@ if [ "$USE_GCC15" -eq 1 ]; then
     x86_64-w64-mingw32-nm -B /usr/x86_64-w64-mingw32/lib/libgmp.a | grep __gmpz_init
     ls $PREFIX/lib | grep libgmp
     ls $PREFIX/include | grep gmp.h
+    cat $PREFIX/lib/pkgconfig/libgmp.pc
 fi
 cd ..
 end_time=$(date +%s.%N)
@@ -270,7 +271,7 @@ autoreconf -i
     --with-libexpat \
     --without-libxml2 \
     --with-libz \
-    --with-libgmp \
+    --with-libgmp=$PREFIX \
     --with-libssh2 \
     --without-libgcrypt \
     --without-libnettle \
