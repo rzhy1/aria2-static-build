@@ -89,6 +89,8 @@ if [ "$USE_GCC15" -eq 1 ]; then
     cp "$PREFIX/lib/libgmp.a" "/usr/x86_64-w64-mingw32/lib/"
     echo “查看 libgmp.a 文件中是否有 __gmpz_init 符号”
     x86_64-w64-mingw32-nm -B /usr/x86_64-w64-mingw32/lib/libgmp.a | grep __gmpz_init
+    ls $PREFIX/lib | grep libgmp
+    ls $PREFIX/include | grep gmp.h
 fi
 cd ..
 end_time=$(date +%s.%N)
