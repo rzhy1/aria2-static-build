@@ -228,8 +228,8 @@ cd libssh2-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
+    CFLAGS="-O2 -g0" \
+    CXXFLAGS="-O2 -g0" 
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
