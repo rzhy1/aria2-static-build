@@ -81,6 +81,7 @@ cd gmp-*
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     CFLAGS="-mtune=generic -O2 -g0" \
     CXXFLAGS="-mtune=generic -O2 -g0"
 make -j$(nproc) install
