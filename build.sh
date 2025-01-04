@@ -20,7 +20,7 @@ export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgc
 echo "$BUILD_INFO"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-USE_GCC15=1
+USE_GCC15=0
 if [ "$USE_GCC15" -eq 1 ]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
@@ -88,21 +88,9 @@ cd gmp-*
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 if [ "$USE_GCC15" -eq 1 ]; then 
-    cp "$PREFIX/lib/libgmp.a" "/usr/x86_64-w64-mingw32/lib/"
+    #cp "$PREFIX/lib/libgmp.a" "/usr/x86_64-w64-mingw32/lib/"
     echo “查看 libgmp.a 文件中是否有 __gmpz_init 符号”
     x86_64-w64-mingw32-nm -B /usr/x86_64-w64-mingw32/lib/libgmp.a | grep __gmpz_init
-    ls $PREFIX/lib | grep libgmp
-    ls $PREFIX/include | grep gmp.h
-    find / -name "gmp.pc" 2>/dev/null
-    echo $PKG_CONFIG_PATH
-    cat $PREFIX/lib/pkgconfig/gmp.pc
-    echo "查找pkg-config --libs gmp"
-    ls $PREFIX/lib
-    ls -l $PREFIX/lib/pkgconfig/gmp.pc
-    pkg-config --variable pc_path pkg-config
-    pkg-config --exists gmp && echo "GMP found" || echo "GMP not found"
-    pkg-config --libs gmp
-    pkg-config --cflags gmp
 fi
 echo "查找libgmp.pc"
 find / -name "libgmp.pc" 2>/dev/null
@@ -284,7 +272,7 @@ autoreconf -i
     --with-libexpat \
     --without-libxml2 \
     --with-libz \
-    --with-libgmp=$PREFIX \
+    --with-libgmp \
     --with-libssh2 \
     --without-libgcrypt \
     --without-libnettle \
@@ -295,8 +283,8 @@ autoreconf -i
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0"
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
