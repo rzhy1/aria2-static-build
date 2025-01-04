@@ -94,8 +94,8 @@ if [ "$USE_GCC15" -eq 1 ]; then
     ls $PREFIX/lib | grep libgmp
     ls $PREFIX/include | grep gmp.h
     echo "查找pkg-config --libs gmp"
-    #pkg-config --libs gmp
-    #pkg-config --cflags gmp
+    pkg-config --libs gmp
+    pkg-config --cflags gmp
     find / -name "gmp.pc" 2>/dev/null
     echo $PKG_CONFIG_PATH
     cat $PREFIX/lib/pkgconfig/gmp.pc
