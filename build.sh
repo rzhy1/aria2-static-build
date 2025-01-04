@@ -16,7 +16,7 @@ HOST=x86_64-w64-mingw32
 PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
-PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
+export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
 echo "$BUILD_INFO"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
@@ -98,6 +98,7 @@ if [ "$USE_GCC15" -eq 1 ]; then
     cat $PREFIX/lib/pkgconfig/gmp.pc
     echo "查找pkg-config --libs gmp"
     ls $PREFIX/lib
+    ls -l $PREFIX/lib/pkgconfig/gmp.pc
     pkg-config --variable pc_path pkg-config
     pkg-config --exists gmp  # 强制刷新缓存
     pkg-config --libs gmp
