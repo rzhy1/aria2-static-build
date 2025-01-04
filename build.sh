@@ -278,7 +278,7 @@ autoreconf -i
     --disable-checking \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-L$PREFIX/lib" \
+    LDFLAGS="-L$PREFIX/lib -lgmp" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O2 -g0" \
