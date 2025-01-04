@@ -270,7 +270,7 @@ autoreconf -i
     --with-libz \
     --with-libgmp=$PREFIX \
     LIBGMP_CFLAGS="-I$PREFIX/include" \
-    LIBGMP_LIBS="-L$PREFIX/lib -lgmp"
+    LIBGMP_LIBS="-L$PREFIX/lib -lgmp" \
     --with-libssh2 \
     --without-libgcrypt \
     --without-libnettle \
