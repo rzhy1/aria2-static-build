@@ -88,10 +88,6 @@ cd gmp-*
     CFLAGS="-mtune=generic -O2 -g0" \
     CXXFLAGS="-mtune=generic -O2 -g0"
 make -j$(nproc) install
-#cp $PREFIX/include/gmp.h $PREFIX/include/libgmp.h
-#cp $PREFIX/lib/pkgconfig/gmp.pc $PREFIX/lib/pkgconfig/libgmp.pc
-ln -s $PREFIX/lib/pkgconfig/gmp.pc $PREFIX/lib/pkgconfig/libgmp.pc
-ln -s $PREFIX/include/gmp.h $PREFIX/include/libgmp.h
 echo "1111111"
 x86_64-w64-mingw32-gcc -L$PREFIX/lib -print-file-name=libgmp.a
 echo "2222222"
