@@ -97,6 +97,7 @@ ls $PREFIX/lib/libgmp.a
 file $PREFIX/lib/libgmp.a
 nm $PREFIX/lib/libgmp.a | grep __gmpz_init
 echo "4444444"
+cat $PREFIX/lib/libgmp.a
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
@@ -107,8 +108,7 @@ if [[ "$USE_GCC15" -eq 1 ]]; then
     sed -i 's/^Name: GNU MP$/Name: gmp/' "$PREFIX/lib/pkgconfig/gmp.pc"
     sed -i 's/^Name: GNU MP$/Name: libgmp/' "$PREFIX/lib/pkgconfig/libgmp.pc"
 fi
-find / -name "libgmp*.a" -o -name "libgmp*.lib"
-find / -name "gmp*.a" -o -name "gmp*.lib"
+
 echo "555555"
 cat $PREFIX/lib/pkgconfig/gmp.pc
 echo "666666"
