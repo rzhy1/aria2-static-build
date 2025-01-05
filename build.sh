@@ -11,7 +11,7 @@
 #
 # $ sudo docker run --rm -it -v /path/to/dest:/out aria2-mingw cp /aria2/src/aria2c.exe /out
 export LD=ld.lld
-#set -euo pipefail
+set -euo pipefail
 HOST=x86_64-w64-mingw32
 PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
@@ -290,6 +290,8 @@ autoreconf -i
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
+    LIBGMP_CFLAGS="-I$PREFIX/include" \
+    LIBGMP_LIBS="-L$PREFIX/lib -lgmp" \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
     CXXFLAGS="-O2 -g0 -flto=$(nproc)"
 make -j$(nproc)
