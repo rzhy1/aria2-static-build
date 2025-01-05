@@ -295,6 +295,7 @@ autoreconf -i
     --with-cppunit-prefix=$PREFIX \
     --disable-checking \
     --with-sysroot=$PREFIX \
+    LIBGMP_LIBS="$PREFIX/lib/libgmp.a"
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-Wl,-verbose -L$PREFIX/lib" \
