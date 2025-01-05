@@ -97,7 +97,6 @@ ls $PREFIX/lib/libgmp.a
 file $PREFIX/lib/libgmp.a
 nm $PREFIX/lib/libgmp.a | grep __gmpz_init
 echo "4444444"
-pkg-config --libs libgmp
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
@@ -114,6 +113,7 @@ echo "555555"
 cat $PREFIX/lib/pkgconfig/gmp.pc
 echo "666666"
 cat $PREFIX/lib/pkgconfig/libgmp.pc
+pkg-config --libs libgmp
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
