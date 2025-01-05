@@ -41,10 +41,6 @@ duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 #x86_64-w64-mingw32-gcc -print-search-dirs
-echo "1111111"
-x86_64-w64-mingw32-gcc -L$PREFIX/lib -print-file-name=libgmp.a
-echo "2222222"
-echo | x86_64-w64-mingw32-gcc -I$PREFIX/include -E -v -
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
@@ -96,6 +92,10 @@ make -j$(nproc) install
 #cp $PREFIX/lib/pkgconfig/gmp.pc $PREFIX/lib/pkgconfig/libgmp.pc
 ln -s $PREFIX/lib/pkgconfig/gmp.pc $PREFIX/lib/pkgconfig/libgmp.pc
 ln -s $PREFIX/include/gmp.h $PREFIX/include/libgmp.h
+echo "1111111"
+x86_64-w64-mingw32-gcc -L$PREFIX/lib -print-file-name=libgmp.a
+echo "2222222"
+echo | x86_64-w64-mingw32-gcc -I$PREFIX/include -E -v -
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
