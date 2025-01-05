@@ -37,7 +37,7 @@ duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
-x86_64-w64-mingw32-gcc -print-search-dirs
+#x86_64-w64-mingw32-gcc -print-search-dirs
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
@@ -90,10 +90,14 @@ make -j$(nproc) install
 ln -s $PREFIX/lib/pkgconfig/gmp.pc $PREFIX/lib/pkgconfig/libgmp.pc
 ln -s $PREFIX/include/gmp.h $PREFIX/include/libgmp.h
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
-pkg-config --libs libgmp
 cd ..
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+
+if [ "$USE_GCC15" -eq 1 ]; then
+    cp $PREFIX/lib/libgmp.a /usr/bin/../lib/gcc/x86_64-w64-mingw32/15.0.0/
+    cp $PREFIX/include/gmp.h /usr/bin/../lib/gcc/x86_64-w64-mingw32/15.0.0/../../../../x86_64-w64-mingw32/include/
+fi
 
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
@@ -278,7 +282,6 @@ autoreconf -i
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
-    LIBGMP_LIBS="-lgmp" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
