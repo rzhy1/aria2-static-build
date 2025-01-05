@@ -10,7 +10,7 @@
 # commands:
 #
 # $ sudo docker run --rm -it -v /path/to/dest:/out aria2-mingw cp /aria2/src/aria2c.exe /out
-#export LD=ld.lld
+export LD=ld.lld
 #set -euo pipefail
 HOST=x86_64-w64-mingw32
 PREFIX=$PWD/$HOST
@@ -100,6 +100,7 @@ echo | x86_64-w64-mingw32-gcc -I$PREFIX/include -E -v -
 echo "3333333"
 ls $PREFIX/lib/libgmp.a
 file $PREFIX/lib/libgmp.a
+nm $PREFIX/lib/libgmp.a | grep __gmpz_init
 echo "4444444"
 echo -e '#include <gmp.h>\nint main() { mpz_t n; mpz_init(n); return 0; }' > test.c
 x86_64-w64-mingw32-gcc -I$PREFIX/include -L$PREFIX/lib -lgmp -o test.exe test.c
