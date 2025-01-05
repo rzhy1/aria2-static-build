@@ -100,6 +100,9 @@ echo | x86_64-w64-mingw32-gcc -I$PREFIX/include -E -v -
 echo "3333333"
 ls $PREFIX/lib/libgmp.a
 file $PREFIX/lib/libgmp.a
+echo "4444444"
+echo -e '#include <gmp.h>\nint main() { mpz_t n; mpz_init(n); return 0; }' > test.c
+x86_64-w64-mingw32-gcc -I$PREFIX/include -L$PREFIX/lib -lgmp -o test.exe test.c
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
