@@ -90,6 +90,7 @@ make -j$(nproc) install
 ln -s $PREFIX/lib/pkgconfig/gmp.pc $PREFIX/lib/pkgconfig/libgmp.pc
 ln -s $PREFIX/include/gmp.h $PREFIX/include/libgmp.h
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
+pkg-config --libs libgmp
 cd ..
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
