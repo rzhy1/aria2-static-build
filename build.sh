@@ -20,7 +20,6 @@ export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgc
 export LIBRARY_PATH=$PREFIX/lib:$LIBRARY_PATH
 export C_INCLUDE_PATH=$PREFIX/include:$C_INCLUDE_PATH
 export CPLUS_INCLUDE_PATH=$PREFIX/include:$CPLUS_INCLUDE_PATH
-export SYSROOT=$PREFIX
 echo "$BUILD_INFO"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
@@ -291,16 +290,14 @@ autoreconf -i
     --without-libnettle \
     --with-cppunit-prefix=$PREFIX \
     --disable-checking \
-    --sysroot=$PREFIX \
+    --with-sysroot=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)" \
-    LIBGMP_CFLAGS="-I$PREFIX/include" \
-    LIBGMP_LIBS="-L$PREFIX/lib -lgmp"
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
