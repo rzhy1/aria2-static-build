@@ -96,6 +96,9 @@ echo "1111111"
 x86_64-w64-mingw32-gcc -L$PREFIX/lib -print-file-name=libgmp.a
 echo "2222222"
 echo | x86_64-w64-mingw32-gcc -I$PREFIX/include -E -v -
+echo "3333333"
+ls $PREFIX/lib/libgmp.a
+file $PREFIX/lib/libgmp.a
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
