@@ -97,8 +97,7 @@ ls $PREFIX/lib/libgmp.a
 file $PREFIX/lib/libgmp.a
 nm $PREFIX/lib/libgmp.a | grep __gmpz_init
 echo "4444444"
-#echo -e '#include <gmp.h>\nint main() { mpz_t n; mpz_init(n); return 0; }' > test.c
-#x86_64-w64-mingw32-gcc -I$PREFIX/include -L$PREFIX/lib -lgmp -o test.exe test.c
+x86_64-w64-mingw32-g++ -I/__w/aria2-static-build/aria2-static-build/x86_64-w64-mingw32/include -L/__w/aria2-static-build/aria2-static-build/x86_64-w64-mingw32/lib  test.c -lgmp -o test.exe
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
