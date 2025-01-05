@@ -97,7 +97,7 @@ ls $PREFIX/lib/libgmp.a
 file $PREFIX/lib/libgmp.a
 nm $PREFIX/lib/libgmp.a | grep __gmpz_init
 echo "4444444"
-cat $PREFIX/lib/libgmp.a
+#cat $PREFIX/lib/libgmp.a
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
@@ -288,7 +288,7 @@ autoreconf -i
     --with-libexpat \
     --without-libxml2 \
     --with-libz \
-    --with-libgmp=$PREFIX \
+    --with-libgmp \
     --with-libssh2 \
     --without-libgcrypt \
     --without-libnettle \
@@ -297,7 +297,7 @@ autoreconf -i
     --with-sysroot=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-L$PREFIX/lib" \
+    LDFLAGS="-Wl,-verbose -L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
