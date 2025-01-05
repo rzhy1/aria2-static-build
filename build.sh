@@ -17,9 +17,9 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
-export LIBRARY_PATH=$PREFIX/lib:$LIBRARY_PATH
-export C_INCLUDE_PATH=$PREFIX/include:$C_INCLUDE_PATH
-export CPLUS_INCLUDE_PATH=$PREFIX/include:$CPLUS_INCLUDE_PATH
+#export LIBRARY_PATH=$PREFIX/lib:$LIBRARY_PATH
+#export C_INCLUDE_PATH=$PREFIX/include:$C_INCLUDE_PATH
+#export CPLUS_INCLUDE_PATH=$PREFIX/include:$CPLUS_INCLUDE_PATH
 echo "$BUILD_INFO"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
@@ -103,11 +103,6 @@ echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" 
 cd ..
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-
-if [ "$USE_GCC15" -eq 1 ]; then
-    cp $PREFIX/lib/libgmp.a /usr/bin/../lib/gcc/x86_64-w64-mingw32/15.0.0/
-    cp $PREFIX/include/gmp.h /usr/bin/../lib/gcc/x86_64-w64-mingw32/15.0.0/../../../../x86_64-w64-mingw32/include/
-fi
 
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
