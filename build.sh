@@ -295,7 +295,9 @@ autoreconf -i
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)" \
+    LIBGMP_CFLAGS="-I$PREFIX/include" \
+    LIBGMP_LIBS="-L$PREFIX/lib -lgmp"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
