@@ -97,7 +97,7 @@ ls $PREFIX/lib/libgmp.a
 file $PREFIX/lib/libgmp.a
 nm $PREFIX/lib/libgmp.a | grep __gmpz_init
 echo "4444444"
-x86_64-w64-mingw32-g++ -I/__w/aria2-static-build/aria2-static-build/x86_64-w64-mingw32/include -L/__w/aria2-static-build/aria2-static-build/x86_64-w64-mingw32/lib  test.c -lgmp -o test.exe
+pkg-config --libs libgmp
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
