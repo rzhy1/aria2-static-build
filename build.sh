@@ -110,7 +110,10 @@ if [[ "$USE_GCC15" -eq 1 ]]; then
 fi
 find / -name "libgmp*.a" -o -name "libgmp*.lib"
 find / -name "gmp*.a" -o -name "gmp*.lib"
+echo "555555"
 cat $PREFIX/lib/pkgconfig/libgmp.pc
+echo "666666"
+cat $PREFIX/lib/pkgconfig/gmp.pc
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
