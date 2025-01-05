@@ -104,6 +104,11 @@ cd ..
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
+f [ "$USE_GCC15" -eq 1 ]; then
+    cp $PREFIX/lib/pkgconfig/gmp.pc $PREFIX/lib/pkgconfig/libgmp.pc
+    sed -i 's/^Name: gmp$/Name: libgmp/' $PREFIX/lib/pkgconfig/libgmp.pc
+fi
+
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
@@ -290,8 +295,6 @@ autoreconf -i
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    LIBGMP_CFLAGS="-I$PREFIX/include" \
-    LIBGMP_LIBS="-L$PREFIX/lib -lgmp" \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
     CXXFLAGS="-O2 -g0 -flto=$(nproc)"
 make -j$(nproc)
