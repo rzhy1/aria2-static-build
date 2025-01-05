@@ -106,7 +106,7 @@ duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 if [[ "$USE_GCC15" -eq 1 ]]; then
     cp "$PREFIX/lib/pkgconfig/gmp.pc" "$PREFIX/lib/pkgconfig/libgmp.pc"
-    sed -i 's/^Name: gmp$/Name: libgmp/' "$PREFIX/lib/pkgconfig/libgmp.pc"
+    sed -i 's/^Name: GNU MP$/Name: libgmp/' "$PREFIX/lib/pkgconfig/libgmp.pc"
 fi
 find / -name "libgmp*.a" -o -name "libgmp*.lib"
 find / -name "gmp*.a" -o -name "gmp*.lib"
