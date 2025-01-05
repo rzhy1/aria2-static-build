@@ -20,6 +20,8 @@ export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgc
 export LIBRARY_PATH=$PREFIX/lib:$LIBRARY_PATH
 export C_INCLUDE_PATH=$PREFIX/include:$C_INCLUDE_PATH
 export CPLUS_INCLUDE_PATH=$PREFIX/include:$CPLUS_INCLUDE_PATH
+export SYSROOT=$PREFIX
+x86_64-w64-mingw32-gcc --sysroot=$SYSROOT -print-search-dirs
 echo "$BUILD_INFO"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
@@ -289,6 +291,7 @@ autoreconf -i
     --without-libnettle \
     --with-cppunit-prefix=$PREFIX \
     --disable-checking \
+    --sysroot=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
