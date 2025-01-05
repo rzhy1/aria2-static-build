@@ -269,8 +269,6 @@ autoreconf -i
     --without-libxml2 \
     --with-libz \
     --with-libgmp=$PREFIX \
-    LIBGMP_CFLAGS="-I$PREFIX/include" \
-    LIBGMP_LIBS="-L$PREFIX/lib -lgmp" \
     --with-libssh2 \
     --without-libgcrypt \
     --without-libnettle \
@@ -279,6 +277,8 @@ autoreconf -i
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
+    LIBGMP_CFLAGS="-I$PREFIX/include" \
+    LIBGMP_LIBS="-L$PREFIX/lib -lgmp" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
