@@ -40,7 +40,9 @@ duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
-x86_64-w64-mingw32-gcc -print-search-dirs
+#x86_64-w64-mingw32-gcc -print-search-dirs
+x86_64-w64-mingw32-gcc -L$PREFIX/lib -print-file-name=libgmp.a
+echo | x86_64-w64-mingw32-gcc -I$PREFIX/include -E -v -
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
