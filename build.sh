@@ -104,9 +104,9 @@ cd ..
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
-if [ "$USE_GCC15" -eq 1 ]; then
-    cp $PREFIX/lib/pkgconfig/gmp.pc $PREFIX/lib/pkgconfig/libgmp.pc
-    sed -i 's/^Name: gmp$/Name: libgmp/' $PREFIX/lib/pkgconfig/libgmp.pc
+if [[ "$USE_GCC15" -eq 1 ]]; then
+    cp "$PREFIX/lib/pkgconfig/gmp.pc" "$PREFIX/lib/pkgconfig/libgmp.pc"
+    sed -i 's/^Name: gmp$/Name: libgmp/' "$PREFIX/lib/pkgconfig/libgmp.pc"
 fi
 
 # 下载并编译 Expat
