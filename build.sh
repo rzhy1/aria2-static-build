@@ -288,7 +288,7 @@ autoreconf -i
     --with-libexpat \
     --without-libxml2 \
     --with-libz \
-    --with-libgmp \
+    --with-libgmp=$PREFIX \
     --with-libssh2 \
     --without-libgcrypt \
     --without-libnettle \
