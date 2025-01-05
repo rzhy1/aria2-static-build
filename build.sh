@@ -284,6 +284,7 @@ autoreconf -i
     --without-libnettle \
     --with-cppunit-prefix=$PREFIX \
     --disable-checking \
+    --with-sysroot=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
