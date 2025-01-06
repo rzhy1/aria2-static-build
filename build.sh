@@ -127,7 +127,7 @@ int main() {
 }
 EOF
 cd $PREFIX
-x86_64-w64-mingw32-g++ -O2 -g0 -I$PREFIX/include -L$PREFIX/lib $PREFIX/test_gmp.cpp -lgmp -o test_gmp.exe
+x86_64-w64-mingw32-g++ -O2 -g0 -I$PREFIX/include -L$PREFIX/lib $PREFIX/test_gmp.cpp -o test_gmp.exe test_gmp.cpp -lgmp
 if [ $? -eq 0 ]; then
   echo "编译成功！"
 else
