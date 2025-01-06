@@ -301,7 +301,7 @@ autoreconf -i
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O2 -g0 " \
     CXXFLAGS="-O2 -g0" \
-    --prefix=$PREFIX \
+    --prefix=$PREFIX
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
