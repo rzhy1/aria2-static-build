@@ -19,7 +19,7 @@ BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
 export CFLAGS="-O2 -g0 -flto"
 export CXXFLAGS="-O2 -g0 -flto"
-export LDFLAGS="-flto -Wl,--threads=$(nproc)"
+#export LDFLAGS="-flto -Wl,--threads=$(nproc)"
 #export LIBRARY_PATH=$PREFIX/lib:$LIBRARY_PATH
 #export C_INCLUDE_PATH=$PREFIX/include:$C_INCLUDE_PATH
 #export CPLUS_INCLUDE_PATH=$PREFIX/include:$CPLUS_INCLUDE_PATH
