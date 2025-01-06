@@ -20,8 +20,7 @@ export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgc
 export CFLAGS="-O2 -g0 -flto"
 export CXXFLAGS="-O2 -g0 -flto"
 echo "链接器多线程"
-ld --help | grep threads
-ld.lld--help | grep threads
+ld.lld --help | grep threads
 #export LIBRARY_PATH=$PREFIX/lib:$LIBRARY_PATH
 #export C_INCLUDE_PATH=$PREFIX/include:$C_INCLUDE_PATH
 #export CPLUS_INCLUDE_PATH=$PREFIX/include:$CPLUS_INCLUDE_PATH
