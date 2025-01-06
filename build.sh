@@ -88,33 +88,10 @@ cd gmp-*
     CFLAGS="-mtune=generic -O2 -g0" \
     CXXFLAGS="-mtune=generic -O2 -g0"
 make -j$(nproc) install
-echo "1111111"
-x86_64-w64-mingw32-gcc -L$PREFIX/lib -print-file-name=libgmp.a
-echo "2222222"
-echo | x86_64-w64-mingw32-gcc -I$PREFIX/include -E -v -
-echo "3333333"
-ls $PREFIX/lib/libgmp.a
-file $PREFIX/lib/libgmp.a
-nm $PREFIX/lib/libgmp.a | grep __gmpz_init
-nm $PREFIX/lib/libgmp.a | grep __gmpz_clear
-nm $PREFIX/lib/libgmp.a | grep __gmp_version
-echo "4444444"
-#cat $PREFIX/lib/libgmp.a
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-
-if [[ "$USE_GCC15" -eq 1 ]]; then
-    cp "$PREFIX/lib/pkgconfig/gmp.pc" "$PREFIX/lib/pkgconfig/libgmp.pc"
-    sed -i 's/^Name: GNU MP$/Name: gmp/' "$PREFIX/lib/pkgconfig/gmp.pc"
-    sed -i 's/^Name: GNU MP$/Name: libgmp/' "$PREFIX/lib/pkgconfig/libgmp.pc"
-    echo "555555"
-    cat $PREFIX/lib/pkgconfig/libgmp.pc
-    pkg-config --libs libgmp
-fi
-echo "6666666"
-cat $PREFIX/lib/pkgconfig/gmp.pc
 
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
@@ -302,7 +279,7 @@ autoreconf -i
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-O2 -g0 " \
+    CFLAGS="-O2 -g0" \
     CXXFLAGS="-O2 -g0"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
