@@ -268,7 +268,7 @@ autoreconf -i
     --with-sysroot=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-L$PREFIX/lib -Wl,--thinlto-jobs=$(nproc)" \
+    LDFLAGS="-L$PREFIX/lib -Wl,--threads=$(nproc)" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$(nproc)
