@@ -17,6 +17,9 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
+export CFLAGS="-O2 -g0 -flto"
+export CXXFLAGS="-O2 -g0 -flto"
+export LDFLAGS="-flto -Wl,--threads=$(nproc)"
 #export LIBRARY_PATH=$PREFIX/lib:$LIBRARY_PATH
 #export C_INCLUDE_PATH=$PREFIX/include:$C_INCLUDE_PATH
 #export CPLUS_INCLUDE_PATH=$PREFIX/include:$CPLUS_INCLUDE_PATH
@@ -84,9 +87,7 @@ cd gmp-*
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    CFLAGS="-mtune=generic -O2 -g0" \
-    CXXFLAGS="-mtune=generic -O2 -g0"
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
@@ -110,9 +111,7 @@ cd expat-*
     --enable-silent-rules \
     --prefix=$PREFIX \
     --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    CFLAGS="-mtune=generic -O2 -g0" \
-    CXXFLAGS="-mtune=generic -O2 -g0"
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -143,9 +142,7 @@ cd sqlite-*
     --disable-dynamic-extensions \
     --prefix=$PREFIX \
     --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0"
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -163,8 +160,6 @@ echo "zlib最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
 curl -L ${zlib_latest_url} | tar xz
 #curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
 cd zlib-*
-CFLAGS="-O2 -g0" \
-CXXFLAGS="-O2 -g0 " \
 CC=$HOST-gcc \
 AR=$HOST-ar \
 LD=$HOST-ld \
@@ -199,9 +194,7 @@ cd c-ares-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    LIBS="-lws2_32" \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0" 
+    LIBS="-lws2_32"
 make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -228,9 +221,7 @@ cd libssh2-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    LIBS="-lws2_32" \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0" 
+    LIBS="-lws2_32"
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -276,11 +267,9 @@ autoreconf -i
     --with-sysroot=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-L$PREFIX/lib" \
+    LDFLAGS="-L$PREFIX/lib -flto -Wl,--threads=$(nproc)" \
     PKG_CONFIG="/usr/bin/pkg-config" \
-    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0"
+    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
