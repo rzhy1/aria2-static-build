@@ -126,8 +126,10 @@ int main() {
     return 0;
 }
 EOF
+
 cd $PREFIX
-x86_64-w64-mingw32-g++ -O2 -g0 -I$PREFIX/include -L$PREFIX/lib $PREFIX/test_gmp.cpp -o test_gmp.exe test_gmp.cpp -lgmp
+x86_64-w64-mingw32-g++ -O2 -g0 -I$PREFIX/include -L$PREFIX/lib $PREFIX/test_gmp.cpp -o test_gmp.exe -lgmp
+
 if [ $? -eq 0 ]; then
   echo "编译成功！"
 else
@@ -296,6 +298,7 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 autoreconf -i
 ./configure \
     --host=$HOST \
+    --prefix=$PREFIX \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     --without-included-gettext \
     --disable-dependency-tracking \
@@ -322,8 +325,7 @@ autoreconf -i
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O2 -g0 " \
-    CXXFLAGS="-O2 -g0" \
-    --prefix=$PREFIX
+    CXXFLAGS="-O2 -g0"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
