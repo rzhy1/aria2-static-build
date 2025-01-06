@@ -85,8 +85,8 @@ cd gmp-*
     --disable-cxx \
     --enable-fat \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0"
+    CFLAGS="-O2 -g0 -fno-PIC -fno-lto" \
+    CXXFLAGS="-O2 -g0 -fno-PIC -fno-lto"
 make -j$(nproc) install
 echo "1111111"
 x86_64-w64-mingw32-gcc -L$PREFIX/lib -print-file-name=libgmp.a
