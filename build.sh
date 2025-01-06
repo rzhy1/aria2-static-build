@@ -85,8 +85,8 @@ cd gmp-*
     --disable-cxx \
     --enable-fat \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    CFLAGS="-O2 -g0 -fno-PIC -fno-lto" \
-    CXXFLAGS="-O2 -g0 -fno-PIC -fno-lto"
+    CFLAGS="-mtune=generic -O2 -g0 -flto" \
+    CXXFLAGS="-mtune=generic -O2 -g0 -flto"
 make -j$(nproc) install
 echo "1111111"
 x86_64-w64-mingw32-gcc -L$PREFIX/lib -print-file-name=libgmp.a
@@ -132,8 +132,8 @@ cd expat-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    CFLAGS="-mtune=generic -O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-mtune=generic -O2 -g0 -flto=$(nproc)"
+    CFLAGS="-mtune=generic -O2 -g0 -flto" \
+    CXXFLAGS="-mtune=generic -O2 -g0 -flto"
 make -j$(nproc) install
 echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -165,8 +165,8 @@ cd sqlite-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
+    CFLAGS="-O2 -g0 -flto" \
+    CXXFLAGS="-O2 -g0 -flto"
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -221,8 +221,8 @@ cd c-ares-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
+    CFLAGS="-O2 -g0 -flto" \
+    CXXFLAGS="-O2 -g0 -flto" 
 make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -250,8 +250,8 @@ cd libssh2-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
+    CFLAGS="-O2 -g0 -flto" \
+    CXXFLAGS="-O2 -g0 -flto" 
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -272,7 +272,7 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
 autoreconf -i
-LIBGMP_LIBS="$PREFIX/lib/libgmp.a" ./configure \
+./configure \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     --prefix=$PREFIX \
@@ -297,11 +297,11 @@ LIBGMP_LIBS="$PREFIX/lib/libgmp.a" ./configure \
     --with-sysroot=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-Wl,-verbose -L$PREFIX/lib" \
+    LDFLAGS="-Wl,--whole-archive -L$PREFIX/lib -Wl,--no-whole-archive" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
+    CFLAGS="-O2 -g0 -flto" \
+    CXXFLAGS="-O2 -g0 -flto"
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
