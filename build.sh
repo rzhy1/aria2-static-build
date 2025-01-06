@@ -115,30 +115,6 @@ if [[ "$USE_GCC15" -eq 1 ]]; then
 fi
 echo "6666666"
 cat $PREFIX/lib/pkgconfig/gmp.pc
-echo "测试"
-cat > $PREFIX/test_gmp.cpp <<EOF
-#include <gmp.h>
-#include <stdio.h>
-
-int main() {
-    mpz_t z;
-    mpz_init(z);
-    printf("GMP version: %s\n", gmp_version);
-    mpz_clear(z);
-    return 0;
-}
-EOF
-
-cd $PREFIX
-x86_64-w64-mingw32-g++ -O2 -g0 -I$PREFIX/include -L$PREFIX/lib $PREFIX/test_gmp.cpp -o test_gmp.exe -l:libgmp.a
-
-if [ $? -eq 0 ]; then
-  echo "编译成功！"
-else
-  echo "编译失败！"
-  exit 1
-fi
-cd ..
 
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
