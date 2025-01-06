@@ -19,12 +19,7 @@ BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
 export CFLAGS="-O2 -g0 -flto=$(nproc)"
 export CXXFLAGS="-O2 -g0 -flto=$(nproc)"
-echo "链接器多线程"
-ld.lld --help | grep threads
-#export LIBRARY_PATH=$PREFIX/lib:$LIBRARY_PATH
-#export C_INCLUDE_PATH=$PREFIX/include:$C_INCLUDE_PATH
-#export CPLUS_INCLUDE_PATH=$PREFIX/include:$CPLUS_INCLUDE_PATH
-echo "$BUILD_INFO"
+
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
 USE_GCC15=0
