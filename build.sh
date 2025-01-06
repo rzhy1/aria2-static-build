@@ -297,7 +297,7 @@ autoreconf -i
     --with-sysroot=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-Wl,--whole-archive -L$PREFIX/lib -Wl,--no-whole-archive" \
+    LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
     CFLAGS="-O2 -g0 -flto" \
