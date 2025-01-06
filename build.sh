@@ -107,13 +107,13 @@ if [[ "$USE_GCC15" -eq 1 ]]; then
     cp "$PREFIX/lib/pkgconfig/gmp.pc" "$PREFIX/lib/pkgconfig/libgmp.pc"
     sed -i 's/^Name: GNU MP$/Name: gmp/' "$PREFIX/lib/pkgconfig/gmp.pc"
     sed -i 's/^Name: GNU MP$/Name: libgmp/' "$PREFIX/lib/pkgconfig/libgmp.pc"
+    echo "555555"
+    cat $PREFIX/lib/pkgconfig/libgmp.pc
+    pkg-config --libs libgmp
 fi
-
-echo "555555"
+echo "6666666"
 cat $PREFIX/lib/pkgconfig/gmp.pc
-echo "666666"
-cat $PREFIX/lib/pkgconfig/libgmp.pc
-pkg-config --libs libgmp
+
 # 下载并编译 Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
