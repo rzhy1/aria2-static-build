@@ -96,6 +96,8 @@ echo "3333333"
 ls $PREFIX/lib/libgmp.a
 file $PREFIX/lib/libgmp.a
 nm $PREFIX/lib/libgmp.a | grep __gmpz_init
+nm $PREFIX/lib/libgmp.a | grep __gmpz_clear
+nm $PREFIX/lib/libgmp.a | grep __gmp_version
 echo "4444444"
 #cat $PREFIX/lib/libgmp.a
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
@@ -128,7 +130,7 @@ int main() {
 EOF
 
 cd $PREFIX
-x86_64-w64-mingw32-g++ -O2 -g0 -I$PREFIX/include -L$PREFIX/lib $PREFIX/test_gmp.cpp -o test_gmp.exe -lgmp
+x86_64-w64-mingw32-g++ -O2 -g0 -I$PREFIX/include -L$PREFIX/lib $PREFIX/test_gmp.cpp -o test_gmp.exe -l:libgmp.a
 
 if [ $? -eq 0 ]; then
   echo "编译成功！"
