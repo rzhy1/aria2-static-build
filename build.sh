@@ -17,8 +17,8 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
-export CFLAGS="-O2 -g0 -flto"
-export CXXFLAGS="-O2 -g0 -flto"
+export CFLAGS="-O2 -g0 -flto=$(nproc)"
+export CXXFLAGS="-O2 -g0 -flto=$(nproc)"
 echo "链接器多线程"
 ld.lld --help | grep threads
 #export LIBRARY_PATH=$PREFIX/lib:$LIBRARY_PATH
@@ -268,7 +268,7 @@ autoreconf -i
     --with-sysroot=$PREFIX \
     ARIA2_STATIC=yes \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-L$PREFIX/lib -flto" \
+    LDFLAGS="-L$PREFIX/lib -flto=$(nproc)" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$(nproc)
