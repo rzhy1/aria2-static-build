@@ -23,7 +23,7 @@ export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgc
 echo "$BUILD_INFO"
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-USE_GCC15=0
+USE_GCC15=1
 if [[ "$USE_GCC15" -eq 1 ]]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
@@ -85,8 +85,8 @@ cd gmp-*
     --disable-cxx \
     --enable-fat \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    CFLAGS="-mtune=generic -O2 -g0 -flto" \
-    CXXFLAGS="-mtune=generic -O2 -g0 -flto"
+    CFLAGS="-mtune=generic -O2 -g0" \
+    CXXFLAGS="-mtune=generic -O2 -g0"
 make -j$(nproc) install
 echo "1111111"
 x86_64-w64-mingw32-gcc -L$PREFIX/lib -print-file-name=libgmp.a
@@ -132,8 +132,8 @@ cd expat-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    CFLAGS="-mtune=generic -O2 -g0 -flto" \
-    CXXFLAGS="-mtune=generic -O2 -g0 -flto"
+    CFLAGS="-mtune=generic -O2 -g0" \
+    CXXFLAGS="-mtune=generic -O2 -g0"
 make -j$(nproc) install
 echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -165,8 +165,8 @@ cd sqlite-*
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    CFLAGS="-O2 -g0 -flto" \
-    CXXFLAGS="-O2 -g0 -flto"
+    CFLAGS="-O2 -g0" \
+    CXXFLAGS="-O2 -g0"
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -221,8 +221,8 @@ cd c-ares-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-O2 -g0 -flto" \
-    CXXFLAGS="-O2 -g0 -flto" 
+    CFLAGS="-O2 -g0" \
+    CXXFLAGS="-O2 -g0" 
 make -j$(nproc) install
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -250,8 +250,8 @@ cd libssh2-*
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lws2_32" \
-    CFLAGS="-O2 -g0 -flto" \
-    CXXFLAGS="-O2 -g0 -flto" 
+    CFLAGS="-O2 -g0" \
+    CXXFLAGS="-O2 -g0" 
 make -j$(nproc) install
 echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -275,7 +275,6 @@ autoreconf -i
 ./configure \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    --prefix=$PREFIX \
     --without-included-gettext \
     --disable-dependency-tracking \
     --disable-libtool-lock \
@@ -300,8 +299,9 @@ autoreconf -i
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CFLAGS="-O2 -g0 -flto" \
-    CXXFLAGS="-O2 -g0 -flto"
+    CFLAGS="-O2 -g0 " \
+    CXXFLAGS="-O2 -g0" \
+    --prefix=$PREFIX \
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
