@@ -117,7 +117,8 @@ duration3=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 # 下载并编译 SQLite
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-sqlite_tag=$(retry curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
+#sqlite_tag=$(retry curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
+sqlite_tag=3.47.2
 download_page=$(curl -s "https://www.sqlite.org/download.html")
 csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
 tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1)
