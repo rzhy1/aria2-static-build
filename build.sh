@@ -117,15 +117,14 @@ duration3=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 # 下载并编译 SQLite
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-#sqlite_tag=$(retry curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
-sqlite_tag=3.47.2
+sqlite_tag=$(retry curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
 download_page=$(curl -s "https://www.sqlite.org/download.html")
 csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
 tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1)
 sqlite_latest_url="https://www.sqlite.org/${tarball_url}"
 echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
-curl -L ${sqlite_latest_url} | tar xz
-#curl -L https://www.sqlite.org/2024/sqlite-autoconf-3460100.tar.gz | tar xz
+#curl -L ${sqlite_latest_url} | tar xz
+curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 ./configure \
     --disable-shared \
