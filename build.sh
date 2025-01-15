@@ -266,7 +266,7 @@ autoreconf -i
     --disable-checking \
     --with-sysroot=$PREFIX \
     ARIA2_STATIC=yes \
-    SQLITE3_LIBS="pkg-config --libs sqlite3" \
+    SQLITE3_LIBS="-L$PREFIX/lib -lsqlite3" \
     CPPFLAGS="-I$PREFIX/include" \
     LDFLAGS="-L$PREFIX/lib" \
     PKG_CONFIG="/usr/bin/pkg-config" \
