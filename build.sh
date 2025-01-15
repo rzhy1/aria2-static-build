@@ -123,8 +123,8 @@ csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to
 tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1)
 sqlite_latest_url="https://www.sqlite.org/${tarball_url}"
 echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
-curl -L ${sqlite_latest_url} | tar xz
-#curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
+#curl -L ${sqlite_latest_url} | tar xz
+curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 ./configure \
     --disable-shared \
