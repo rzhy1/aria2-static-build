@@ -138,7 +138,7 @@ cd sqlite-*
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 echo "显示信息"
-grep sqlite3_open_v2 $PREFIX/include/sqlite3.h
+nm $PREFIX/lib/libsqlite3.a | grep sqlite3_open_v2
 echo "显示信息结束"
 
 cd ..
