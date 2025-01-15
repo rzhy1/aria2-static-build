@@ -242,7 +242,8 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
 autoreconf -i
-./configure \
+echo $SQLITE3_LIBS
+./configure SQLITE3_LIBS=`pkg-config --libs sqlite3` \
     --host=$HOST \
     --prefix=$PREFIX \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
