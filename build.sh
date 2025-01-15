@@ -137,6 +137,10 @@ cd sqlite-*
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
+echo "显示信息"
+grep sqlite3_open_v2 $PREFIX/include/sqlite3.h
+echo "显示信息结束"
+
 cd ..
 end_time=$(date +%s.%N)
 duration4=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
@@ -234,9 +238,6 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
 autoreconf -i
-echo "显示信息"
-./configure --help | grep sqlite
-echo "显示信息结束"
 ./configure \
     --host=$HOST \
     --prefix=$PREFIX \
