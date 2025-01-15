@@ -252,7 +252,6 @@ prepare_sqlite() {
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
     --disable-session \
-    --disable-dynamic-extensions \
     --disable-editline \
     CFLAGS="-O2 -g0  -flto=$(nproc)" \
     CXXFLAGS="-O2 -g0  -flto=$(nproc)" 
