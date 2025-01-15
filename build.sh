@@ -131,6 +131,10 @@ cd sqlite-*
     --enable-static \
     --disable-debug \
     --enable-silent-rules \
+    --enable-editline=no \
+    --enable-fts3=no --enable-fts4=no --enable-fts5=no \
+    --enable-rtree=no \
+    --enable-session=no \
     --disable-dynamic-extensions \
     --prefix=$PREFIX \
     --host=$HOST \
@@ -138,7 +142,7 @@ cd sqlite-*
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 echo "显示信息"
-nm $PREFIX/lib/libsqlite3.a | grep sqlite3_open_v2
+pkg-config --libs sqlite3
 echo "显示信息结束"
 
 cd ..
