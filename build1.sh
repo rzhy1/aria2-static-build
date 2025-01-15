@@ -370,6 +370,7 @@ build_aria2() {
     --enable-checking=release \
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF} \
+    SQLITE3_LIBS="-L$PREFIX/lib -lsqlite3" \
     CFLAGS="-O2 -g0 -flto=$(nproc)" \
     CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
