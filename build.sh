@@ -141,10 +141,6 @@ cd sqlite-*
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
-echo "显示信息"
-pkg-config --libs sqlite3
-echo "显示信息结束"
-
 cd ..
 end_time=$(date +%s.%N)
 duration4=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
