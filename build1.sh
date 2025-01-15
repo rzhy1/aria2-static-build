@@ -246,9 +246,6 @@ prepare_sqlite() {
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
     --disable-editline \
-    --enable-fts3=no --enable-fts4=no --enable-fts5=no \
-    --enable-rtree=no \
-    --enable-session=no \
     CFLAGS="-O2 -g0  -flto=$(nproc)" \
     CXXFLAGS="-O2 -g0  -flto=$(nproc)" 
   make -j$(nproc)
