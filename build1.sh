@@ -50,7 +50,6 @@ fi
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查找pthread"
-ls /usr/x86_64-w64-mingw32/lib | grep pthread
 
 BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
@@ -258,8 +257,10 @@ prepare_sqlite() {
     CXXFLAGS="-O2 -g0  -flto=$(nproc)" 
   make -j$(nproc)
   make install
-   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
+  sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
+  pkg-config --libs sqlite3
+  pkg-config --cflags --libs sqlite3
 }
 
 prepare_c_ares() {
