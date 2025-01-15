@@ -245,7 +245,7 @@ prepare_sqlite() {
   fi
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
-    --enable-editline=no \
+    --disable-editline \
     --enable-fts3=no --enable-fts4=no --enable-fts5=no \
     --enable-rtree=no \
     --enable-session=no \
