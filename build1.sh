@@ -236,23 +236,16 @@ prepare_sqlite() {
     retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
   fi
-  echo "检查1"
   mkdir -p "/usr/src/sqlite-${sqlite_tag}"
-  echo "检查2"
   tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
-  echo "检查3"
   cd "/usr/src/sqlite-${sqlite_tag}"
-  echo "检查4"
   if [ x"${TARGET_HOST}" = x"Windows" ]; then
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  echo "检查5"
   export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lpthread"
   export LIBS="$LIBS -lpthread"
-  echo "检查6"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
-    --enable-threadsafe \ 
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
