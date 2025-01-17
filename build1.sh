@@ -394,7 +394,7 @@ prepare_zlib_ng
 prepare_xz
 prepare_libxml2
 #prepare_sqlite
-sudo apt install fossil
+apt install fossil
 # 创建目录并克隆 SQLite 源码
 mkdir ~/sqlite
 cd ~/sqlite
