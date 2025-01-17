@@ -243,12 +243,19 @@ prepare_sqlite() {
   if [ x"${TARGET_HOST}" = x"Windows" ]; then
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
+  fi
   export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lpthread"
   export LIBS="$LIBS -lpthread"
-  fi
+  autoreconf -if
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
-    CFLAGS="-O2 -g0  -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0  -flto=$(nproc)" 
+    --disable-debug \
+    --disable-fts3 --disable-fts4 --disable-fts5 \
+    --disable-rtree \
+    --disable-session \
+    --disable-editline \
+    --disable-load-extension \
+    CFLAGS="-O2 -g0" \
+    CXXFLAGS="-O2 -g0" 
   make -j$(nproc)
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
