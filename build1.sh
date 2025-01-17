@@ -246,9 +246,8 @@ prepare_sqlite() {
   fi
   export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lpthread"
   export LIBS="$LIBS -lpthread"
-  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
+  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --static=0 --disable-shared  ${SQLITE_EXT_CONF} \
     --disable-debug \
-    --disable-amalgamation \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
     --disable-session \
