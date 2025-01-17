@@ -245,7 +245,7 @@ prepare_sqlite() {
   fi
   export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lpthread"
   export LIBS="$LIBS -lpthread"
-  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
+  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  "${SQLITE_EXT_CONF}" \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
@@ -254,10 +254,11 @@ prepare_sqlite() {
     --disable-load-extension \
     CFLAGS="-O2 -g0" \
     CXXFLAGS="-O2 -g0" 
+  echo "检查"
+  grep "enable-static" config.log
+  grep "disable-shared" config.log
+  echo "检查结束"
   make -j$(nproc)
-  if [ ! -f libsqlite3.a ]; then
-    ar rcs libsqlite3.a sqlite3.o
-  fi
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
