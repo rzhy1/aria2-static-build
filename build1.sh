@@ -254,17 +254,13 @@ prepare_sqlite() {
     --disable-load-extension \
     CFLAGS="-O2 -g0" \
     CXXFLAGS="-O2 -g0" 
-  echo "检查"
-  grep "enable-static" config.log
-  grep "disable-shared" config.log
-  echo "检查结束"
   make -j$(nproc)
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
   pkg-config --libs sqlite3
   pkg-config --cflags --libs sqlite3
-  find / name libsqlite3.a
+  find / -name libsqlite3.a
 }
 
 prepare_c_ares() {
