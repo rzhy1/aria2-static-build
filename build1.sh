@@ -49,7 +49,6 @@ else
 fi
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
-echo "查找pthread"
 
 BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
@@ -262,8 +261,7 @@ prepare_sqlite() {
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
   pkg-config --libs sqlite3
   pkg-config --cflags --libs sqlite3
-  find / -name "*sqlite3.a"
-  ls ${CROSS_PREFIX}/lib | grep libsqlite3.a
+
 }
 
 prepare_c_ares() {
@@ -379,7 +377,6 @@ build_aria2() {
     --enable-checking=release \
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF} \
-    SQLITE3_LIBS="-L${CROSS_PREFIX}/lib -lsqlite3" \
     CFLAGS="-O2 -g0" \
     CXXFLAGS="-O2 -g0"
   make -j$(nproc)
