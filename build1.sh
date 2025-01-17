@@ -247,12 +247,6 @@ prepare_sqlite() {
   export LIBS="$LIBS -lpthread"
   fi
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
-    --disable-debug \
-    --disable-fts3 --disable-fts4 --disable-fts5 \
-    --disable-rtree \
-    --disable-session \
-    --disable-editline \
-    --disable-load-extension \
     CFLAGS="-O2 -g0  -flto=$(nproc)" \
     CXXFLAGS="-O2 -g0  -flto=$(nproc)" 
   make -j$(nproc)
@@ -393,28 +387,7 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zli
 prepare_zlib_ng
 prepare_xz
 prepare_libxml2
-#prepare_sqlite
-apt install fossil
-# 创建目录并克隆 SQLite 源码
-mkdir ~/sqlite
-cd ~/sqlite
-fossil clone https://sqlite.org/src sqlite.fossil
-fossil open sqlite.fossil
-
-# 更新到最新版本
-fossil update trunk
-
-# 编译 SQLite
-mkdir bld
-cd bld
-../configure
-make
-make sqlite3
-make install
-pkg-config --libs sqlite3
-pkg-config --cflags --libs sqlite3
-find / -name "*sqlite3.a"
-ls ${CROSS_PREFIX}/lib | grep libsqlite3.a  
+prepare_sqlite
 prepare_c_ares
 prepare_libssh2
 #wait
