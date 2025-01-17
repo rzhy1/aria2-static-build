@@ -393,7 +393,28 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zli
 prepare_zlib_ng
 prepare_xz
 prepare_libxml2
-prepare_sqlite
+#prepare_sqlite
+sudo apt install fossil
+# 创建目录并克隆 SQLite 源码
+mkdir ~/sqlite
+cd ~/sqlite
+fossil clone https://sqlite.org/src sqlite.fossil
+fossil open sqlite.fossil
+
+# 更新到最新版本
+fossil update trunk
+
+# 编译 SQLite
+mkdir bld
+cd bld
+../configure
+make
+make sqlite3
+make install
+pkg-config --libs sqlite3
+pkg-config --cflags --libs sqlite3
+find / -name "*sqlite3.a"
+ls ${CROSS_PREFIX}/lib | grep libsqlite3.a  
 prepare_c_ares
 prepare_libssh2
 #wait
