@@ -231,8 +231,7 @@ prepare_libxml2() {
 
 prepare_sqlite() {
   sqlite_tag="$(retry wget -qO- --compression=auto https://www.sqlite.org/index.html \| sed -nr "'s/.*>Version (.+)<.*/\1/p'")"
-  sqlite_latest_url="https://github.com/sqlite/sqlite/archive/master.tar.gz"
-  #sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
+  sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
@@ -246,7 +245,9 @@ prepare_sqlite() {
   fi
   export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lpthread"
   export LIBS="$LIBS -lpthread"
-  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --static=0 --disable-shared  ${SQLITE_EXT_CONF} \
+  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared  ${SQLITE_EXT_CONF} \
+    --disable-amalgamation \ 
+    --enable-threadsafe \ 
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
@@ -255,6 +256,10 @@ prepare_sqlite() {
     --disable-load-extension \
     CFLAGS="-O2 -g0" \
     CXXFLAGS="-O2 -g0" 
+  echo "检查"
+  grep "enable-static" config.log
+  grep "disable-shared" config.log
+  echo "检查结束"
   make -j$(nproc)
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
