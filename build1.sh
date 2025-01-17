@@ -261,7 +261,8 @@ prepare_sqlite() {
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
   pkg-config --libs sqlite3
   pkg-config --cflags --libs sqlite3
-  ls ${CROSS_PREFIX}/lib | grep libsqlite3.a
+  find / -name "*sqlite3*"
+  ls ${CROSS_PREFIX}/lib/pkgconfig | grep sqlite3.pc
 }
 
 prepare_c_ares() {
@@ -378,8 +379,8 @@ build_aria2() {
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF} \
     SQLITE3_LIBS="-L${CROSS_PREFIX}/lib -lsqlite3" \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
+    CFLAGS="-O2 -g0" \
+    CXXFLAGS="-O2 -g0"
   make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
