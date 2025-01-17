@@ -256,11 +256,11 @@ prepare_sqlite() {
     --disable-load-extension \
     CFLAGS="-O2 -g0" \
     CXXFLAGS="-O2 -g0" 
-  echo "检查"
-  grep "enable-static" config.log
-  grep "disable-shared" config.log
-  echo "检查结束"
   make -j$(nproc)
+  # 手动生成静态库（如果未自动生成）
+  if [ ! -f libsqlite3.a ]; then
+    ar rcs libsqlite3.a sqlite3.o
+  fi
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
