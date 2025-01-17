@@ -261,6 +261,7 @@ prepare_sqlite() {
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
   pkg-config --libs sqlite3
   pkg-config --cflags --libs sqlite3
+  ls ${CROSS_PREFIX}/lib | grep libsqlite3.a
 }
 
 prepare_c_ares() {
