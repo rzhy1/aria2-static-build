@@ -230,7 +230,7 @@ prepare_libxml2() {
 }
 
 prepare_sqlite() {
-  sqlite_tag="$(retry wget -qO- --compression=auto https://www.sqlite.org/index.html \| sed -nr "'s/.*>Version (.+)<.*/\1/p'")"
+  sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
   sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
@@ -252,17 +252,14 @@ prepare_sqlite() {
     --disable-session \
     --disable-editline \
     --disable-load-extension \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0" 
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
-  pkg-config --libs sqlite3
-  pkg-config --cflags --libs sqlite3
-  find / -name libsqlite3.a
 }
 
 prepare_c_ares() {
@@ -378,8 +375,8 @@ build_aria2() {
     --enable-checking=release \
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF} \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0"
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
@@ -391,12 +388,12 @@ prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib、xz、libxml2、sqlite、c_ares、libssh2⭐⭐⭐⭐⭐⭐"
-prepare_zlib_ng
-prepare_xz
-prepare_libxml2
-prepare_sqlite
-prepare_c_ares
-prepare_libssh2
+prepare_zlib_ng &
+prepare_xz &
+prepare_libxml2 &
+prepare_sqlite &
+prepare_c_ares &
+prepare_libssh2 &
 #wait
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
