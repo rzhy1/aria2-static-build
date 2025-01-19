@@ -255,6 +255,7 @@ prepare_sqlite() {
     CFLAGS="-O2 -g0" \
     CXXFLAGS="-O2 -g0" 
   make -j$(nproc)
+  x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
