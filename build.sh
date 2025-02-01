@@ -22,11 +22,14 @@ export CXXFLAGS="-O2 -g0 -flto=$(nproc)"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-USE_GCC15=0
+USE_GCC15=1
 if [[ "$USE_GCC15" -eq 1 ]]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
-    tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
+    #tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
+    mkdir -p /opt/mingw64
+    tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C /opt/mingw64
+    export PATH="/opt/mingw64/bin:${PATH}"
 else
     echo "使用相对成熟的 mingw-w64-x86_64-toolchain (GCC 14)..."
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz"  "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
