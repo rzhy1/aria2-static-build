@@ -88,6 +88,8 @@ make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 find / -name *gmp.a 2>/dev/null
+find / -name *gmp.h 2>/dev/null
+find / -name *gmp.pc 2>/dev/null
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
