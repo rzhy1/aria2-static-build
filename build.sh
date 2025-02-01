@@ -22,7 +22,7 @@ export CXXFLAGS="-O2 -g0 -flto=$(nproc)"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-USE_GCC15=0
+USE_GCC15=1
 if [[ "$USE_GCC15" -eq 1 ]]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
@@ -87,6 +87,7 @@ cd gmp-*
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
+find / -name *gmp.a 2>/dev/null
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
