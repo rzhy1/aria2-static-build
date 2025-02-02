@@ -81,6 +81,9 @@ sed -i \
 -e 's#ac_prog=(\$CC -print-prog-name=ld) 2>&5 | tr -d '\\\\'015#ac_prog=(\"\$CC\" -print-prog-name=ld) 2>&5 | sed '\''s/\\\\r$//'\''#g' \
 -e 's#ac_prog=(\$CC -print-prog-name=ld) 2>&5#ac_prog=(\"\$CC\" -print-prog-name=ld) 2>&5 | sed '\''s/\\\\r$//'\''#g' \
 configure
+echo "检查"
+grep 'ac_prog=.*-print-prog-name=ld' configure
+echo "检查结束"
 CC=x86_64-w64-mingw32-gcc ./configure \
     --disable-shared \
     --enable-static \
