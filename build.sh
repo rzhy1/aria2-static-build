@@ -80,8 +80,8 @@ curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/ref
 
 # patch configure（不检测long long）
 
-perl -0777 -ne 'print $1 if /if test "\$gmp_prog_cc_works" = yes; then(.*?\n)*?no, long long reliability test [12], program does not run.*?\n(.*?\n)*?fi/s' configure
-perl -i -0777 -pe 's/if test "\$gmp_prog_cc_works" = yes; then\n(.*?\n)*?no, long long reliability test [12], program does not run.*?\n(.*?\n)*?fi\n//sg' configure
+perl -0777 -ne 'print if /if test "\$gmp_prog_cc_works" = yes; then/ .. /fi/' configure
+
 
 echo "检查"
 bash -n configure
