@@ -92,12 +92,8 @@ if test -z "$start_line"; then
   exit 1
 fi
 
-
-#对行号进行转义
-escaped_start_line=$(echo "$start_line" | sed 's/[]()]/\\&/g')
-
 # 使用 sed 命令进行注释
-sed -i "${escaped_start_line}s/^/# /" "$configure_file"
+sed -i "${start_line}s/^/# /" "$configure_file"
 
 echo "Long long reliability test 2 line successfully commented out in $configure_file"
 echo "检查"
