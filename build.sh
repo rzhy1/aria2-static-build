@@ -84,7 +84,7 @@ echo "检查"
 #grep 'long long reliability test' configure
 echo "检查结束"
 
-CC=x86_64-w64-mingw32-gcc ./configure c_cv_type_long_long=yes \
+CC=x86_64-w64-mingw32-gcc ./configure \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
