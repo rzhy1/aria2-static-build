@@ -6561,7 +6561,7 @@ fi
 if test "$gmp_prog_cc_works" = yes; then
   # remove anything that might look like compiler output to our "||" expression
   rm -f conftest* a.out b.out a.exe a_out.exe
- # cat >conftest.c <<EOF
+  cat >conftest.c <<EOF
 /* The following provokes a segfault in the compiler on powerpc-apple-darwin.
    Extracted from tests/mpn/t-iord_u.c.  Causes Apple's gcc 3.3 build 1640 and
    1666 to segfault with e.g., -O2 -mpowerpc64.  */
@@ -6580,44 +6580,44 @@ int dummy;
 
 int main () { return 0; }
 EOF
-  echo "Test compile: long long reliability test 1" >&5
-  gmp_compile="$cc $cflags $cppflags conftest.c >&5"
-  if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
-  (eval $gmp_compile) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-    cc_works_part=yes
-    if test "$cross_compiling" = no; then
-      if { ac_try='./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest'
-  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; }; then :;
-      else
-        cc_works_part=norun
-      fi
-    fi
-  else
-    cc_works_part=no
-  fi
-  if test "$cc_works_part" != yes; then
-    echo "failed program was:" >&5
-    cat conftest.c >&5
-  fi
-  rm -f conftest* a.out b.out a.exe a_out.exe
-  case $cc_works_part in
-    yes)
-
-      ;;
-    no)
-      gmp_prog_cc_works="no, long long reliability test 1"
-      ;;
-    norun)
-      gmp_prog_cc_works="no, long long reliability test 1, program does not run"
-      ;;
-  esac
+#  echo "Test compile: long long reliability test 1" >&5
+#  gmp_compile="$cc $cflags $cppflags conftest.c >&5"
+#  if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
+#  (eval $gmp_compile) 2>&5
+#  ac_status=$?
+#  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+#  test $ac_status = 0; }; then
+#    cc_works_part=yes
+#    if test "$cross_compiling" = no; then
+#      if { ac_try='./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest'
+#  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
+#  (eval $ac_try) 2>&5
+#  ac_status=$?
+#  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+#  test $ac_status = 0; }; }; then :;
+#      else
+#        cc_works_part=norun
+#      fi
+#    fi
+#  else
+#    cc_works_part=no
+#  fi
+#  if test "$cc_works_part" != yes; then
+#    echo "failed program was:" >&5
+#    cat conftest.c >&5
+#  fi
+#  rm -f conftest* a.out b.out a.exe a_out.exe
+#  case $cc_works_part in
+#    yes)
+#
+#      ;;
+#    no)
+#      gmp_prog_cc_works="no, long long reliability test 1"
+#      ;;
+#    norun)
+#      gmp_prog_cc_works="no, long long reliability test 1, program does not run"
+#      ;;
+#  esac
 fi
 
 
@@ -6626,7 +6626,7 @@ fi
 if test "$gmp_prog_cc_works" = yes; then
   # remove anything that might look like compiler output to our "||" expression
   rm -f conftest* a.out b.out a.exe a_out.exe
-#  cat >conftest.c <<EOF
+  cat >conftest.c <<EOF
 /* The following provokes an internal compiler error on powerpc-apple-darwin.
    Extracted from mpz/cfdiv_q_2exp.c.  Causes Apple's gcc 3.3 build 1640 and
    1666 to get an ICE with -O1 -mpowerpc64.  */
@@ -6641,44 +6641,44 @@ int dummy;
 
 int main () { return 0; }
 EOF
-  echo "Test compile: long long reliability test 2" >&5
-  gmp_compile="$cc $cflags $cppflags conftest.c >&5"
-  if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
-  (eval $gmp_compile) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-    cc_works_part=yes
-    if test "$cross_compiling" = no; then
-      if { ac_try='./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest'
-  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; }; then :;
-      else
-        cc_works_part=norun
-      fi
-    fi
-  else
-    cc_works_part=no
-  fi
-  if test "$cc_works_part" != yes; then
-    echo "failed program was:" >&5
-    cat conftest.c >&5
-  fi
-  rm -f conftest* a.out b.out a.exe a_out.exe
-  case $cc_works_part in
-    yes)
-
-      ;;
-    no)
-      gmp_prog_cc_works="no, long long reliability test 2"
-      ;;
-    norun)
-      gmp_prog_cc_works="no, long long reliability test 2, program does not run"
-      ;;
-  esac
+#  echo "Test compile: long long reliability test 2" >&5
+#  gmp_compile="$cc $cflags $cppflags conftest.c >&5"
+#  if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
+#  (eval $gmp_compile) 2>&5
+#  ac_status=$?
+#  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+#  test $ac_status = 0; }; then
+#    cc_works_part=yes
+#    if test "$cross_compiling" = no; then
+#      if { ac_try='./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest'
+#  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
+#  (eval $ac_try) 2>&5
+#  ac_status=$?
+#  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+#  test $ac_status = 0; }; }; then :;
+#      else
+#        cc_works_part=norun
+#      fi
+#    fi
+#  else
+#    cc_works_part=no
+#  fi
+#  if test "$cc_works_part" != yes; then
+#    echo "failed program was:" >&5
+#    cat conftest.c >&5
+#  fi
+#  rm -f conftest* a.out b.out a.exe a_out.exe
+#  case $cc_works_part in
+#    yes)
+#
+#      ;;
+#    no)
+#      gmp_prog_cc_works="no, long long reliability test 2"
+#      ;;
+#    norun)
+#      gmp_prog_cc_works="no, long long reliability test 2, program does not run"
+#      ;;
+#  esac
 fi
 
 
@@ -8180,7 +8180,7 @@ fi
 if test "$gmp_prog_cc_works" = yes; then
   # remove anything that might look like compiler output to our "||" expression
   rm -f conftest* a.out b.out a.exe a_out.exe
-#  cat >conftest.c <<EOF
+  cat >conftest.c <<EOF
 /* The following provokes a segfault in the compiler on powerpc-apple-darwin.
    Extracted from tests/mpn/t-iord_u.c.  Causes Apple's gcc 3.3 build 1640 and
    1666 to segfault with e.g., -O2 -mpowerpc64.  */
@@ -8199,44 +8199,44 @@ int dummy;
 
 int main () { return 0; }
 EOF
-  echo "Test compile: long long reliability test 1" >&5
-  gmp_compile="$cc $cflags $cppflags $flag conftest.c >&5"
-  if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
-  (eval $gmp_compile) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-    cc_works_part=yes
-    if test "$cross_compiling" = no; then
-      if { ac_try='./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest'
-  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; }; then :;
-      else
-        cc_works_part=norun
-      fi
-    fi
-  else
-    cc_works_part=no
-  fi
-  if test "$cc_works_part" != yes; then
-    echo "failed program was:" >&5
-    cat conftest.c >&5
-  fi
-  rm -f conftest* a.out b.out a.exe a_out.exe
-  case $cc_works_part in
-    yes)
-
-      ;;
-    no)
-      gmp_prog_cc_works="no, long long reliability test 1"
-      ;;
-    norun)
-      gmp_prog_cc_works="no, long long reliability test 1, program does not run"
-      ;;
-  esac
+#  echo "Test compile: long long reliability test 1" >&5
+#  gmp_compile="$cc $cflags $cppflags $flag conftest.c >&5"
+#  if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
+#  (eval $gmp_compile) 2>&5
+#  ac_status=$?
+#  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+#  test $ac_status = 0; }; then
+#    cc_works_part=yes
+#    if test "$cross_compiling" = no; then
+#      if { ac_try='./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest'
+#  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
+#  (eval $ac_try) 2>&5
+#  ac_status=$?
+#  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+#  test $ac_status = 0; }; }; then :;
+#      else
+#        cc_works_part=norun
+#      fi
+#    fi
+#  else
+#    cc_works_part=no
+#  fi
+#  if test "$cc_works_part" != yes; then
+#    echo "failed program was:" >&5
+#    cat conftest.c >&5
+#  fi
+#  rm -f conftest* a.out b.out a.exe a_out.exe
+#  case $cc_works_part in
+#    yes)
+#
+#      ;;
+#    no)
+#      gmp_prog_cc_works="no, long long reliability test 1"
+#      ;;
+#    norun)
+#      gmp_prog_cc_works="no, long long reliability test 1, program does not run"
+#      ;;
+#  esac
 fi
 
 
@@ -8245,7 +8245,7 @@ fi
 if test "$gmp_prog_cc_works" = yes; then
   # remove anything that might look like compiler output to our "||" expression
   rm -f conftest* a.out b.out a.exe a_out.exe
-#  cat >conftest.c <<EOF
+  cat >conftest.c <<EOF
 /* The following provokes an internal compiler error on powerpc-apple-darwin.
    Extracted from mpz/cfdiv_q_2exp.c.  Causes Apple's gcc 3.3 build 1640 and
    1666 to get an ICE with -O1 -mpowerpc64.  */
@@ -8260,44 +8260,44 @@ int dummy;
 
 int main () { return 0; }
 EOF
-  echo "Test compile: long long reliability test 2" >&5
-  gmp_compile="$cc $cflags $cppflags $flag conftest.c >&5"
-  if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
-  (eval $gmp_compile) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-    cc_works_part=yes
-    if test "$cross_compiling" = no; then
-      if { ac_try='./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest'
-  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; }; then :;
-      else
-        cc_works_part=norun
-      fi
-    fi
-  else
-    cc_works_part=no
-  fi
-  if test "$cc_works_part" != yes; then
-    echo "failed program was:" >&5
-    cat conftest.c >&5
-  fi
-  rm -f conftest* a.out b.out a.exe a_out.exe
-  case $cc_works_part in
-    yes)
-
-      ;;
-    no)
-      gmp_prog_cc_works="no, long long reliability test 2"
-      ;;
-    norun)
-      gmp_prog_cc_works="no, long long reliability test 2, program does not run"
-      ;;
-  esac
+#  echo "Test compile: long long reliability test 2" >&5
+#  gmp_compile="$cc $cflags $cppflags $flag conftest.c >&5"
+#  if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
+#  (eval $gmp_compile) 2>&5
+#  ac_status=$?
+#  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+#  test $ac_status = 0; }; then
+#    cc_works_part=yes
+#    if test "$cross_compiling" = no; then
+#      if { ac_try='./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest'
+#  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
+#  (eval $ac_try) 2>&5
+#  ac_status=$?
+#  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+#  test $ac_status = 0; }; }; then :;
+#      else
+#        cc_works_part=norun
+#      fi
+#    fi
+#  else
+#    cc_works_part=no
+#  fi
+#  if test "$cc_works_part" != yes; then
+#    echo "failed program was:" >&5
+#    cat conftest.c >&5
+#  fi
+#  rm -f conftest* a.out b.out a.exe a_out.exe
+#  case $cc_works_part in
+#    yes)
+#
+#      ;;
+#    no)
+#      gmp_prog_cc_works="no, long long reliability test 2"
+#      ;;
+#    norun)
+#      gmp_prog_cc_works="no, long long reliability test 2, program does not run"
+#      ;;
+#  esac
 fi
 
 
@@ -23479,11 +23479,14 @@ _ACEOF
 
 fi
 ac_fn_c_check_type "$LINENO" "long long" "ac_cv_type_long_long" "$ac_includes_default"
+if test "x$ac_cv_type_long_long" = xyes; then :
 
 cat >>confdefs.h <<_ACEOF
 #define HAVE_LONG_LONG 1
 _ACEOF
 
+
+fi
 ac_fn_c_check_type "$LINENO" "ptrdiff_t" "ac_cv_type_ptrdiff_t" "$ac_includes_default"
 if test "x$ac_cv_type_ptrdiff_t" = xyes; then :
 
