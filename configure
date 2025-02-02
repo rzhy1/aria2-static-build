@@ -6607,17 +6607,17 @@ EOF
 #    cat conftest.c >&5
 #  fi
 #  rm -f conftest* a.out b.out a.exe a_out.exe
-#  case $cc_works_part in
-#    yes)
-#
-#      ;;
-#    no)
-#      gmp_prog_cc_works="no, long long reliability test 1"
-#      ;;
-#    norun)
-#      gmp_prog_cc_works="no, long long reliability test 1, program does not run"
-#      ;;
-#  esac
+  case $cc_works_part in
+    yes)
+
+      ;;
+    no)
+      gmp_prog_cc_works="no, long long reliability test 1"
+      ;;
+    norun)
+      gmp_prog_cc_works="no, long long reliability test 1, program does not run"
+      ;;
+  esac
 fi
 
 
@@ -6668,17 +6668,17 @@ EOF
 #    cat conftest.c >&5
 #  fi
 #  rm -f conftest* a.out b.out a.exe a_out.exe
-#  case $cc_works_part in
-#    yes)
-#
-#      ;;
-#    no)
-#      gmp_prog_cc_works="no, long long reliability test 2"
-#      ;;
-#    norun)
-#      gmp_prog_cc_works="no, long long reliability test 2, program does not run"
-#      ;;
-#  esac
+  case $cc_works_part in
+    yes)
+
+      ;;
+    no)
+      gmp_prog_cc_works="no, long long reliability test 2"
+      ;;
+    norun)
+      gmp_prog_cc_works="no, long long reliability test 2, program does not run"
+      ;;
+  esac
 fi
 
 
@@ -8226,17 +8226,17 @@ EOF
 #    cat conftest.c >&5
 #  fi
 #  rm -f conftest* a.out b.out a.exe a_out.exe
-#  case $cc_works_part in
-#    yes)
-#
-#      ;;
-#    no)
-#      gmp_prog_cc_works="no, long long reliability test 1"
-#      ;;
-#    norun)
-#      gmp_prog_cc_works="no, long long reliability test 1, program does not run"
-#      ;;
-#  esac
+  case $cc_works_part in
+    yes)
+
+      ;;
+    no)
+      gmp_prog_cc_works="no, long long reliability test 1"
+      ;;
+    norun)
+      gmp_prog_cc_works="no, long long reliability test 1, program does not run"
+      ;;
+  esac
 fi
 
 
@@ -8287,17 +8287,17 @@ EOF
 #    cat conftest.c >&5
 #  fi
 #  rm -f conftest* a.out b.out a.exe a_out.exe
-#  case $cc_works_part in
-#    yes)
-#
-#      ;;
-#    no)
-#      gmp_prog_cc_works="no, long long reliability test 2"
-#      ;;
-#    norun)
-#      gmp_prog_cc_works="no, long long reliability test 2, program does not run"
-#      ;;
-#  esac
+  case $cc_works_part in
+    yes)
+
+      ;;
+    no)
+      gmp_prog_cc_works="no, long long reliability test 2"
+      ;;
+    norun)
+      gmp_prog_cc_works="no, long long reliability test 2, program does not run"
+      ;;
+  esac
 fi
 
 
