@@ -79,50 +79,6 @@ cd gmp-*
 curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
-awk '
-# 初始化
-BEGIN { in_target_block = 0; block_level = 0; n1 = -1; n2 = -1; n3 = -1; }
-
-# 查找 Test compile: long long reliability test 并记录行号
-/Test compile: long long reliability test/ {
-  n1 = NR;  # 记录找到的行号
-}
-
-# 查找 if test "$gmp_prog_cc_works" = yes; then 并记录行号
-n1 > 0 && n2 == -1 && /if test "\$gmp_prog_cc_works" = yes; then/ {
-  n2 = NR;  # 记录 if 语句的行号
-  block_level = 1;  # 进入块的开始
-}
-
-# 处理 if 语句块，记录 fi 行号，完成块定位
-n2 > 0 && block_level > 0 {
-  if (/^if /) block_level++;  # 遇到 if，增加层级
-  if (/^fi/) block_level--;  # 遇到 fi，减少层级
-  if (block_level == 0) {  # 当层级为0时，找到了块的结束
-    n3 = NR;  # 记录 fi 语句的行号
-    in_target_block = 1;  # 设置标记
-  }
-}
-
-# 在 n2 到 n3 之间的内容注释掉或删除
-n2 > 0 && n3 > 0 && NR >= n2 && NR <= n3 {
-  print "# " $0;  # 注释掉这一行，可以改为 print "" 来删除
-  next;  # 跳过该行，继续处理下一行
-}
-
-# 如果不在目标块内，正常输出
-{ print }
-' configure > configure.new
-
-# 替换原文件
-mv configure.new configure
-awk '
-  /case / { in_case=1 }
-  /;;/ && in_case { count++ }
-  /esac/ { in_case=0; count=0 }
-  count > 1 { sub(/;;/, ""); count-- }
-  { print }
-' configure > configure.new && mv configure.new configure
 echo "检查"
 grep 'long long reliability test' configure
 echo "检查结束"
