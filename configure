@@ -45,7 +45,7 @@
 ## -------------------- ##
 ## M4sh Initialization. ##
 ## -------------------- ##
-limb_chosen="none"
+
 # Be more Bourne compatible
 DUALCASE=1; export DUALCASE # for MKS sh
 if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then :
@@ -6620,70 +6620,6 @@ EOF
   esac
 fi
 
-
-
-
-if test "$gmp_prog_cc_works" = yes; then
-  # remove anything that might look like compiler output to our "||" expression
-  rm -f conftest* a.out b.out a.exe a_out.exe
-  cat >conftest.c <<EOF
-/* The following provokes an internal compiler error on powerpc-apple-darwin.
-   Extracted from mpz/cfdiv_q_2exp.c.  Causes Apple's gcc 3.3 build 1640 and
-   1666 to get an ICE with -O1 -mpowerpc64.  */
-
-#if defined (__GNUC__) && ! defined (__cplusplus)
-int g();
-void f(int u){int i;long long x;x=u?~0:0;if(x)for(i=0;i<9;i++);x&=g();if(x)g();}
-int g(){return 0;}
-#else
-int dummy;
-#endif
-
-int main () { return 0; }
-EOF
-  echo "Test compile: long long reliability test 2" >&5
-  gmp_compile="$cc $cflags $cppflags conftest.c >&5"
-  if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
-  (eval $gmp_compile) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-    cc_works_part=yes
-    if test "$cross_compiling" = no; then
-      if { ac_try='./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest'
-  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; }; then :;
-      else
-        cc_works_part=norun
-      fi
-    fi
-  else
-    cc_works_part=no
-  fi
-  if test "$cc_works_part" != yes; then
-    echo "failed program was:" >&5
-    cat conftest.c >&5
-  fi
-  rm -f conftest* a.out b.out a.exe a_out.exe
-  case $cc_works_part in
-    yes)
-
-      ;;
-    no)
-      gmp_prog_cc_works="no, long long reliability test 2"
-      ;;
-    norun)
-      gmp_prog_cc_works="no, long long reliability test 2, program does not run"
-      ;;
-  esac
-fi
-
-
-
-
 if test "$gmp_prog_cc_works" = yes; then
   # remove anything that might look like compiler output to our "||" expression
   rm -f conftest* a.out b.out a.exe a_out.exe
@@ -8238,70 +8174,6 @@ EOF
       ;;
   esac
 fi
-
-
-
-
-if test "$gmp_prog_cc_works" = yes; then
-  # remove anything that might look like compiler output to our "||" expression
-  rm -f conftest* a.out b.out a.exe a_out.exe
-  cat >conftest.c <<EOF
-/* The following provokes an internal compiler error on powerpc-apple-darwin.
-   Extracted from mpz/cfdiv_q_2exp.c.  Causes Apple's gcc 3.3 build 1640 and
-   1666 to get an ICE with -O1 -mpowerpc64.  */
-
-#if defined (__GNUC__) && ! defined (__cplusplus)
-int g();
-void f(int u){int i;long long x;x=u?~0:0;if(x)for(i=0;i<9;i++);x&=g();if(x)g();}
-int g(){return 0;}
-#else
-int dummy;
-#endif
-
-int main () { return 0; }
-EOF
-  echo "Test compile: long long reliability test 2" >&5
-  gmp_compile="$cc $cflags $cppflags $flag conftest.c >&5"
-  if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
-  (eval $gmp_compile) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; then
-    cc_works_part=yes
-    if test "$cross_compiling" = no; then
-      if { ac_try='./a.out || ./b.out || ./a.exe || ./a_out.exe || ./conftest'
-  { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_try\""; } >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; }; }; then :;
-      else
-        cc_works_part=norun
-      fi
-    fi
-  else
-    cc_works_part=no
-  fi
-  if test "$cc_works_part" != yes; then
-    echo "failed program was:" >&5
-    cat conftest.c >&5
-  fi
-  rm -f conftest* a.out b.out a.exe a_out.exe
-  case $cc_works_part in
-    yes)
-
-      ;;
-    no)
-      gmp_prog_cc_works="no, long long reliability test 2"
-      ;;
-    norun)
-      gmp_prog_cc_works="no, long long reliability test 2, program does not run"
-      ;;
-  esac
-fi
-
-
-
 
 if test "$gmp_prog_cc_works" = yes; then
   # remove anything that might look like compiler output to our "||" expression
@@ -12510,9 +12382,9 @@ $as_echo_n "checking for ld used by $CC... " >&6; }
   case $host in
   *-*-mingw*)
     # gcc leaves a trailing carriage return, which upsets mingw
-     ac_prog=`(x86_64-w64-mingw32-gcc -print-prog-name=ld) 2>&5 | tr -d '\015'` ;;
+    ac_prog=`($CC -print-prog-name=ld) 2>&5 | tr -d '\015'` ;;
   *)
-    ac_prog=`(x86_64-w64-mingw32-gcc -print-prog-name=ld) 2>&5` ;;
+    ac_prog=`($CC -print-prog-name=ld) 2>&5` ;;
   esac
   case $ac_prog in
     # Accept absolute paths.
@@ -20006,9 +19878,9 @@ $as_echo_n "checking for ld used by $CC... " >&6; }
   case $host in
   *-*-mingw*)
     # gcc leaves a trailing carriage return, which upsets mingw
-    ac_prog=`(x86_64-w64-mingw32-gcc -print-prog-name=ld) 2>&5 | tr -d '\015'` ;;
+    ac_prog=`($CC -print-prog-name=ld) 2>&5 | tr -d '\015'` ;;
   *)
-    ac_prog=`(x86_64-w64-mingw32-gcc -print-prog-name=ld) 2>&5` ;;
+    ac_prog=`($CC -print-prog-name=ld) 2>&5` ;;
   esac
   case $ac_prog in
     # Accept absolute paths.
