@@ -5967,7 +5967,7 @@ fi
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler $cc $cflags $cppflags" >&5
 $as_echo_n "checking compiler $cc $cflags $cppflags... " >&6; }
-gmp_prog_cc_works=no
+gmp_prog_cc_works=yes
 
 # first see a simple "main()" works, then go on to other checks
 if test "$gmp_prog_cc_works" = yes; then
@@ -7100,7 +7100,7 @@ if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  gmp_prog_cc_works=no
+  gmp_prog_cc_works=yes
 else
   echo "failed program was:" >&5
   cat conftest.c >&5
@@ -7586,7 +7586,7 @@ fi
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler $cc $cflags $cppflags $flag" >&5
 $as_echo_n "checking compiler $cc $cflags $cppflags $flag... " >&6; }
-gmp_prog_cc_works=no
+gmp_prog_cc_works=yes
 
 # first see a simple "main()" works, then go on to other checks
 if test "$gmp_prog_cc_works" = yes; then
