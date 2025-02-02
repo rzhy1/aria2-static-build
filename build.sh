@@ -81,11 +81,11 @@ curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/ref
 # patch configure（不检测long long）
 # 定义 configure.txt 文件路径
 configure_file="configure"
+# 定义要匹配的字符串
 match_string='if { ac_try=\'\\.\\/a.out \\|\\| \\.\\\\\/b.out \\|\\| \\.\\\\\/a.exe \\|\\| \\.\\\\\/a_out.exe \\|\\| \\.\\\\\/conftest\''
 
 # 使用 grep 查找匹配行的行号
-start_line=$(grep -n "$match_string" "$configure_file" | awk -F: '{gsub(/[()]/,"\\\\&"); print $1}')
-
+start_line=$(grep -n "$match_string" "$configure_file" | awk -F: '{printf "%s", $1}')
 
 if test -z "$start_line"; then
   echo "Error: Could not find the target line in $configure_file" >&2
@@ -94,8 +94,6 @@ fi
 
 # 使用 sed 命令进行注释
 sed -i "${start_line}s/^/# /" "$configure_file"
-
-echo "Long long reliability test 2 line successfully commented out in $configure_file"
 
 echo "Long long reliability test 2 line successfully commented out in $configure_file"
 echo "检查"
