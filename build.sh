@@ -76,9 +76,51 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
-curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
+#curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
+find_and_comment() {
+  local file="$1"
+  local search_str="Test compile: long long reliability test"
+
+  while read -r line; do
+    n1=$(awk -v s="$search_str" '$0 ~ s {print NR; exit}' "$file")
+    if [ -n "$n1" ]; then
+      # 计算结束行号
+      n2=$((n1 + 37))
+
+      # 使用 sed 注释指定范围的行
+      sed -i "${n1},${n2}s/^/# /" "$file"
+
+      echo "注释了文件 $file 中从第 $n1 行到第 $n2 行"
+    else
+      echo "在文件 $file 中未找到字符串 '$search_str'"
+      break  # 如果没有找到匹配的行，则退出循环
+    fi
+  done < <(find "$file" -type f -print) # 如果参数为目录则查找该目录所有文件
+
+}
+
+# 检查是否有文件作为参数
+if [ $# -eq 0 ]; then
+  echo "用法: $0 <configure_file或目录>"
+  exit 1
+fi
+
+# 循环处理所有输入的文件或目录
+for file in "$@"; do
+  if [ -d "$file" ]; then
+    # 传入目录，查找所有文件
+    find_and_comment "$file"
+  elif [ -f "$file" ]; then
+    # 传入的是单个文件
+    find_and_comment "$file"
+  else
+    echo "错误: 文件或目录 '$file' 不存在."
+  fi
+done
+
+echo "处理完成."
 echo "检查"
 grep 'long long reliability test' configure
 echo "检查结束"
