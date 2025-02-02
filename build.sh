@@ -78,7 +78,10 @@ curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
 #curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 # patch configure（不检测long long）
-sed -i 's/if test "$limb_chosen" = longlong;/if false;/' configure
+sed -i -e '/eval limb_chosen="\\\$limb\([a-zA-Z0-9_]\+\)";/a \
+    limb_chosen=none' configure
+sed -i -e '/test -n "\$limb_chosen" || eval limb_chosen="\\\$limb\([a-zA-Z0-9_]\+\)";/a \
+    limb_chosen=none' configure
 echo "检查"
 #grep 'limb_chosen" = longlong' configure
 echo "检查结束"
