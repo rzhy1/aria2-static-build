@@ -83,7 +83,7 @@ sed -i -e '/eval limb_chosen="\\\$limb\([a-zA-Z0-9_]\+\)";/a \
 sed -i -e '/test -n "\$limb_chosen" || eval limb_chosen="\\\$limb\([a-zA-Z0-9_]\+\)";/a \
     limb_chosen=none' configure
 echo "检查"
-#grep 'limb_chosen" = longlong' configure
+grep 'limb_chosen=' configure
 echo "检查结束"
 #    --disable-cxx \
 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure -v \
