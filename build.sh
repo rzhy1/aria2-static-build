@@ -85,35 +85,38 @@ BEGIN { in_target_block = 0; block_level = 0; n1 = -1; n2 = -1; n3 = -1; }
 
 # 查找 Test compile: long long reliability test 并记录行号
 /Test compile: long long reliability test/ {
-  n1 = NR;
+  n1 = NR;  # 记录找到的行号
 }
 
 # 查找 if test "$gmp_prog_cc_works" = yes; then 并记录行号
 n1 > 0 && n2 == -1 && /if test "\$gmp_prog_cc_works" = yes; then/ {
-  n2 = NR;
-  block_level = 1;
+  n2 = NR;  # 记录 if 语句的行号
+  block_level = 1;  # 进入块的开始
 }
 
-# 在目标块内处理
+# 处理 if 语句块，记录 fi 行号，完成块定位
 n2 > 0 && block_level > 0 {
-  if (/^if /) block_level++;
-  if (/^fi/) block_level--;
-  if (block_level == 0) {
-    n3 = NR;
-    in_target_block = 1;
+  if (/^if /) block_level++;  # 遇到 if，增加层级
+  if (/^fi/) block_level--;  # 遇到 fi，减少层级
+  if (block_level == 0) {  # 当层级为0时，找到了块的结束
+    n3 = NR;  # 记录 fi 语句的行号
+    in_target_block = 1;  # 设置标记
   }
 }
 
-# 注释或删除 n2 到 n3 之间的内容
+# 在 n2 到 n3 之间的内容注释掉或删除
 n2 > 0 && n3 > 0 && NR >= n2 && NR <= n3 {
   print "# " $0;  # 注释掉这一行，可以改为 print "" 来删除
-  next;
+  next;  # 跳过该行，继续处理下一行
 }
 
-# 其他行正常输出
+# 如果不在目标块内，正常输出
 { print }
 ' configure > configure.new
+
+# 替换原文件
 mv configure.new configure
+
 echo "检查"
 sed -n '7170,7190p' configure
 grep 'long long reliability test' configure
