@@ -82,27 +82,26 @@ cd gmp-*
 find_and_comment() {
   local file="$1"
   local search_str="Test compile: long long reliability test"
-    
-  local n1
-  while n1=$(awk -v s="$search_str" '$0 ~ s {print NR}' "$file"); do
-    if [ -n "$n1" ]; then
-      # 计算结束行号
-      n2=$((n1 + 37))
+  local start_line
+  local end_line
+  local current_line=1
+  while true; do
+    # 使用 awk 查找未注释的行
+    start_line=$(awk -v s="$search_str" -v cl="$current_line" 'NR >= cl && !/^# / && $0 ~ s {print NR; exit}' "$file")
 
-      # 使用 sed 注释指定范围的行
-      sed -i "${n1},${n2}s/^/# /" "$file"
-
-      echo "注释了文件 $file 中从第 $n1 行到第 $n2 行"
-    else
-      echo "在文件 $file 中未找到字符串 '$search_str'"
-    break # 退出循环
+    if [ -z "$start_line" ]; then
+        echo "在文件 $file 中未找到更多字符串 '$search_str'"
+        break # 如果没有找到更多匹配的行，退出循环
     fi
-    
-    # 将已注释行之后的内容写入临时文件,用于下一次匹配查找
-     tail -n +"$((n2+1))" "$file" > "$file".tmp
-     mv "$file".tmp "$file"
-  done
 
+    end_line=$((start_line + 37))
+
+    # 注释找到的行范围
+    sed -i "${start_line},${end_line}s/^/# /" "$file"
+
+    echo "注释了文件 $file 中从第 $start_line 行到第 $end_line 行"
+    current_line=$((end_line + 1)) # 更新下次搜索的起始行号
+  done
 }
 
 
