@@ -6561,7 +6561,7 @@ fi
 if test "$gmp_prog_cc_works" = yes; then
   # remove anything that might look like compiler output to our "||" expression
   rm -f conftest* a.out b.out a.exe a_out.exe
-  cat >conftest.c <<EOF
+ # cat >conftest.c <<EOF
 /* The following provokes a segfault in the compiler on powerpc-apple-darwin.
    Extracted from tests/mpn/t-iord_u.c.  Causes Apple's gcc 3.3 build 1640 and
    1666 to segfault with e.g., -O2 -mpowerpc64.  */
@@ -6626,7 +6626,7 @@ fi
 if test "$gmp_prog_cc_works" = yes; then
   # remove anything that might look like compiler output to our "||" expression
   rm -f conftest* a.out b.out a.exe a_out.exe
-  cat >conftest.c <<EOF
+#  cat >conftest.c <<EOF
 /* The following provokes an internal compiler error on powerpc-apple-darwin.
    Extracted from mpz/cfdiv_q_2exp.c.  Causes Apple's gcc 3.3 build 1640 and
    1666 to get an ICE with -O1 -mpowerpc64.  */
@@ -8180,7 +8180,7 @@ fi
 if test "$gmp_prog_cc_works" = yes; then
   # remove anything that might look like compiler output to our "||" expression
   rm -f conftest* a.out b.out a.exe a_out.exe
-  cat >conftest.c <<EOF
+#  cat >conftest.c <<EOF
 /* The following provokes a segfault in the compiler on powerpc-apple-darwin.
    Extracted from tests/mpn/t-iord_u.c.  Causes Apple's gcc 3.3 build 1640 and
    1666 to segfault with e.g., -O2 -mpowerpc64.  */
@@ -8245,7 +8245,7 @@ fi
 if test "$gmp_prog_cc_works" = yes; then
   # remove anything that might look like compiler output to our "||" expression
   rm -f conftest* a.out b.out a.exe a_out.exe
-  cat >conftest.c <<EOF
+#  cat >conftest.c <<EOF
 /* The following provokes an internal compiler error on powerpc-apple-darwin.
    Extracted from mpz/cfdiv_q_2exp.c.  Causes Apple's gcc 3.3 build 1640 and
    1666 to get an ICE with -O1 -mpowerpc64.  */
