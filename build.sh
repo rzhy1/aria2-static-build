@@ -69,6 +69,41 @@ retry() {
   return 1
 }
 
+echo "⭐⭐⭐⭐⭐⭐测试⭐⭐⭐⭐⭐⭐"
+# 1. 生成 C 语言测试文件 test.c
+cat > test.c <<EOF
+#include <stdio.h>
+
+int main() {
+    long long x = 9223372036854775807LL;
+    printf("long long test: %lld\\n", x);
+    return 0;
+}
+EOF
+
+echo "[INFO] Created test.c"
+
+# 2. 使用 x86_64-w64-mingw32-gcc 交叉编译
+x86_64-w64-mingw32-gcc test.c -o test.exe
+if [ $? -ne 0 ]; then
+    echo "[ERROR] Compilation failed!"
+    exit 1
+else
+    echo "[INFO] Compilation successful! Executable: test.exe"
+fi
+
+# 3. 检测是否在 Windows 下运行（如果是 Linux，直接打印成功信息）
+if command -v wine &> /dev/null; then
+    echo "[INFO] Running test.exe using Wine..."
+    wine test.exe
+else
+    echo "[INFO] Compilation successful, but test.exe must be run on Windows."
+fi
+
+# 4. 清理临时文件（可选）
+rm -f test.c
+
+
 # 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
