@@ -370,7 +370,28 @@ build_aria2() {
     --prefix="${CROSS_PREFIX}" \
     --enable-static \
     --disable-shared \
+    --with-cppunit-prefix=$PREFIX \
     --enable-silent-rules \
+    --with-libz \
+    --with-libssh2 \
+    --with-libxml2 \
+    --with-libcares \
+    --with-sqlite3 \
+    --with-libuv=no \
+    --with-tcmalloc=no \
+    --with-jemalloc=no \
+    --without-appletls \
+    --without-gnutls \
+    --without-openssl \
+    --without-libgmp \
+    --without-libexpat \
+    --without-libgcrypt \
+    --without-libnettle \
+    --without-included-gettext \
+    --disable-epoll \
+    --disable-nls \
+    --disable-dependency-tracking \
+    --disable-libtool-lock \
     --disable-checking \
     --enable-checking=release \
     ARIA2_STATIC=yes \
