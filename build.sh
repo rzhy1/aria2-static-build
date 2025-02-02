@@ -117,7 +117,7 @@ mv configure.new configure
 echo "检查"
 #grep 'long long reliability test' configure
 echo "检查结束"
-
+chmod +x ./configure
 CC=x86_64-w64-mingw32-gcc ./configure \
     --disable-shared \
     --enable-static \
