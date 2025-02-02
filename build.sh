@@ -77,9 +77,9 @@ echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
 # patch configure
-sed -i -E \
-    -e 's|ac_prog=\`\(\$CC -print-prog-name=ld\) 2>&5 \| tr -d '\\\\015'\` ;;|ac_prog=\`("\$CC" -print-prog-name=ld) 2>&5 | sed 's/\\\\r\$//'\` ;;|' \
-    -e 's|ac_prog=\`\(\$CC -print-prog-name=ld\) 2>&5 \`\` ;;|ac_prog=\`("\$CC" -print-prog-name=ld) 2>&5 | sed 's/\\\\r\$//'\` ;;|' \
+sed -i \
+    -e 's|ac_prog=`(\$CC -print-prog-name=ld) 2>&5 | tr -d '\\\\015'` ;;|ac_prog=`("\$CC" -print-prog-name=ld) 2>&5 | sed "s/\\\\r\$//"` ;;|' \
+    -e 's|ac_prog=`(\$CC -print-prog-name=ld) 2>&5` ;;|ac_prog=`("\$CC" -print-prog-name=ld) 2>&5 | sed "s/\\\\r\$//"` ;;|' \
     configure
 echo "检查"
 grep 'ac_prog=.*-print-prog-name=ld' configure
