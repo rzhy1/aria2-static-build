@@ -76,11 +76,8 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
+curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure
 # patch configure
-sed -i \
-    -e 's/ac_prog=`(\$CC -print-prog-name=ld) 2>&5 | tr -d '\\015'` ;;/ac_prog=`("\$CC" -print-prog-name=ld) 2>&5 | sed "s/\\\\r$//"` ;;/' \
-    -e 's/ac_prog=`(\$CC -print-prog-name=ld) 2>&5` ;;/ac_prog=`("\$CC" -print-prog-name=ld) 2>&5 | sed "s/\\\\r$//"` ;;/' \
-    configure
 echo "检查"
 grep 'ac_prog=.*-print-prog-name=ld' configure
 echo "检查结束"
