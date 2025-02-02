@@ -76,7 +76,7 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
-# curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure
+curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure
 # patch configure
 echo "检查"
 grep 'ac_prog=.*-print-prog-name=ld' configure
@@ -88,7 +88,6 @@ CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure
     --prefix=$PREFIX \
     --host=$HOST \
     --enable-fat \
-    --disable-check-long-long \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
