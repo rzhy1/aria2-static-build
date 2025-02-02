@@ -76,10 +76,11 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
-curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
-# patch configure
+#curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
+# patch configure（不检测long long）
+sed -i 's/if test "$limb_chosen" = longlong;/if false;/' configure
 echo "检查"
-grep 'ac_prog=.*-print-prog-name=ld' configure
+grep 'limb_chosen" = longlong' configure
 echo "检查结束"
 #    --disable-cxx \
 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure -v \
