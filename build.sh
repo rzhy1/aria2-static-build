@@ -109,7 +109,7 @@ in_target_block {
 mv configure.new configure
 
 echo "检查"
-grep 'long long reliability test' configure
+#grep 'long long reliability test' configure
 echo "检查结束"
 
 ./configure \
