@@ -79,7 +79,41 @@ cd gmp-*
 curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
+awk '
+# 初始化
+BEGIN { in_target_block = 0; block_level = 0; n1 = -1; n2 = -1; n3 = -1; }
 
+# 查找 Test compile: long long reliability test 并记录行号
+/Test compile: long long reliability test/ {
+  n1 = NR;
+}
+
+# 查找 if test "$gmp_prog_cc_works" = yes; then 并记录行号
+n1 > 0 && n2 == -1 && /if test "\$gmp_prog_cc_works" = yes; then/ {
+  n2 = NR;
+  block_level = 1;
+}
+
+# 在目标块内处理
+n2 > 0 && block_level > 0 {
+  if (/^if /) block_level++;
+  if (/^fi/) block_level--;
+  if (block_level == 0) {
+    n3 = NR;
+    in_target_block = 1;
+  }
+}
+
+# 注释或删除 n2 到 n3 之间的内容
+n2 > 0 && n3 > 0 && NR >= n2 && NR <= n3 {
+  print "# " $0;  # 注释掉这一行，可以改为 print "" 来删除
+  next;
+}
+
+# 其他行正常输出
+{ print }
+' configure > configure.new
+mv configure.new configure
 echo "检查"
 #grep 'long long reliability test' configure
 echo "检查结束"
