@@ -82,26 +82,20 @@ cd gmp-*
 find_and_comment() {
   local file="$1"
   local search_str="Test compile: long long reliability test"
-  local start_line
-  local end_line
   local current_line=1
-  while true; do
-    # 使用 awk 查找未注释的行
-    start_line=$(awk -v s="$search_str" -v cl="$current_line" 'NR >= cl && !/^# / && $0 ~ s {print NR; exit}' "$file")
+  
+  while read -r start_line; do
+    
+    [[ -z "$start_line" ]] && { echo "在文件 $file 中未找到更多字符串 '$search_str'"; break; }
 
-    if [ -z "$start_line" ]; then
-        echo "在文件 $file 中未找到更多字符串 '$search_str'"
-        break # 如果没有找到更多匹配的行，退出循环
-    fi
+    local end_line=$((start_line + 37))
 
-    end_line=$((start_line + 37))
-
-    # 注释找到的行范围
     sed -i "${start_line},${end_line}s/^/# /" "$file"
 
     echo "注释了文件 $file 中从第 $start_line 行到第 $end_line 行"
-    current_line=$((end_line + 1)) # 更新下次搜索的起始行号
-  done
+    current_line=$((end_line + 1))
+
+  done < <(awk -v s="$search_str" -v cl="$current_line" 'NR >= cl && !/^# / && $0 ~ s {print NR}' "$file")
 }
 
 
