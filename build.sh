@@ -115,7 +115,8 @@ n2 > 0 && n3 > 0 && NR >= n2 && NR <= n3 {
 ' configure > configure.new
 mv configure.new configure
 echo "检查"
-#grep 'long long reliability test' configure
+sed -n '7170,7190p' configure
+grep 'long long reliability test' configure
 echo "检查结束"
 chmod +x ./configure
 CC=x86_64-w64-mingw32-gcc ./configure \
