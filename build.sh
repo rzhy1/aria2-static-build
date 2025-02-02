@@ -79,14 +79,42 @@ cd gmp-*
 curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
+perl -0777 -pi -e '
+# 处理每个外层 if 块
+BEGIN { $in_if = 0; }
+if (/^if test "\$gmp_prog_cc_works" = yes; then/) {
+    $in_if = 1;
+    $delete_block = 0;  # 默认不删除
+}
 
-perl -0777 -ne 'print if /if test "\$gmp_prog_cc_works" = yes; then/ .. /fi/' configure
+# 当在 if 块中，检查每行
+if ($in_if) {
+    if (/long long reliability test [12], program does not run/) {
+        $delete_block = 1;
+    }
+}
+
+# 如果找到了触发条件，则删除该 if 块
+if ($in_if && $delete_block) {
+    # 寻找闭合的 fi
+    if (/^fi$/) {
+        $in_if = 0;
+        $delete_block = 0;  # 重置标记
+    }
+    next;  # 删除该行
+}
+
+# 结束当前 if 块的判断
+if (/^fi$/ && $in_if) {
+    $in_if = 0;  # 退出 if 块
+}
+' configure
 
 echo "检查"
 bash -n configure
 echo "检查1"
 grep -n "^fi" configure
-#grep 'long long reliability test' configure
+grep 'long long reliability test' configure
 echo "检查结束"
 
 ./configure \
