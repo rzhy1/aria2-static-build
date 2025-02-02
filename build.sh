@@ -85,7 +85,7 @@ grep 'limb_chosen' configure
 echo "检查结束"
 
 #    --disable-cxx \
-CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure CPPFLAGS="-DHAVE_LONG_LONG=0" \
+CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure CPPFLAGS="-DHAVE_LONG_LONG=1" \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
