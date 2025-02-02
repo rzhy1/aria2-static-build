@@ -78,9 +78,9 @@ curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
 # patch configure
 sed -i \
-    -e 's#ac_prog=`(\$CC -print-prog-name=ld) 2>&5 | tr -d '\''\\015'\''#ac_prog=`("$CC" -print-prog-name=ld) 2>&5 | sed '\''s/\\r$//'\''#g' \
-    -e 's#ac_prog=`(\$CC -print-prog-name=ld) 2>&5#ac_prog=`("$CC" -print-prog-name=ld) 2>&5#g' \
-    configure
+-e 's/ac_prog=`(\\$CC -print-prog-name=ld) 2>&5 | tr -d '\\\'015\'` ;;/ac_prog=`("\$CC" -print-prog-name=ld) 2>&5 | sed \'s/\\\\r$//\'` ;;/' \
+-e 's/ac_prog=`(\\$CC -print-prog-name=ld) 2>&5` ;;/ac_prog=`("\$CC" -print-prog-name=ld) 2>&5 | sed \'s/\\\\r$//\'` ;;/' \
+configure
 echo "检查"
 grep 'ac_prog=.*-print-prog-name=ld' configure
 echo "检查结束"
