@@ -79,7 +79,6 @@ cd gmp-*
 #curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
- 查找 configure 文件中包含 "Test compile: long long reliability test" 的行号
 find_and_comment() {
   local file="$1"
   local search_str="Test compile: long long reliability test"
