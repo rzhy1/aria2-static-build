@@ -79,7 +79,7 @@ cd gmp-*
 #curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
-sed -i 's/limb_chosen=longlong/limb_chosen=none/' configure
+sed -i 's/if test "$limb_chosen" = longlong;/if false;/' configure
 echo "检查"
 grep 'limb_chosen' configure
 echo "检查结束"
