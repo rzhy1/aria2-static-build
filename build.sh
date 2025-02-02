@@ -259,25 +259,31 @@ autoreconf -i
     --host=$HOST \
     --prefix=$PREFIX \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    --without-included-gettext \
-    --disable-dependency-tracking \
-    --disable-libtool-lock \
+    --with-sysroot=$PREFIX \
+    --with-cppunit-prefix=$PREFIX \
     --enable-silent-rules \
-    --disable-nls \
-    --with-libcares \
-    --without-gnutls \
-    --without-openssl \
-    --with-sqlite3 \
-    --with-libexpat \
-    --without-libxml2 \
     --with-libz \
     --with-libgmp \
     --with-libssh2 \
+    --with-libcares \
+    --with-sqlite3 \
+    --with-libexpat \
+    --with-libuv=no \
+    --with-tcmalloc=no \
+    --with-jemalloc=no \
+    --without-appletls \
+    --without-gnutls \
+    --without-openssl \
+    --without-libxml2 \
     --without-libgcrypt \
     --without-libnettle \
-    --with-cppunit-prefix=$PREFIX \
+    --without-included-gettext \
+    --disable-epoll \
+    --disable-nls \
+    --disable-dependency-tracking \
+    --disable-libtool-lock \
     --disable-checking \
-    --with-sysroot=$PREFIX \
+
     ARIA2_STATIC=yes \
     SQLITE3_LIBS="-L$PREFIX/lib -lsqlite3" \
     CPPFLAGS="-I$PREFIX/include" \
