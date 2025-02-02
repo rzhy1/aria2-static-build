@@ -79,13 +79,13 @@ cd gmp-*
 curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
-sed -i 's/^ *limb_chosen=.*$/limb_chosen=none/' configure
+#sed -i 's/^ *limb_chosen=.*$/limb_chosen=none/' configure
 echo "检查"
 grep 'limb_chosen' configure
 echo "检查结束"
 
 #    --disable-cxx \
-CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure ac_cv_type_long_long=no \
+CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure CPPFLAGS="-DHAVE_LONG_LONG=0" \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
