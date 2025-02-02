@@ -103,7 +103,7 @@ mv configure.new configure
 echo "检查"
 #grep 'long long reliability test' configure
 echo "检查结束"
-
+cat configure
 ./configure \
     --disable-shared \
     --enable-static \
