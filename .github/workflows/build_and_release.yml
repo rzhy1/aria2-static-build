@@ -28,7 +28,7 @@ jobs:
           # DEBIAN_FRONTEND=noninteractive sudo apt-get upgrade -y
           apt-get install -y --no-install-recommends \
               make binutils autoconf automake autotools-dev libtool \
-              patch ca-certificates \
+              patch ca-certificates g++-mingw-w64-x86-64 \
               pkg-config git wget curl dpkg-dev \
               autopoint libcppunit-dev lzip jq unzip zstd lld rsync bc
       - name: Compile
