@@ -84,8 +84,8 @@ configure_file="configure"
 # 定义要匹配的字符串
 match_string='if { ac_try=\'\\.\\/a.out \\|\\| \\.\\\\\/b.out \\|\\| \\.\\\\\/a.exe \\|\\| \\.\\\\\/a_out.exe \\|\\| \\.\\\\\/conftest\''
 
-# 使用 grep 查找匹配行的行号
-start_line=$(grep -n "$match_string" "$configure_file" | awk -F: '{print $1}')
+# 使用 grep 查找匹配行的行号,并转义括号
+start_line=$(grep -n "$match_string" "$configure_file" | awk -F: '{gsub(/\(/,"\\\\("); gsub(/\)/,"\\\\)");print $1}')
 
 if test -z "$start_line"; then
   echo "Error: Could not find the target line in $configure_file" >&2
@@ -96,7 +96,6 @@ fi
 sed -i "${start_line}s/^/# /" "$configure_file"
 
 echo "Long long reliability test 2 line successfully commented out in $configure_file"
-
 echo "检查"
 grep 'long long reliability test' configure
 echo "检查结束"
