@@ -85,7 +85,7 @@ grep 'limb_chosen' configure
 echo "检查结束"
 
 #    --disable-cxx \
-CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure -v \
+CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure ac_cv_type_long_long=yes \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
