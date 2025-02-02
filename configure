@@ -7083,9 +7083,9 @@ esac
 
         # If we're supposed to be using a "long long" for a limb, check that
         # it works.
-                                  eval limb_chosen=\"\$limb$abi1\" limb_chosen=none
-        test -n "$limb_chosen" || eval limb_chosen=\"\$limb$abi2\" limb_chosen=none
-        if test "$limb_chosen" = longlong; then
+                                  eval limb_chosen=\"\$limb$abi1\"
+        test -n "$limb_chosen" || eval limb_chosen=\"\$limb$abi2\"
+        if test "$limb_chosen" = none; then
           { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler $cc $cflags $cppflags has long long" >&5
 $as_echo_n "checking compiler $cc $cflags $cppflags has long long... " >&6; }
 cat >conftest.c <<EOF
