@@ -5967,7 +5967,7 @@ fi
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler $cc $cflags $cppflags" >&5
 $as_echo_n "checking compiler $cc $cflags $cppflags... " >&6; }
-gmp_prog_cc_works=yes
+gmp_prog_cc_works=no
 
 # first see a simple "main()" works, then go on to other checks
 if test "$gmp_prog_cc_works" = yes; then
@@ -7085,7 +7085,7 @@ esac
         # it works.
                                   eval limb_chosen=\"\$limb$abi1\"
         test -n "$limb_chosen" || eval limb_chosen=\"\$limb$abi2\"
-        if test "$limb_chosen" = none; then
+        if test "$limb_chosen" = longlong; then
           { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler $cc $cflags $cppflags has long long" >&5
 $as_echo_n "checking compiler $cc $cflags $cppflags has long long... " >&6; }
 cat >conftest.c <<EOF
@@ -7100,7 +7100,7 @@ if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$gmp_compile\""; } >&5
   ac_status=$?
   $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
   test $ac_status = 0; }; then
-  gmp_prog_cc_works=yes
+  gmp_prog_cc_works=no
 else
   echo "failed program was:" >&5
   cat conftest.c >&5
@@ -7586,7 +7586,7 @@ fi
 
         { $as_echo "$as_me:${as_lineno-$LINENO}: checking compiler $cc $cflags $cppflags $flag" >&5
 $as_echo_n "checking compiler $cc $cflags $cppflags $flag... " >&6; }
-gmp_prog_cc_works=yes
+gmp_prog_cc_works=no
 
 # first see a simple "main()" works, then go on to other checks
 if test "$gmp_prog_cc_works" = yes; then
