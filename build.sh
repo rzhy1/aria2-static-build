@@ -81,13 +81,14 @@ curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/ref
 echo "检查"
 grep 'ac_prog=.*-print-prog-name=ld' configure
 echo "检查结束"
-CC=x86_64-w64-mingw32-gcc ./configure \
+#    --disable-cxx \
+CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ ./configure -v \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
     --host=$HOST \
     --enable-fat \
-    --disable-cxx \
+    -O0 \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
