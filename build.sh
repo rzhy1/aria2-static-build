@@ -82,7 +82,8 @@ int main() {
 EOF
 
 echo "[INFO] Created test.c"
-
+which x86_64-w64-mingw32-gcc
+cat test.c
 # 2. 使用 x86_64-w64-mingw32-gcc 交叉编译
 x86_64-w64-mingw32-gcc test.c -o test.exe
 if [ $? -ne 0 ]; then
