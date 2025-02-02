@@ -72,7 +72,7 @@ jobs:
           apt-get install -y --no-install-recommends \
               automake  autoconf autopoint jq libtool \
               make pkgconf wget curl tcl g++-mingw-w64-x86-64 \
-              ca-certificates unzip zstd lld rsync bc
+              ca-certificates libcppunit-dev unzip zstd lld rsync bc
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
