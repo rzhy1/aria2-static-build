@@ -105,7 +105,7 @@ BEGIN { in_if_block = 0; should_delete = 0; }
     }
 }' configure > configure.tmp && mv configure.tmp configure
 echo "检查"
-grep 'long long reliability test' configure
+#grep 'long long reliability test' configure
 echo "检查结束"
 
 ./configure \
