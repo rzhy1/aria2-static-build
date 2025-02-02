@@ -82,13 +82,12 @@ echo "检查"
 grep 'ac_prog=.*-print-prog-name=ld' configure
 echo "检查结束"
 #    --disable-cxx \
-CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O1 -g" ./configure -v \
+CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure -v \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
     --host=$HOST \
     --enable-fat \
-    -O0 \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
