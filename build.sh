@@ -79,7 +79,16 @@ cd gmp-*
 curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
-sed -i '/^if test "\$gmp_prog_cc_works" = yes; then/,/fi/ { /long long reliability test/ { :a; N; /fi/!ba; d } }' configure
+awk '
+/^if test "\$gmp_prog_cc_works" = yes; then/ { delete_block=1 }  # 发现 if 语句，标记删除模式
+delete_block { buffer = buffer $0 ORS }                          # 记录整个 if 代码块
+/delete_block/ && /long long reliability test/ { keep_deleting=1 } # 如果匹配到 long long reliability test，则确认删除
+delete_block && /fi/ {                                           # 发现 fi 结束 if 代码块
+    if (keep_deleting) { buffer=""; keep_deleting=0 }           # 如果检测到 long long reliability test，清空 buffer
+    delete_block=0; print buffer; buffer=""; next               # 结束删除模式
+}
+!delete_block' configure > configure.tmp && mv configure.tmp configure
+
 echo "检查"
 grep 'long long reliability test' configure
 echo "检查结束"
