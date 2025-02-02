@@ -91,7 +91,7 @@ find_and_comment() {
     current_line=$((end_line + 1))
   done < <(awk -v s="$search_str" -v cl="$current_line" 'NR >= cl && !/^# / && $0 ~ s {print NR}' "$file")
 }
-find_and_comment "configure"
+find_and_comment "configure"  && echo "configure文件修改完成"
 
 ./configure \
     --disable-shared \
