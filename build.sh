@@ -88,13 +88,13 @@ echo "检查"
 grep 'long long reliability test' configure
 echo "检查结束"
 
-#    --disable-cxx \
-CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure CPPFLAGS="-DHAVE_LONG_LONG=1" \
+./configure" \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
     --host=$HOST \
     --enable-fat \
+    --disable-cxx \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
