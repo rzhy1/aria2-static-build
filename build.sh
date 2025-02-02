@@ -17,8 +17,8 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
-#export CFLAGS="-O2 -g0 -flto=$(nproc)"
-#export CXXFLAGS="-O2 -g0 -flto=$(nproc)"
+export CFLAGS="-O2 -g0 -flto=$(nproc)"
+export CXXFLAGS="-O2 -g0 -flto=$(nproc)"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
@@ -83,36 +83,17 @@ find_and_comment() {
   local file="$1"
   local search_str="Test compile: long long reliability test"
   local current_line=1
-  
-  while read -r start_line; do
-    
+  while read -r start_line; do  
     [[ -z "$start_line" ]] && { echo "在文件 $file 中未找到更多字符串 '$search_str'"; break; }
-
     local end_line=$((start_line + 37))
-
     sed -i "${start_line},${end_line}s/^/# /" "$file"
-
     echo "注释了文件 $file 中从第 $start_line 行到第 $end_line 行"
     current_line=$((end_line + 1))
-
   done < <(awk -v s="$search_str" -v cl="$current_line" 'NR >= cl && !/^# / && $0 ~ s {print NR}' "$file")
 }
-
-
-# 直接使用 configure 文件作为参数
-if [ ! -f "configure" ]; then
-    echo "错误: 当前目录下找不到 'configure' 文件."
-    exit 1
-fi
-
 find_and_comment "configure"
 
-echo "处理完成."
-echo "检查"
-grep 'long long reliability test' configure
-echo "检查结束"
-chmod +x ./configure
-CC=x86_64-w64-mingw32-gcc ./configure \
+./configure \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
@@ -123,10 +104,6 @@ CC=x86_64-w64-mingw32-gcc ./configure \
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
-#find / -name *gmp.a 2>/dev/null
-#find / -name *gmp.h 2>/dev/null
-#find / -name *gmp.pc 2>/dev/null
-#cat $PREFIX/lib/pkgconfig/gmp.pc
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
