@@ -84,20 +84,18 @@ configure_file="configure"
 # 定义要匹配的字符串
 match_string='if { ac_try=\'\\.\\/a.out \\|\\| \\.\\\\\/b.out \\|\\| \\.\\\\\/a.exe \\|\\| \\.\\\\\/a_out.exe \\|\\| \\.\\\\\/conftest\''
 
-# 使用 awk 命令转义匹配字符串中的特殊字符
-# 并对双引号进行转义
-escaped_match_string=$(echo "$match_string" | awk '{gsub(/\\/,"\\\\\\\\"); gsub(/\[/,"\\\\[");gsub(/\]/,"\\\\]");gsub(/\*/,"\\\*");gsub(/\?/,"\\\?");gsub(/\|/,"\\\\\\|");gsub(/\(/,"\\\\(");gsub(/\)/,"\\\\)");gsub(/"/,"\\\\\\\"");gsub(/'\''/,"\\\\\\\'"); print}')
+# 使用 grep 查找匹配行的行号
+start_line=$(grep -n "$match_string" "$configure_file" | awk -F: '{print $1}')
 
-# 使用 sed 命令直接修改 configure.txt 文件，并使用转义后的匹配字符串
-sed_command="/${escaped_match_string}/s/^/# /"
-
-# 使用 sed 命令直接修改 configure.txt 文件
-if sed -i "$sed_command" "$configure_file"; then
-  echo "Long long reliability test 2 line successfully commented out in $configure_file"
-else
-  echo "Failed to comment out long long reliability test 2 line in $configure_file" >&2
+if test -z "$start_line"; then
+  echo "Error: Could not find the target line in $configure_file" >&2
   exit 1
 fi
+
+# 使用 sed 命令进行注释
+sed -i "${start_line}s/^/# /" "$configure_file"
+
+echo "Long long reliability test 2 line successfully commented out in $configure_file"
 
 echo "检查"
 grep 'long long reliability test' configure
