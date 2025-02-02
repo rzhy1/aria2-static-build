@@ -98,15 +98,23 @@ awk '
             if (if_count == 0) {
                 in_block = 0;
                 if (block_content ~ /long long reliability test/) {
-                    next; # Skip printing block
+                  next; # Skip printing block
                 } else {
                    printf "%s", block_content;
                 }
                 block_content = "";
             }
         }
-        next;
+       
+       # 增加 case/esac 处理, 避免删除 case 语句的一部分
+       if ($0 ~ /case/) {
+           case_count++;
+       } else if ($0 ~ /esac/) {
+          case_count--;
+       }
+       next;
     }
+
     {
         print;
     }
