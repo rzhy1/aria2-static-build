@@ -85,7 +85,7 @@ configure_file="configure"
 # 定义 sed 命令，用于注释掉 long long reliability test 2 的代码块
 # 使用 sed 命令，只注释 if 语句开始行
 sed_command='
-/if { ac_try=\'\\.\/a.out \\|\\| \\.\\\/b.out \\|\\| \\.\\\/a.exe \\|\\| \\.\\\/a_out.exe \\|\\| \\.\\\/conftest\'/s/^/# /
+/if { ac_try=\'\\.\\/a.out \\|\\| \\.\\\\\/b.out \\|\\| \\.\\\\\/a.exe \\|\\| \\.\\\\\/a_out.exe \\|\\| \\.\\\\\/conftest\'/s/^/# /
 '
 # 使用 sed 命令修改 configure 文件
 if sed -i "$sed_command" "$configure_file"; then
