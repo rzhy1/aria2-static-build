@@ -81,16 +81,17 @@ curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/ref
 # patch configure（不检测long long）
 # 定义 configure.txt 文件路径
 configure_file="configure"
+# 定义要匹配的字符串
+match_string='if { ac_try=\'\\.\\/a.out \\|\\| \\.\\\\\/b.out \\|\\| \\.\\\\\/a.exe \\|\\| \\.\\\\\/a_out.exe \\|\\| \\.\\\\\/conftest\''
 
-# 定义 sed 命令，用于注释掉 long long reliability test 2 的代码块
-# 使用 sed 命令，只注释 if 语句开始行
-sed_command='
-/if { ac_try=\'\\.\\/a.out \\|\\| \\.\\\\\/b.out \\|\\| \\.\\\\\/a.exe \\|\\| \\.\\\\\/a_out.exe \\|\\| \\.\\\\\/conftest\'/s/^/# /
-'
-# 使用 sed 命令修改 configure 文件
+# 使用 awk 命令转义匹配字符串中的特殊字符
+escaped_match_string=$(echo "$match_string" | awk '{gsub(/\\/,"\\\\\\\\"); gsub(/\[/,"\\\\[");gsub(/\]/,"\\\\]");gsub(/\*/,"\\\*");gsub(/\?/,"\\\?");gsub(/\|/,"\\\\\\|") ;gsub(/\(/,"\\\\(");gsub(/\)/,"\\\\)"); print}')
+# 使用 sed 命令直接修改 configure.txt 文件，并使用转义后的匹配字符串
+sed_command="/${escaped_match_string}/s/^/# /"
+
 if sed -i "$sed_command" "$configure_file"; then
-  echo "Long long reliability test 2 line successfully commented out in $configure_file"
-else
+    echo "Long long reliability test 2 line successfully commented out in $configure_file"
+  else
   echo "Failed to comment out long long reliability test 2 line in $configure_file" >&2
   exit 1
 fi
