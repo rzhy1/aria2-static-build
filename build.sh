@@ -82,7 +82,7 @@ echo "检查"
 grep 'ac_prog=.*-print-prog-name=ld' configure
 echo "检查结束"
 #    --disable-cxx \
-CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure -v \
+CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O1 -g" ./configure -v \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
