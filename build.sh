@@ -17,8 +17,8 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
-export CFLAGS="-O2 -g0 -flto=$(nproc)"
-export CXXFLAGS="-O2 -g0 -flto=$(nproc)"
+#export CFLAGS="-O2 -g0 -flto=$(nproc)"
+#export CXXFLAGS="-O2 -g0 -flto=$(nproc)"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
@@ -40,6 +40,8 @@ duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 #x86_64-w64-mingw32-gcc -print-search-dirs
+x86_64-w64-mingw32-ar --plugin
+x86_64-w64-mingw32-ranlib --plugin
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
@@ -76,7 +78,7 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
-./configure  CC="x86_64-w64-mingw32-gcc -O2 -g0" \
+./configure CC="x86_64-w64-mingw32-gcc" CFLAGS="-O2 -g0" CXXFLAGS="-O2 -g0" \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
