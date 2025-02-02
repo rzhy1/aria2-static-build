@@ -283,7 +283,6 @@ autoreconf -i
     --disable-dependency-tracking \
     --disable-libtool-lock \
     --disable-checking \
-
     ARIA2_STATIC=yes \
     SQLITE3_LIBS="-L$PREFIX/lib -lsqlite3" \
     CPPFLAGS="-I$PREFIX/include" \
