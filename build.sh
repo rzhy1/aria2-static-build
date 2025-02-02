@@ -79,9 +79,9 @@ cd gmp-*
 curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
-#sed -i 's/^ *limb_chosen=.*$/limb_chosen=none/' configure
+sed -i '/no, long long reliability test/ { :a; N; /fi/!ba; d }' configure
 echo "检查"
-grep 'limb_chosen' configure
+grep 'long long reliability test' configure
 echo "检查结束"
 
 #    --disable-cxx \
