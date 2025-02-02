@@ -82,7 +82,7 @@ cd gmp-*
 sed -i -e '/eval[ \t]limb_chosen[ \t]*=[ \t]*"\\\$limb\([a-zA-Z0-9_]\+\)";/a limb_chosen=none' configure
 sed -i -e '/test[ \t]-n[ \t]*"\\\$limb_chosen"[ \t]*\|\|[ \t]*eval[ \t]limb_chosen[ \t]*=[ \t]*"\\\$limb\([a-zA-Z0-9_]\+\)";/a limb_chosen=none' configure
 echo "检查"
-grep 'limb_chosen=' configure
+grep 'limb_chosen' configure
 echo "检查结束"
 
 #    --disable-cxx \
