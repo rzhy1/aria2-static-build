@@ -17,8 +17,8 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
-#export CFLAGS="-O2 -g0 -flto=$(nproc)"
-#export CXXFLAGS="-O2 -g0 -flto=$(nproc)"
+export CFLAGS="-O2 -g0 -flto=$(nproc)"
+export CXXFLAGS="-O2 -g0 -flto=$(nproc)"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
@@ -83,6 +83,7 @@ cd gmp-*
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
+    CC=x86_64-w64-mingw32-gcc \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
