@@ -76,35 +76,15 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
-#curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
+curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
-awk '
-  BEGIN { in_target_block=0; block_level=0; has_keyword=0; buffer="" }
-  /^if test "\$gmp_prog_cc_works" = yes; then/ && block_level==0 {
-    in_target_block=1; block_level=1; has_keyword=0; buffer=$0 "\n"; next
-  }
-  in_target_block {
-    buffer = buffer $0 "\n"
-    if (/long long reliability test/) { has_keyword=1 }
-    if (/^if /) { block_level++ }
-    if (/^fi/) { block_level-- }
-    if (block_level == 0) {
-      in_target_block=0
-      if (!has_keyword) { printf "%s", buffer }
-      buffer=""
-    }
-    next
-  }
-  { print }
-' configure > configure.new
-mv configure.new configure
 
 echo "检查"
 #grep 'long long reliability test' configure
 echo "检查结束"
-cat configure
-./configure \
+
+./configure c_cv_type_long_long=yes \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
