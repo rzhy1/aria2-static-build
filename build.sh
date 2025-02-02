@@ -80,31 +80,23 @@ cd gmp-*
 
 # patch configure（不检测long long）
 awk '
-BEGIN { in_target_block=0; block_level=0; has_keyword=0; buffer="" }
-# 定位到目标块的开始
-/^if test "\$gmp_prog_cc_works" = yes; then/ && block_level==0 {
-  in_target_block=1; block_level=1; has_keyword=0; buffer=$0 "\n"; next
-}
-in_target_block {
-  # 记录块的内容
-  buffer = buffer $0 "\n"
-  # 查找是否包含目标关键字
-  if (/long long reliability test/) { has_keyword=1 }
-  # 如果遇到嵌套的 if 块，增加层级
-  if (/^if /) { block_level++ }
-  # 如果遇到 fi，减少层级
-  if (/^fi/) { block_level-- }
-  # 当层级回到零时，关闭当前块
-  if (block_level == 0) {
-    in_target_block=0
-    # 如果没有找到关键字，打印该块内容
-    if (!has_keyword) { printf "%s", buffer }
-    buffer=""
+  BEGIN { in_target_block=0; block_level=0; has_keyword=0; buffer="" }
+  /^if test "\$gmp_prog_cc_works" = yes; then/ && block_level==0 {
+    in_target_block=1; block_level=1; has_keyword=0; buffer=$0 "\n"; next
   }
-  next
-}
-{ print }
-
+  in_target_block {
+    buffer = buffer $0 "\n"
+    if (/long long reliability test/) { has_keyword=1 }
+    if (/^if /) { block_level++ }
+    if (/^fi/) { block_level-- }
+    if (block_level == 0) {
+      in_target_block=0
+      if (!has_keyword) { printf "%s", buffer }
+      buffer=""
+    }
+    next
+  }
+  { print }
 ' configure > configure.new
 mv configure.new configure
 
