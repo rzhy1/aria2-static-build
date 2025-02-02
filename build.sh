@@ -85,15 +85,19 @@ configure_file="configure"
 match_string='if { ac_try=\'\\.\\/a.out \\|\\| \\.\\\\\/b.out \\|\\| \\.\\\\\/a.exe \\|\\| \\.\\\\\/a_out.exe \\|\\| \\.\\\\\/conftest\''
 
 # 使用 grep 查找匹配行的行号
-start_line=$(grep -n "$match_string" "$configure_file" | awk -F: '{printf "%s", $1}')
+start_line=$(grep -n "$match_string" "$configure_file" | awk -F: '{print $1}')
 
 if test -z "$start_line"; then
   echo "Error: Could not find the target line in $configure_file" >&2
   exit 1
 fi
 
+
+#对行号进行转义
+escaped_start_line=$(echo "$start_line" | sed 's/[]()]/\\&/g')
+
 # 使用 sed 命令进行注释
-sed -i "${start_line}s/^/# /" "$configure_file"
+sed -i "${escaped_start_line}s/^/# /" "$configure_file"
 
 echo "Long long reliability test 2 line successfully commented out in $configure_file"
 echo "检查"
