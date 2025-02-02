@@ -80,12 +80,32 @@ cd gmp-*
 
 # patch configure（不检测long long）
 sed -i '/if test "\$gmp_prog_cc_works" = yes; then/{
-  /long long reliability test/!b
   :a
-  /esac.*fi/!{
+  /fi/!{
+    /long long reliability test/b del
+    /if /b if_start
+    /case /b case_start
     N
     ba
   }
+  b end
+  :if_start
+  :if_loop
+  /fi/!{
+    N
+    /if /b if_loop
+  b a
+  }
+  :case_start
+  :case_loop
+  /esac/!{
+    N
+    /case /b case_loop
+  b a
+  }
+  :del
+  /fi/!d
+  :end
   d
 }' configure
 
