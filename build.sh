@@ -82,7 +82,7 @@ curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/ref
 perl -i -0777 -pe 's/if test "\$gmp_prog_cc_works" = yes; then\n(.*?\n)?(.*no, long long reliability test [12], program does not run.*?\n)+.*?fi\n//sg' configure
 
 echo "检查"
-grep 'long long reliability test' configure
+#grep 'long long reliability test' configure
 echo "检查结束"
 
 ./configure \
