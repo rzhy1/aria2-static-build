@@ -79,6 +79,7 @@ cd gmp-*
 #curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
+ 查找 configure 文件中包含 "Test compile: long long reliability test" 的行号
 find_and_comment() {
   local file="$1"
   local search_str="Test compile: long long reliability test"
@@ -97,28 +98,18 @@ find_and_comment() {
       echo "在文件 $file 中未找到字符串 '$search_str'"
       break  # 如果没有找到匹配的行，则退出循环
     fi
-  done < <(find "$file" -type f -print) # 如果参数为目录则查找该目录所有文件
+  done < <(find "$file" -type f -print)
 
 }
 
-# 检查是否有文件作为参数
-if [ $# -eq 0 ]; then
-  echo "用法: $0 <configure_file或目录>"
-  exit 1
+
+# 直接使用 configure 文件作为参数
+if [ ! -f "configure" ]; then
+    echo "错误: 当前目录下找不到 'configure' 文件."
+    exit 1
 fi
 
-# 循环处理所有输入的文件或目录
-for file in "$@"; do
-  if [ -d "$file" ]; then
-    # 传入目录，查找所有文件
-    find_and_comment "$file"
-  elif [ -f "$file" ]; then
-    # 传入的是单个文件
-    find_and_comment "$file"
-  else
-    echo "错误: 文件或目录 '$file' 不存在."
-  fi
-done
+find_and_comment "configure"
 
 echo "处理完成."
 echo "检查"
