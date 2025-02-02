@@ -69,42 +69,6 @@ retry() {
   return 1
 }
 
-echo "⭐⭐⭐⭐⭐⭐测试⭐⭐⭐⭐⭐⭐"
-# 1. 生成 C 语言测试文件 test.c
-cat > test.c <<EOF
-#include <stdio.h>
-
-int main() {
-    long long x = 9223372036854775807LL;
-    printf("long long test: %lld\\n", x);
-    return 0;
-}
-EOF
-
-echo "[INFO] Created test.c"
-which x86_64-w64-mingw32-gcc
-cat test.c
-# 2. 使用 x86_64-w64-mingw32-gcc 交叉编译
-x86_64-w64-mingw32-gcc test.c -o test.exe
-if [ $? -ne 0 ]; then
-    echo "[ERROR] Compilation failed!"
-    exit 1
-else
-    echo "[INFO] Compilation successful! Executable: test.exe"
-fi
-
-# 3. 检测是否在 Windows 下运行（如果是 Linux，直接打印成功信息）
-if command -v wine &> /dev/null; then
-    echo "[INFO] Running test.exe using Wine..."
-    wine test.exe
-else
-    echo "[INFO] Compilation successful, but test.exe must be run on Windows."
-fi
-
-# 4. 清理临时文件（可选）
-rm -f test.c
-
-
 # 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
@@ -112,15 +76,13 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
-#   --disable-cxx \
-./configure \
+./configure  CC="x86_64-w64-mingw32-gcc -O2 -g0" \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
     --host=$HOST \
     --enable-fat \
-    CFLAGS="-O1 -g0" \
-    CXXFLAGS="-O1 -g0" \
+    --disable-cxx \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
