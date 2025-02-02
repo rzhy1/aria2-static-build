@@ -80,7 +80,7 @@ cd gmp-*
 # patch configure（不检测long long）
 sed -i 's/if test "$limb_chosen" = longlong;/if false;/' configure
 echo "检查"
-grep 'limb_chosen" = longlong' configure
+#grep 'limb_chosen" = longlong' configure
 echo "检查结束"
 #    --disable-cxx \
 CC=x86_64-w64-mingw32-gcc CXX=x86_64-w64-mingw32-g++ CFLAGS="-O0 -g" ./configure -v \
