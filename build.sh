@@ -116,8 +116,13 @@ n2 > 0 && n3 > 0 && NR >= n2 && NR <= n3 {
 
 # 替换原文件
 mv configure.new configure
-sed -i 's/;;[[:space:]]*;;/;;/g' configure
-
+awk '
+  /case / { in_case=1 }
+  /;;/ && in_case { count++ }
+  /esac/ { in_case=0; count=0 }
+  count > 1 { sub(/;;/, ""); count-- }
+  { print }
+' configure > configure.new && mv configure.new configure
 echo "检查"
 grep 'long long reliability test' configure
 echo "检查结束"
