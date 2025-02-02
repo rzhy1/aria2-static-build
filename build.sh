@@ -79,11 +79,8 @@ cd gmp-*
 #curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
-
+sed -n '/if test "\$gmp_prog_cc_works" = yes; then/,/esac\nfi/p' configure
 echo "检查"
-bash -n configure
-echo "检查1"
-grep -n "^fi" configure
 grep 'long long reliability test' configure
 echo "检查结束"
 
