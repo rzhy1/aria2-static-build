@@ -79,38 +79,46 @@ cd gmp-*
 curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
-perl -0777 -pi -e '
-# 标记是否在外层 if 块中
-BEGIN { $in_if = 0; $delete_block = 0; }
+input_file="configure"    # 直接使用 configure 文件名
+output_file="configure.new" # 输出到新的 configure 文件
 
-# 如果找到了外层 if 的起始
-if (/^if test "\$gmp_prog_cc_works" = yes; then/) {
-    $in_if = 1;
-    $delete_block = 0;  # 初始时不删除
-}
-
-# 如果在 if 块中，检查每一行
-if ($in_if) {
-    # 如果找到 long long reliability test，触发删除
-    if (/long long reliability test/) {
-        $delete_block = 1;  # 设置删除标记
+awk '
+    /if test "\$gmp_prog_cc_works" = yes; then/ {
+        in_block = 1;
+        if_count = 1;
+        block_content = $0 ORS;
+        next;
     }
-}
-
-# 如果标记为删除，则跳过该行
-if ($delete_block) {
-    if (/^fi$/) {
-        $in_if = 0;  # 找到 fi，退出删除块
-        $delete_block = 0;  # 重置删除标记
+    in_block == 1 {
+        block_content = block_content $0 ORS;
+        if ($0 ~ /if/) {
+            if_count++;
+        } else if ($0 ~ /fi/) {
+            if_count--;
+            if (if_count == 0) {
+                in_block = 0;
+                if (block_content ~ /long long reliability test/) {
+                    next; # Skip printing block
+                } else {
+                   printf "%s", block_content;
+                }
+                block_content = "";
+            }
+        }
+        next;
     }
-    next;  # 删除当前行
-}
+    {
+        print;
+    }
+' "$input_file" > "$output_file"
 
-# 如果遇到 fi，退出 if 块
-if (/^fi$/ && $in_if) {
-    $in_if = 0;  # 退出外层 if 块
-}
-' configure
+# 如果修改成功，可以替换原来的 configure 文件
+if [ $? -eq 0 ]; then
+    mv "$output_file" "$input_file"
+    echo "Modified configure file successfully."
+else
+    echo "Error modifying configure file."
+fi
 
 
 echo "检查"
