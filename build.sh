@@ -79,65 +79,15 @@ cd gmp-*
 curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
 # patch configure（不检测long long）
-input_file="configure"    # 直接使用 configure 文件名
-output_file="configure.new" # 输出到新的 configure 文件
-
-awk '
-  {
-      print "Line " NR ": "$0;
-      if (/if test "\$gmp_prog_cc_works" = yes; then/) {
-          print "  Found if start";
-          in_block = 1;
-          if_count = 1;
-          block_content = $0 ORS;
-          next;
-      }
-      if (in_block == 1) {
-          print "  In block";
-          block_content = block_content $0 ORS;
-          if ($0 ~ /if/) {
-              if_count++;
-              print "    if count++ " if_count;
-          } else if ($0 ~ /fi/) {
-              if_count--;
-              print "    if count-- " if_count;
-              if (if_count == 0) {
-                print "    if count = 0, check content";
-                  in_block = 0;
-                 if (block_content ~ /long long reliability test/) {
-                     print "     skip block"
-                     next; # Skip printing block
-                  } else {
-                     printf "%s", block_content;
-                  }
-                  block_content = "";
-              }
-          }
-         
-          if ($0 ~ /case/) {
-             case_count++;
-             print "     case count++ " case_count
-          } else if ($0 ~ /esac/) {
-            case_count--;
-            print "     case count-- " case_count
-         }
-         next;
-      }
-       print "  Out of block";
-      {
-        print
-      }
-
+sed -i '/if test "\$gmp_prog_cc_works" = yes; then/{
+  /long long reliability test/!b
+  :a
+  /esac\nfi/!{
+    N
+    ba
   }
- ' "$input_file" > "$output_file"
-
-# 如果修改成功，可以替换原来的 configure 文件
-if [ $? -eq 0 ]; then
-    mv "$output_file" "$input_file"
-    echo "Modified configure file successfully."
-else
-    echo "Error modifying configure file."
-fi
+  d
+}' configure
 
 echo "检查"
 bash -n configure
