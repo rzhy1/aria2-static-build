@@ -83,7 +83,6 @@ cd gmp-*
     --host=$HOST \
     --disable-cxx \
     --enable-fat \
-    CC=x86_64-w64-mingw32-gcc \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
