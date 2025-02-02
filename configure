@@ -12510,9 +12510,9 @@ $as_echo_n "checking for ld used by $CC... " >&6; }
   case $host in
   *-*-mingw*)
     # gcc leaves a trailing carriage return, which upsets mingw
-    ac_prog=`("$CC" -print-prog-name=ld) 2>&5 | sed 's/\\r$//'` ;;
+    ac_prog=`("$CC" -print-prog-name=ld) 2>&5 | sed 's/\\r$//'`
   *)
-    ac_prog=`("$CC" -print-prog-name=ld) 2>&5 | sed 's/\\\\r$//'` ;;
+    ac_prog=`("$CC" -print-prog-name=ld) 2>&5 | sed 's/\\r$//'`
   esac
   case $ac_prog in
     # Accept absolute paths.
@@ -20006,9 +20006,9 @@ $as_echo_n "checking for ld used by $CC... " >&6; }
   case $host in
   *-*-mingw*)
     # gcc leaves a trailing carriage return, which upsets mingw
-    ac_prog=`("$CC" -print-prog-name=ld) 2>&5 | sed 's/\\r$//'` ;;
+    ac_prog=`("$CC" -print-prog-name=ld) 2>&5 | sed 's/\\r$//'`
   *)
-    ac_prog=`("$CC" -print-prog-name=ld) 2>&5 | sed 's/\\\\r$//'` ;;
+    ac_prog=`("$CC" -print-prog-name=ld) 2>&5 | sed 's/\\r$//'`
   esac
   case $ac_prog in
     # Accept absolute paths.
