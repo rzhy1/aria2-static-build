@@ -27,28 +27,22 @@ USE_GCC15=1
 if [[ "$USE_GCC15" -eq 1 ]]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
-    mkdir -p /opt/mingw64
-    tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C /opt/mingw64
+    tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C /usr/
 else
     echo "使用相对成熟的 mingw-w64-x86_64-toolchain (GCC 14)..."
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz"  "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p /opt/mingw64
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
-#    export PATH="/opt/mingw64/bin:${PATH}"    
+    export PATH="/opt/mingw64/bin:${PATH}"    
 fi
 end_time=$(date +%s.%N)
 duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-export PATH="/usr/bin:/opt/mingw64/bin:${PATH}"
-#ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-* /usr/bin/
+# ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-* /usr/bin/ 一次链接所有
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 #x86_64-w64-mingw32-gcc -print-search-dirs
-echo "查询"
-which x86_64-w64-mingw32-gcc
-which x86_64-w64-mingw32-g++
-echo "查询结束"
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
