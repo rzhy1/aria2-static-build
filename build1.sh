@@ -52,6 +52,7 @@ x86_64-w64-mingw32-gcc --version
 echo "查询"
 ls -l /usr/bin | grep gold
 echo "查询2"
+find / -type f -name "*gold*" 2>/dev/null
 #ls -l ${CROSS_ROOT}/bin | grep x86_64-w64-mingw32
 echo "查询结束"
 
