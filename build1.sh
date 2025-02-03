@@ -58,10 +58,8 @@ which x86_64-w64-mingw32-gcc
 find / -name "x86_64-w64-mingw32-gcc"
 which lld
 which gold
-find / -name "x86_64-w64-mingw32-gold"
 which x86_64-w64-mingw32-gold
-find / -name "x86_64-w64-mingw32-ld.lld"
-which x86_64-w64-mingw32-ld.lld
+which x86_64-w64-mingw32-lld
 echo "查询结束"
 
 BUILD_ARCH="$(gcc -dumpmachine)"
