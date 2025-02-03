@@ -58,8 +58,11 @@ which x86_64-w64-mingw32-gcc
 find / -name "x86_64-w64-mingw32-gcc"
 which lld
 which gold
-find / -type f -name "*lld*" 2>/dev/null
-find / -type f -name "*gold*" 2>/dev/null
+/usr/bin/lld --version
+/usr/bin/gold --version
+/usr/lib/llvm-19/bin/lld --version
+#find / -type f -name "*lld*" 2>/dev/null
+#find / -type f -name "*gold*" 2>/dev/null
 which x86_64-w64-mingw32-gold
 which x86_64-w64-mingw32-lld
 echo "查询结束"
