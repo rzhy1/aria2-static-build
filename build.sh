@@ -33,11 +33,14 @@ else
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz"  "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p /opt/mingw64
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
-    export PATH="/opt/mingw64/bin:${PATH}"
+#    export PATH="/opt/mingw64/bin:${PATH}"
+    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc
+    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++
+    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-ld /usr/bin/x86_64-w64-mingw32-ld
 fi
 end_time=$(date +%s.%N)
 duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-#ln -s $(which ld.lld) /usr/bin/x86_64-w64-mingw32-ld.lld
+
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 
 echo "x86_64-w64-mingw32-gcc版本是："
