@@ -44,9 +44,8 @@ if [ "$USE_GCC15" -eq 1 ]; then
     tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
 else
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
-    tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C "/usr/"
-#    mkdir -p ${CROSS_ROOT}
-#    tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
+    mkdir -p ${CROSS_ROOT}
+    tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
@@ -195,7 +194,9 @@ prepare_xz() {
     --disable-shared \
     --disable-doc \
     --enable-debug=no \
-    --disable-nls
+    --disable-nls \
+    CFLAGS="-O2 -g0"  \
+    CXXFLAGS="-O2 -g0" 
   make -j$(nproc)
   make install
    xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
@@ -220,7 +221,9 @@ prepare_libxml2() {
     --without-python \
     --without-icu \
     --enable-static \
-    --disable-shared
+    --disable-shared \
+    CFLAGS="-O2 -g0" \
+    CXXFLAGS="-O2 -g0"
   make -j$(nproc)
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
@@ -249,7 +252,9 @@ prepare_sqlite() {
     --disable-rtree \
     --disable-session \
     --disable-editline \
-    --disable-load-extension
+    --disable-load-extension \
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
@@ -284,7 +289,9 @@ prepare_c_ares() {
     --disable-shared \
     --enable-silent-rules \
     --disable-tests \
-    --without-random
+    --without-random \
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
   make install
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
@@ -305,9 +312,12 @@ prepare_libssh2() {
     --disable-examples-build \
     --disable-docker-tests \
     --disable-sshd-tests \
-    --disable-debug
+    --disable-debug \
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
   make install
+  #unset CFLAGS
   libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
   echo "| libssh2 | ${libssh2_ver} | ${libssh2_latest_url:-cached libssh2} |" >>"${BUILD_INFO}"
 }
@@ -386,7 +396,9 @@ build_aria2() {
     --disable-checking \
     --enable-checking=release \
     ARIA2_STATIC=yes \
-    ${ARIA2_EXT_CONF}
+    ${ARIA2_EXT_CONF} \
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
