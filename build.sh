@@ -94,13 +94,11 @@ find_and_comment() {
 }
 find_and_comment "configure"  && echo "configure文件修改完成"
 
-./configure \
+BUILD_CC=gcc BUILD_CXX=g++ ./configure \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
     --host=$HOST \
-    --enable-fat \
-    --disable-cxx \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
 echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
