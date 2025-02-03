@@ -58,6 +58,7 @@ which x86_64-w64-mingw32-gcc
 find / -name "x86_64-w64-mingw32-gcc"
 which lld
 which gold
+find / -name "*mingw*lld" 2>/dev/null
 which x86_64-w64-mingw32-gold
 which x86_64-w64-mingw32-lld
 echo "查询结束"
