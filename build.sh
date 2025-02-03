@@ -37,6 +37,13 @@ else
     ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc
     ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++
     ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-ld /usr/bin/x86_64-w64-mingw32-ld
+    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-ar /usr/bin/x86_64-w64-mingw32-ar
+    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-ranlib /usr/bin/x86_64-w64-mingw32-ranlib
+    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-gcc-ar /usr/bin/x86_64-w64-mingw32-gcc-ar
+    for file in /opt/mingw64/bin/x86_64-w64-mingw32-*; do
+        target="/usr/bin/$(basename "$file")"
+        sudo ln -sf "$file" "$target"
+    done
 fi
 end_time=$(date +%s.%N)
 duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
