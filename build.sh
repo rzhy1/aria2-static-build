@@ -23,26 +23,22 @@ export LDFLAGS="${LDFLAGS:-} -flto"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-USE_GCC15=0
+USE_GCC15=1
 if [[ "$USE_GCC15" -eq 1 ]]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
-    tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
+    mkdir -p /opt/mingw64
+    tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C /opt/mingw64
 else
     echo "使用相对成熟的 mingw-w64-x86_64-toolchain (GCC 14)..."
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz"  "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p /opt/mingw64
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
-#    export PATH="/opt/mingw64/bin:${PATH}"
-    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-* /usr/bin/
-#    for file in /opt/mingw64/bin/x86_64-w64-mingw32-*; do
-#        target="/usr/bin/$(basename "$file")"
-#        ln -sf "$file" "$target"
-#    done
+#    export PATH="/opt/mingw64/bin:${PATH}"    
 fi
 end_time=$(date +%s.%N)
 duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-
+ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-* /usr/bin/
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 
 echo "x86_64-w64-mingw32-gcc版本是："
