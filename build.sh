@@ -34,16 +34,11 @@ else
     mkdir -p /opt/mingw64
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
 #    export PATH="/opt/mingw64/bin:${PATH}"
-    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-gcc /usr/bin/x86_64-w64-mingw32-gcc
-    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-g++ /usr/bin/x86_64-w64-mingw32-g++
-    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-ld /usr/bin/x86_64-w64-mingw32-ld
-    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-ar /usr/bin/x86_64-w64-mingw32-ar
-    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-ranlib /usr/bin/x86_64-w64-mingw32-ranlib
-    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-gcc-ar /usr/bin/x86_64-w64-mingw32-gcc-ar
-    for file in /opt/mingw64/bin/x86_64-w64-mingw32-*; do
-        target="/usr/bin/$(basename "$file")"
-        ln -sf "$file" "$target"
-    done
+    ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-* /usr/bin/
+#    for file in /opt/mingw64/bin/x86_64-w64-mingw32-*; do
+#        target="/usr/bin/$(basename "$file")"
+#        ln -sf "$file" "$target"
+#    done
 fi
 end_time=$(date +%s.%N)
 duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
