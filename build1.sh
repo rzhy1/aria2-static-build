@@ -57,7 +57,7 @@ echo "查询"
 which x86_64-w64-mingw32-gcc
 find / -name "x86_64-w64-mingw32-gcc"
 which lld
-lld --version
+#lld --version
 #/usr/lib/llvm-19/bin/lld --version
 echo "查询1结束"
 find / -type f -name "*lld-link*" 2>/dev/null
