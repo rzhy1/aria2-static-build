@@ -8,6 +8,8 @@ export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export LIBTOOL=ld.lld
+export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -pipe -flto -g0"
+export CXXFLAGS="$CFLAGS"
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 retry() {
@@ -194,9 +196,7 @@ prepare_xz() {
     --disable-shared \
     --disable-doc \
     --enable-debug=no \
-    --disable-nls \
-    CFLAGS="-O2 -g0"  \
-    CXXFLAGS="-O2 -g0" 
+    --disable-nls
   make -j$(nproc)
   make install
    xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
@@ -221,9 +221,7 @@ prepare_libxml2() {
     --without-python \
     --without-icu \
     --enable-static \
-    --disable-shared \
-    CFLAGS="-O2 -g0" \
-    CXXFLAGS="-O2 -g0"
+    --disable-shared
   make -j$(nproc)
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
@@ -252,9 +250,7 @@ prepare_sqlite() {
     --disable-rtree \
     --disable-session \
     --disable-editline \
-    --disable-load-extension \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
+    --disable-load-extension
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
@@ -289,9 +285,7 @@ prepare_c_ares() {
     --disable-shared \
     --enable-silent-rules \
     --disable-tests \
-    --without-random \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
+    --without-random
   make -j$(nproc)
   make install
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
@@ -312,12 +306,9 @@ prepare_libssh2() {
     --disable-examples-build \
     --disable-docker-tests \
     --disable-sshd-tests \
-    --disable-debug \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
+    --disable-debug
   make -j$(nproc)
   make install
-  #unset CFLAGS
   libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
   echo "| libssh2 | ${libssh2_ver} | ${libssh2_latest_url:-cached libssh2} |" >>"${BUILD_INFO}"
 }
@@ -396,9 +387,7 @@ build_aria2() {
     --disable-checking \
     --enable-checking=release \
     ARIA2_STATIC=yes \
-    ${ARIA2_EXT_CONF} \
-    CFLAGS="-O2 -g0 -flto=$(nproc)" \
-    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
+    ${ARIA2_EXT_CONF}
   make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
