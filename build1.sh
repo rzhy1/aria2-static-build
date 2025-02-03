@@ -56,6 +56,8 @@ x86_64-w64-mingw32-gcc --version
 echo "查询"
 which x86_64-w64-mingw32-gcc
 find / -name "x86_64-w64-mingw32-gcc"
+which lld
+which gold
 find / -name "x86_64-w64-mingw32-gold"
 which x86_64-w64-mingw32-gold
 find / -name "x86_64-w64-mingw32-ld.lld"
