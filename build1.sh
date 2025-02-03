@@ -7,11 +7,11 @@ export CROSS_HOST="x86_64-w64-mingw32"
 export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
-#export LD=/usr/lib/llvm-19/bin/lld-link
-export LD=ld.lld
+export LD=/usr/lib/llvm-19/bin/lld-link
+#export LD=ld.lld
 export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -pipe -flto -g0"
 export CXXFLAGS="$CFLAGS"
-export LDFLAGS="${LDFLAGS:-} -flto -Wl,-threads=$(nproc) -lpthread"
+export LDFLAGS="${LDFLAGS:-} -flto -Wl,-threads=$(nproc) -Wl,--flavor,link -lpthread"
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 
