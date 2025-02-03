@@ -10,15 +10,16 @@
 # commands:
 #
 # $ sudo docker run --rm -it -v /path/to/dest:/out aria2-mingw cp /aria2/src/aria2c.exe /out
-export LD=ld.lld
+export LD=x86_64-w64-mingw32-ld
 set -euo pipefail
 HOST=x86_64-w64-mingw32
 PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
-export CFLAGS="-O3 -g0 -flto=$(nproc)"
-export CXXFLAGS="-O3 -g0 -flto=$(nproc)"
+export CFLAGS="-march=tigerlake -O2 -pipe -flto -mtune=tigerlake"
+export CXXFLAGS="$CFLAGS"
+export LDFLAGS="$LDFLAGS -flto"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
