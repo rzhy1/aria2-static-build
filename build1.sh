@@ -7,9 +7,8 @@ export CROSS_HOST="x86_64-w64-mingw32"
 export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
-#export LD=ld.lld
-export LD=x86_64-w64-mingw32-ld
-export CFLAGS="-march=tigerlake -O2 -pipe -flto -mtune=tigerlake -g0"
+export LD=x86_64-w64-mingw32-ld.lld
+export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -pipe -flto -g0"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="$LDFLAGS -flto"
 set -o pipefail
