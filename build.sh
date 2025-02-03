@@ -42,7 +42,7 @@ else
     ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-gcc-ar /usr/bin/x86_64-w64-mingw32-gcc-ar
     for file in /opt/mingw64/bin/x86_64-w64-mingw32-*; do
         target="/usr/bin/$(basename "$file")"
-        sudo ln -sf "$file" "$target"
+        ln -sf "$file" "$target"
     done
 fi
 end_time=$(date +%s.%N)
