@@ -41,7 +41,7 @@ echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/0
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
-USE_GCC15=1
+USE_GCC15=0
 if [ "$USE_GCC15" -eq 1 ]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
@@ -59,7 +59,7 @@ find / -name "x86_64-w64-mingw32-gcc"
 #which lld
 which gold
 #/usr/bin/lld --version
-/usr/bin/gold --version
+gold --version
 #/usr/lib/llvm-19/bin/lld --version
 #find / -type f -name "*lld*" 2>/dev/null
 echo "查询结束"
