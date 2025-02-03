@@ -7,15 +7,9 @@ export CROSS_HOST="x86_64-w64-mingw32"
 export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
-#export LD=/usr/lib/llvm-19/bin/lld-link
-export LD=gold
-export LIBTOOL=/usr/lib/llvm-19/bin/lld-link
-export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -pipe -flto -g0"
-export CXXFLAGS="$CFLAGS"
-export LDFLAGS="${LDFLAGS:-} -flto -Wl,-threads=$(nproc) -Wl,--flavor,link -lpthread"
+export LD=ld.lld
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
-
 retry() {
   # max retry 5 times
   try=5
@@ -55,11 +49,8 @@ else
 fi
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
-echo "查询"
-which lld
-echo "查询结束"
 
-BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
+BUILD_ARCH="$(gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
 TARGET_HOST="${CROSS_HOST#*-}"
 case "${TARGET_ARCH}" in
@@ -202,7 +193,9 @@ prepare_xz() {
     --disable-shared \
     --disable-doc \
     --enable-debug=no \
-    --disable-nls
+    --disable-nls \
+    CFLAGS="-O2 -g0"  \
+    CXXFLAGS="-O2 -g0" 
   make -j$(nproc)
   make install
    xz_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/liblzma.pc" | awk '{print $2}')"
@@ -227,7 +220,9 @@ prepare_libxml2() {
     --without-python \
     --without-icu \
     --enable-static \
-    --disable-shared
+    --disable-shared \
+    CFLAGS="-O2 -g0" \
+    CXXFLAGS="-O2 -g0"
   make -j$(nproc)
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
@@ -256,7 +251,9 @@ prepare_sqlite() {
     --disable-rtree \
     --disable-session \
     --disable-editline \
-    --disable-load-extension
+    --disable-load-extension \
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)" 
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
@@ -291,7 +288,9 @@ prepare_c_ares() {
     --disable-shared \
     --enable-silent-rules \
     --disable-tests \
-    --without-random
+    --without-random \
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
   make install
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
@@ -312,7 +311,9 @@ prepare_libssh2() {
     --disable-examples-build \
     --disable-docker-tests \
     --disable-sshd-tests \
-    --disable-debug
+    --disable-debug \
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
   make install
   #unset CFLAGS
@@ -394,7 +395,9 @@ build_aria2() {
     --disable-checking \
     --enable-checking=release \
     ARIA2_STATIC=yes \
-    ${ARIA2_EXT_CONF}
+    ${ARIA2_EXT_CONF} \
+    CFLAGS="-O2 -g0 -flto=$(nproc)" \
+    CXXFLAGS="-O2 -g0 -flto=$(nproc)"
   make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
@@ -406,13 +409,13 @@ prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib、xz、libxml2、sqlite、c_ares、libssh2⭐⭐⭐⭐⭐⭐"
-prepare_zlib_ng
-prepare_xz
-prepare_libxml2
-prepare_sqlite
-prepare_c_ares
-prepare_libssh2
-#wait
+prepare_zlib_ng &
+prepare_xz &
+prepare_libxml2 &
+prepare_sqlite &
+prepare_c_ares &
+prepare_libssh2 &
+wait
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
