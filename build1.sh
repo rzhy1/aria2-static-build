@@ -49,9 +49,8 @@ else
 fi
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
-which x86_64-w64-mingw32-ld.lld
 
-BUILD_ARCH="$(gcc -dumpmachine)"
+BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
 TARGET_HOST="${CROSS_HOST#*-}"
 case "${TARGET_ARCH}" in
