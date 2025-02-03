@@ -71,8 +71,8 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends \
               automake  autoconf autopoint jq libtool \
-              make pkgconf wget curl tcl mingw-w64 \
-              ca-certificates libcppunit-dev unzip zstd rsync bc
+              make pkgconf wget curl tcl \
+              ca-certificates libcppunit-dev unzip lld zstd rsync bc
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
