@@ -56,12 +56,10 @@ x86_64-w64-mingw32-gcc --version
 echo "查询"
 which x86_64-w64-mingw32-gcc
 find / -name "x86_64-w64-mingw32-gcc"
-#which lld
-which gold
-#/usr/bin/lld --version
-gold --version
+which lld
+lld --version
 #/usr/lib/llvm-19/bin/lld --version
-#find / -type f -name "*lld*" 2>/dev/null
+#find / -type f -name "lld-link*"
 echo "查询结束"
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
