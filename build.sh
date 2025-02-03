@@ -17,9 +17,9 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
-export CFLAGS="-march=tigerlake -O2 -pipe -flto -mtune=tigerlake"
+export CFLAGS="-march=tigerlake -O2 -pipe -flto -mtune=tigerlake -g0"
 export CXXFLAGS="$CFLAGS"
-export LDFLAGS="$LDFLAGS -flto"
+export LDFLAGS="${LDFLAGS:-} -flto"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
