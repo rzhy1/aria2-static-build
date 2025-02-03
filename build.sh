@@ -38,7 +38,7 @@ else
 fi
 end_time=$(date +%s.%N)
 duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-export PATH="/opt/mingw64/bin:${PATH}"
+export PATH="/usr/bin:/opt/mingw64/bin:${PATH}"
 #ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-* /usr/bin/
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 
