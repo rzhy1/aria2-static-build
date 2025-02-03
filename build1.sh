@@ -60,7 +60,8 @@ which lld
 #lld --version
 #/usr/lib/llvm-19/bin/lld --version
 echo "查询1结束"
-find / -type f -name "*lld-link*" 2>/dev/null
+ls -l  /usr/lib/llvm-*/bin | grep lld
+#find / -type f -name "*lld-link*" 2>/dev/null
 echo "查询结束"
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
