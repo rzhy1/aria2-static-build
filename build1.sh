@@ -57,7 +57,7 @@ x86_64-w64-mingw32-gcc --version
 echo "查询"
 which gold
 echo "查询1结束"
-ls -l /usr/bin | grep gold
+which x86_64-w64-mingw32-gold
 echo "查询结束"
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
