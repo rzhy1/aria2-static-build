@@ -60,7 +60,8 @@ which lld
 #lld --version
 #/usr/lib/llvm-19/bin/lld --version
 echo "查询1结束"
-ls -l  /usr/lib/llvm-*/bin | grep lld
+#ls -l  /usr/lib/llvm-*/bin | grep lld
+ls -l  /usr/bin | grep lld
 #find / -type f -name "*lld-link*" 2>/dev/null
 echo "查询结束"
 
