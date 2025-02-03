@@ -13,6 +13,9 @@ export CXXFLAGS="$CFLAGS"
 export LDFLAGS="$LDFLAGS -flto"
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
+echo "查询"
+where x86_64-w64-mingw32-ld.lld
+echo "查询结束"
 retry() {
   # max retry 5 times
   try=5
