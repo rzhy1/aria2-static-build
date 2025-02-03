@@ -7,7 +7,7 @@ export CROSS_HOST="x86_64-w64-mingw32"
 export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
-export LD=x86_64-w64-mingw32-ld.lld
+export LD=x86_64-w64-mingw32-gold
 export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -pipe -flto -g0"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="$LDFLAGS -flto"
@@ -62,9 +62,6 @@ which gold
 /usr/bin/gold --version
 #/usr/lib/llvm-19/bin/lld --version
 #find / -type f -name "*lld*" 2>/dev/null
-#find / -type f -name "*gold*" 2>/dev/null
-which x86_64-w64-mingw32-gold
-which x86_64-w64-mingw32-lld
 echo "查询结束"
 
 BUILD_ARCH="$(gcc -dumpmachine)"
