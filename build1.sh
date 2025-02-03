@@ -53,6 +53,7 @@ echo "查询"
 ls -l /usr/bin | grep x86_64-w64-mingw32
 echo "查询1"
 ls -l ${CROSS_ROOT} | grep x86_64-w64-mingw32
+ls -l /usr/bin | grep gold
 echo "查询2"
 ls -l ${CROSS_ROOT}/bin | grep x86_64-w64-mingw32
 echo "查询结束"
