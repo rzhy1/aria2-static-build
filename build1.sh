@@ -7,10 +7,10 @@ export CROSS_HOST="x86_64-w64-mingw32"
 export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
-export LD=x86_64-w64-mingw32-gold
+export LD=/usr/lib/llvm-*/bin/lld-link
 export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -pipe -flto -g0"
 export CXXFLAGS="$CFLAGS"
-export LDFLAGS="$LDFLAGS -flto"
+export LDFLAGS="${LDFLAGS:-} -flto -Wl,-threads=$(nproc)"
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 
@@ -55,13 +55,8 @@ echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
 which x86_64-w64-mingw32-gcc
-find / -name "x86_64-w64-mingw32-gcc"
 which lld
-#lld --version
-#/usr/lib/llvm-19/bin/lld --version
 echo "查询1结束"
-#ls -l  /usr/lib/llvm-*/bin | grep lld
-ls -l  /usr/bin | grep lld
 #find / -type f -name "*lld-link*" 2>/dev/null
 echo "查询结束"
 
