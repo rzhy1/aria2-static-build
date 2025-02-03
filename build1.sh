@@ -11,7 +11,7 @@ export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export LD=ld.lld
 export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -pipe -flto -g0"
 export CXXFLAGS="$CFLAGS"
-export LDFLAGS="${LDFLAGS:-} -flto -Wl,-threads=$(nproc)"
+export LDFLAGS="${LDFLAGS:-} -flto"
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 
