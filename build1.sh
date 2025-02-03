@@ -9,6 +9,7 @@ export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export LD=/usr/lib/llvm-19/bin/lld-link
 #export LD=ld.lld
+export LIBTOOL=/usr/lib/llvm-19/bin/lld-link
 export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -pipe -flto -g0"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="${LDFLAGS:-} -flto -Wl,-threads=$(nproc) -Wl,--flavor,link -lpthread"
