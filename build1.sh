@@ -56,11 +56,11 @@ x86_64-w64-mingw32-gcc --version
 echo "查询"
 which x86_64-w64-mingw32-gcc
 find / -name "x86_64-w64-mingw32-gcc"
-which lld
+#which lld
 which gold
 #/usr/bin/lld --version
-#/usr/bin/gold --version
-/usr/lib/llvm-19/bin/lld --version
+/usr/bin/gold --version
+#/usr/lib/llvm-19/bin/lld --version
 #find / -type f -name "*lld*" 2>/dev/null
 #find / -type f -name "*gold*" 2>/dev/null
 which x86_64-w64-mingw32-gold
