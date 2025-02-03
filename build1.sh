@@ -64,7 +64,7 @@ gold --version
 #find / -type f -name "*lld*" 2>/dev/null
 echo "查询结束"
 
-BUILD_ARCH="$(gcc -dumpmachine)"
+BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
 TARGET_HOST="${CROSS_HOST#*-}"
 case "${TARGET_ARCH}" in
