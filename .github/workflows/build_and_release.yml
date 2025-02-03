@@ -71,7 +71,7 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends \
               automake  autoconf autopoint jq libtool \
-              make pkgconf wget curl tcl binutils-gold \
+              make pkgconf wget curl tcl mingw-w64 binutils-gold \
               ca-certificates libcppunit-dev unzip llvm lld zstd rsync bc
       - name: Compile
         env:
