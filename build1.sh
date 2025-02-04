@@ -257,6 +257,7 @@ prepare_sqlite() {
   echo "查询结束1"
   ./configure CFLAGS="$CFLAGS -D_REENTRANT" CXXFLAGS="$CXXFLAGS -D_REENTRANT" \
     --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
+    --enable-threadsafe \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
