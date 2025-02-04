@@ -169,8 +169,8 @@ echo "地方撒发大水"
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     CFLAGS="-D_REENTRANT" \
     CXXFLAGS="-D_REENTRANT" \
-    LDFLAGS="-L$PREFIX/lib -lwinpthread -pthread" \
-    LIBS="-lwinpthread"
+    LDFLAGS="-L$PREFIX/lib -pthread" \
+    LIBS="-lpthread"
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
