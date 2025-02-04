@@ -57,10 +57,7 @@ find / -name "*pthread.a"
 find / -name "*pthread.h"
 find / -name "*pthread*.pc"
 echo "查询结束"
-echo "显示内容"
-which tclsh
-tclsh --version
-echo "显示内容"
+
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
 TARGET_HOST="${CROSS_HOST#*-}"
@@ -256,6 +253,9 @@ prepare_sqlite() {
   sed -i 's/proj-check-function-in-lib pthread_mutexattr_init pthread/proj-check-function-in-lib pthread_mutexattr_init winpthread/g' autosetup/sqlite-config.tcl
   ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/libwinpthread.a
   cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
+  echo "显示内容"
+  file ${CROSS_PREFIX}/lib/libwinpthread.a
+  echo "显示内容"
   #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   export CFLAGS="-I${CROSS_PREFIX}/include"
   export CXXFLAGS="-I${CROSS_PREFIX}/include"
