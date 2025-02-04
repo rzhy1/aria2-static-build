@@ -247,16 +247,10 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  #mv /usr/x86_64-w64-mingw32/lib/libpthread.a /usr/x86_64-w64-mingw32/lib/libpthread.a.bak
-  cp /usr/x86_64-w64-mingw32/lib/*pthread.a ${CROSS_PREFIX}/lib/
-  cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
-  export LDFLAGS="$LDFLAGS -lwinpthread"
-  export LIBS="$LIBS -lwinpthread"
-  export CFLAGS="$CFLAGS -D_WIN32 -D_WINPTHREADS"
+  export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lpthread"
+  export LIBS="$LIBS -lpthread"
   echo "查询1"
-  ld -L${CROSS_PREFIX}/lib -lwinpthread --verbose
-  echo "查询2"
-  #pkg-config --libs --cflags winpthreads
+  ld -L/usr/x86_64-w64-mingw32/lib -lwinpthread --verbose
   echo "查询结束1"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
