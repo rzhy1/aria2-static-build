@@ -70,7 +70,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
-              automake  autoconf autopoint jq libtool tcl \
+              automake  autoconf autopoint jq libtool tcl tcl-dev \
               make pkg-config wget curl g++-mingw-w64-x86-64 \
               ca-certificates libcppunit-dev unzip lld zstd rsync bc
       - name: Compile
