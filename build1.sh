@@ -55,7 +55,6 @@ x86_64-w64-mingw32-gcc --version
 echo "查询"
 find / -name "*pthread.a"
 find / -name "*pthread.h"
-find / -name "*pthreads.pc"
 echo "查询结束"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
@@ -253,7 +252,6 @@ prepare_sqlite() {
   export LDFLAGS="$LDFLAGS -lwinpthread"
   export LIBS="$LIBS -lwinpthread"
   echo "查询"
-  x86_64-w64-mingw32-pkg-config --libs winpthreads
   x86_64-w64-mingw32-gcc -print-file-name=libwinpthread.a
   echo "查询结束"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
