@@ -253,6 +253,7 @@ prepare_sqlite() {
   export LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread"
   export LIBS="-lwinpthread"
   export ac_cv_search_pthread_create="-lwinpthread"
+  export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   ./configure \
     --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}"  --enable-static  --disable-shared "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
