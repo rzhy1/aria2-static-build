@@ -253,7 +253,8 @@ prepare_sqlite() {
   export LDFLAGS="$LDFLAGS -lwinpthread"
   export LIBS="$LIBS -lwinpthread"
   echo "查询"
-  x86_64-w64-mingw32-gcc -print-file-name=libwinpthread.a
+  ld -L${CROSS_PREFIX}/lib -lwinpthread --verbose
+  pkg-config --libs --cflags winpthreads
   echo "查询结束"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
