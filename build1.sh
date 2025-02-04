@@ -254,7 +254,6 @@ prepare_sqlite() {
     --disable-tcl \
     --disable-session \
     --disable-editline \
-    --disable-dynamic-extensions \
     --disable-load-extension
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
