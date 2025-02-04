@@ -253,17 +253,17 @@ prepare_sqlite() {
   export LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread"
   export LIBS="-lwinpthread"
   export ac_cv_search_pthread_create="-lwinpthread"
-  # "${SQLITE_EXT_CONF}"
   ./configure \
-    --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  \
+    --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}"  --enable-static  --disable-shared "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
+    --enable-silent-rules \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
-    --disable-tcl \
     --disable-session \
     --disable-editline \
-    --disable-load-extension
+    --disable-load-extension \
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
