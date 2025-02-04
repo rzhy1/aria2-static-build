@@ -34,7 +34,7 @@ sudo dpkg --add-architecture i386
 
 export DEBIAN_FRONTEND=noninteractive
 # keep debs in container for store cache in docker volume
-rm -f /etc/apt/apt.conf.d/*
+sudo rm -f /etc/apt/apt.conf.d/*
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
@@ -49,13 +49,13 @@ else
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
-ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
+sudo ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
-find / -name "*pthread.a"
-find / -name "*pthread.h"
-find / -name "*pthread*.pc"
+sudo find / -name "*pthread.a"
+sudo find / -name "*pthread.h"
+sudo find / -name "*pthread*.pc"
 echo "查询结束"
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
