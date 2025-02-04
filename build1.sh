@@ -250,7 +250,7 @@ prepare_sqlite() {
   fi
   ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/libwinpthread.a
   #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  LDFLAGS="$LDFLAGS -lwinpthread" \
+  LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread" \
   LIBS="-lwinpthread" \
   ac_cv_search_pthread_create=-lwinpthread \
   ./configure \
