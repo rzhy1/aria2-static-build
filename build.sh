@@ -147,8 +147,8 @@ cd sqlite-*
 ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
 LDFLAGS="-L$PREFIX/lib -lwinpthread" \
 LIBS="-lwinpthread" \
-ac_cv_search_pthread_create=-lwinpthread \
-ac_cv_search_pthread_mutexattr_init=-lwinpthread \
+ac_cv_search_pthread_create="-lwinpthread" \
+ac_cv_search_pthread_mutexattr_init="-lwinpthread"  \
 ./configure \
     --disable-shared \
     --enable-threadsafe \
