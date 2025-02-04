@@ -30,13 +30,13 @@ retry() {
   return 1
 }
 source /etc/os-release
-sudo dpkg --add-architecture i386
+dpkg --add-architecture i386
 
 export DEBIAN_FRONTEND=noninteractive
 # keep debs in container for store cache in docker volume
-sudo rm -f /etc/apt/apt.conf.d/*
-echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' | sudo tee /etc/apt/apt.conf.d/01keep-debs
-echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' | sudo tee /etc/apt/apt.conf.d/99-trust-https
+rm -f /etc/apt/apt.conf.d/*
+echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
+echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 USE_GCC15=0
@@ -46,16 +46,16 @@ if [ "$USE_GCC15" -eq 1 ]; then
     tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
 else
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
-    sudo mkdir -p ${CROSS_ROOT}
+    mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
-sudo ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
+ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
-sudo find / -name "*pthread.a"
-sudo find / -name "*pthread.h"
-sudo find / -name "*pthread*.pc"
+find / -name "*pthread.a"
+find / -name "*pthread.h"
+find / -name "*pthread*.pc"
 echo "查询结束"
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
