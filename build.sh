@@ -150,8 +150,6 @@ curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
-export LDFLAGS="$LDFLAGS -lwinpthread"
-export LIBS="$LIBS -lwinpthread"
 ./configure \
     --disable-shared \
     --enable-threadsafe \
@@ -165,7 +163,9 @@ export LIBS="$LIBS -lwinpthread"
     --disable-dynamic-extensions \
     --prefix=$PREFIX \
     --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
+    LDFLAGS="-L$PREFIX/lib -lwinpthread $LDFLAGS" \
+    LIBS="-lwinpthread"
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
