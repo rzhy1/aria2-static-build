@@ -149,6 +149,9 @@ echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
+ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${$PREFIX}/lib/libwinpthread.a
+export LDFLAGS="$LDFLAGS -lwinpthread"
+export LIBS="$LIBS -lwinpthread"
 ./configure \
     --disable-shared \
     --enable-static \
