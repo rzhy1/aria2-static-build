@@ -250,12 +250,10 @@ prepare_sqlite() {
   fi
   ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/libwinpthread.a
   #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  export LDFLAGS="$LDFLAGS -lwinpthread"
-  export LIBS="$LIBS -lwinpthread"
-  echo "查询1"
-  #ld -L/usr/x86_64-w64-mingw32/lib -lwinpthread --verbose
-  echo "查询结束1"
-  ./configure CFLAGS="$CFLAGS -D_REENTRANT" CXXFLAGS="$CXXFLAGS -D_REENTRANT" \
+  LDFLAGS="$LDFLAGS -lwinpthread" \
+  LIBS="-lwinpthread" \
+  ac_cv_search_pthread_create=-lwinpthread \
+  ./configure \
     --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
