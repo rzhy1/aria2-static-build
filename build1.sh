@@ -38,14 +38,6 @@ rm -f /etc/apt/apt.conf.d/*
 echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
-(
-  git clone https://github.com/mirror/mingw-w64.git
-  cd mingw-w64/mingw-w64-libraries/winpthreads
-  ./configure --host=x86_64-w64-mingw32 --prefix=${CROSS_PREFIX}
-  make -j$(nproc)
-  make install
-)
-
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 USE_GCC15=0
 if [ "$USE_GCC15" -eq 1 ]; then
@@ -65,6 +57,15 @@ find / -name "*pthread.a"
 find / -name "*pthread.h"
 find / -name "*pthread*.pc"
 echo "查询结束"
+
+# 单独安装winpthreads
+(
+  git clone https://github.com/mirror/mingw-w64.git
+  cd mingw-w64/mingw-w64-libraries/winpthreads
+  ./configure --host=x86_64-w64-mingw32 --prefix=${CROSS_PREFIX}
+  make -j$(nproc)
+  make install
+)
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
