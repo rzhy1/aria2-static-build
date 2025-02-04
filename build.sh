@@ -154,7 +154,10 @@ ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
 #export CXXFLAGS="-D_REENTRANT"
 #export LDFLAGS="-L$PREFIX/lib -lwinpthread"
 #export LIBS="-lwinpthread"
-LDFLAGS="-L$PREFIX/lib -lwinpthread" LIBS="-lwinpthread"./configure \
+LDFLAGS="-L$PREFIX/lib -lwinpthread" \
+LIBS="-lwinpthread" \
+ac_cv_search_pthread_create=-lwinpthread \
+./configure \
     --disable-shared \
     --enable-threadsafe \
     --enable-static \
@@ -168,7 +171,6 @@ LDFLAGS="-L$PREFIX/lib -lwinpthread" LIBS="-lwinpthread"./configure \
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    ac_cv_search_pthread_create=-lwinpthread
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
