@@ -249,8 +249,8 @@ prepare_sqlite() {
   #mv /usr/x86_64-w64-mingw32/lib/libpthread.a /usr/x86_64-w64-mingw32/lib/libpthread.a.bak
   cp /usr/x86_64-w64-mingw32/lib/*pthread.a ${CROSS_PREFIX}/lib/
   cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
-  export LDFLAGS="$LDFLAGS -lpthread"
-  export LIBS="$LIBS -lpthread"
+  export LDFLAGS="$LDFLAGS -lwinpthread"
+  export LIBS="$LIBS -lwinpthread"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
