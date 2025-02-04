@@ -251,6 +251,7 @@ prepare_sqlite() {
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
+    --disable-tcl \
     --disable-session \
     --disable-editline \
     --disable-load-extension
