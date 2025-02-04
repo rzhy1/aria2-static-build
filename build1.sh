@@ -246,9 +246,11 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  export LDFLAGS="$LDFLAGS -L${CROSS_PREFIX}/lib -lpthread"
+  #mv /usr/x86_64-w64-mingw32/lib/libpthread.a /usr/x86_64-w64-mingw32/lib/libpthread.a.bak
+  cp /usr/x86_64-w64-mingw32/lib/*pthread.a ${CROSS_PREFIX}/lib/
+  cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
+  export LDFLAGS="$LDFLAGS -lpthread"
   export LIBS="$LIBS -lpthread"
-  mv ${CROSS_PREFIX}/lib/libpthread.a ${CROSS_PREFIX}/lib/libpthread.a.bak
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
