@@ -47,7 +47,7 @@ echo "查询"
 find / -name "*pthread.a"
 find / -name "*pthread.h"
 find / -name "*pthread*.pc"
-echo "查询结束
+echo "查询结束"
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
