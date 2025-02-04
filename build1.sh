@@ -53,14 +53,6 @@ ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 
-# 单独安装winpthreads
-(
-  git clone https://github.com/mirror/mingw-w64.git
-  cd mingw-w64/mingw-w64-libraries/winpthreads
-  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}"  --enable-static  --disable-shared
-  make -j$(nproc)
-  make install
-)
 echo "查询"
 find / -name "*pthread.a"
 find / -name "*pthread.h"
@@ -261,8 +253,8 @@ prepare_sqlite() {
   sed -i 's/proj-check-function-in-lib pthread_create pthread/proj-check-function-in-lib pthread_create winpthread/g' autosetup/sqlite-config.tcl
   sed -i 's/proj-check-function-in-lib pthread_mutexattr_init pthread/proj-check-function-in-lib pthread_mutexattr_init winpthread/g' autosetup/sqlite-config.tcl
   #ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/libwinpthread.a
-  #cp /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/
-  #cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
+  cp /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/
+  cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
   echo "显示内容"
   file ${CROSS_PREFIX}/lib/libwinpthread.a
   objdump -t ${CROSS_PREFIX}/lib/libwinpthread.a | grep pthread_create
