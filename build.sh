@@ -150,11 +150,11 @@ curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
-export CFLAGS="-D_REENTRANT"
-export CXXFLAGS="-D_REENTRANT"
-export LDFLAGS="-L$PREFIX/lib -lwinpthread"
-export LIBS="-lwinpthread"
-./configure \
+#export CFLAGS="-D_REENTRANT"
+#export CXXFLAGS="-D_REENTRANT"
+#export LDFLAGS="-L$PREFIX/lib -lwinpthread"
+#export LIBS="-lwinpthread"
+LDFLAGS="-L$PREFIX/lib -lwinpthread" LIBS="-lwinpthread"./configure \
     --disable-shared \
     --enable-threadsafe \
     --enable-static \
