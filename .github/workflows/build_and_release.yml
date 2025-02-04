@@ -17,16 +17,14 @@ on:
 jobs:
   build-aria2c:
     runs-on: ubuntu-24.04
-    container:
-      image: ubuntu:devel
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install prerequisites
         run: |
-          apt-get update
+          sudo apt-get update
           # DEBIAN_FRONTEND=noninteractive sudo apt-get upgrade -y
-          apt-get install -y --no-install-recommends \
+          sudo pt-get install -y --no-install-recommends \
               make binutils autoconf automake autotools-dev libtool \
               patch ca-certificates g++-mingw-w64-x86-64 \
               pkg-config git wget curl dpkg-dev \
@@ -60,15 +58,13 @@ jobs:
           path: "${{ github.workspace }}/build_info.md"
   build-aria2c1:
     runs-on: ubuntu-24.04
-    container:
-      image: ubuntu:devel
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install prerequisites
         run: |
-          apt-get update
-          apt-get install -y --no-install-recommends \
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
               automake  autoconf autopoint jq libtool tcl tcl-dev \
               make pkg-config wget curl g++-mingw-w64-x86-64 \
               ca-certificates libcppunit-dev unzip lld zstd rsync bc
