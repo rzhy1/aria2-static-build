@@ -256,7 +256,7 @@ prepare_sqlite() {
   cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
   echo "显示内容"
   file ${CROSS_PREFIX}/lib/libwinpthread.a
-  nm -gD ${CROSS_PREFIX}/lib/libwinpthread.a | grep pthread_create
+  objdump -t ${CROSS_PREFIX}/lib/libwinpthread.a | grep pthread_create
   echo "显示内容"
   #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   export CFLAGS="-I${CROSS_PREFIX}/include"
