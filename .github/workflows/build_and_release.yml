@@ -71,7 +71,7 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends \
               automake  autoconf autopoint jq libtool \
-              make pkg-config wget curl mingw-w64-tools g++-mingw-w64-x86-64 \
+              make pkg-config wget curl mingw-w64 g++-mingw-w64-x86-64 \
               ca-certificates libcppunit-dev unzip lld zstd rsync bc
       - name: Compile
         env:
