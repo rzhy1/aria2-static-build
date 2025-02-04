@@ -254,10 +254,9 @@ prepare_sqlite() {
   #ld -L/usr/x86_64-w64-mingw32/lib -lwinpthread --verbose
   echo "查询结束1"
   CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
-    --with-pthread \
+    --enable-threadsafe \
     --with-sysroot=${CROSS_PREFIX} \
     --with-windir=/usr/x86_64-w64-mingw32 \
-    --enable-threadsafe \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
