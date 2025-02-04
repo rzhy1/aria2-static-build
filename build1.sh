@@ -248,6 +248,8 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
+  sed -i 's/proj-check-function-in-lib pthread_create pthread/proj-check-function-in-lib pthread_create winpthread/g' autosetup/sqlite-config.tcl
+  sed -i 's/proj-check-function-in-lib pthread_mutexattr_init pthread/proj-check-function-in-lib pthread_mutexattr_init winpthread/g' autosetup/sqlite-config.tcl
   ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/libwinpthread.a
   #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   export LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread"
