@@ -249,11 +249,8 @@ prepare_sqlite() {
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
   ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/libwinpthread.a
-  echo "三大发顺丰"
-  ls -l ${CROSS_PREFIX}/lib/libwinpthread.a
-  echo "三大发顺丰"
   #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  LDFLAGS="--L/usr/x86_64-w64-mingw32/lib -lwinpthread" \
+  LDFLAGS="-L/usr/x86_64-w64-mingw32/lib -lwinpthread" \
   LIBS="-lwinpthread" \
   ac_cv_search_pthread_create=-lwinpthread \
   ./configure \
