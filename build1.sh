@@ -253,7 +253,7 @@ prepare_sqlite() {
   ls -l ${CROSS_PREFIX}/lib/libwinpthread.a
   echo "三大发顺丰"
   #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread" \
+  LDFLAGS="--L/usr/x86_64-w64-mingw32/lib -lwinpthread" \
   LIBS="-lwinpthread" \
   ac_cv_search_pthread_create=-lwinpthread \
   ./configure \
