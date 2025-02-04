@@ -40,7 +40,7 @@ echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "fals
 
 (
   git clone https://github.com/mirror/mingw-w64.git
-  mingw-w64/mingw-w64-libraries/winpthreads
+  cd mingw-w64/mingw-w64-libraries/winpthreads
   ./configure --host=x86_64-w64-mingw32 --prefix=${CROSS_PREFIX}
   make -j$(nproc)
   make install
