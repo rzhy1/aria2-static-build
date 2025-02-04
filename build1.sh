@@ -251,6 +251,9 @@ prepare_sqlite() {
   cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
   export LDFLAGS="$LDFLAGS -lwinpthread"
   export LIBS="$LIBS -lwinpthread"
+  echo "查询"
+  x86_64-w64-mingw32-pkg-config --libs winpthreads
+  echo "查询结束"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
