@@ -248,15 +248,14 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/libwinpthread.a
+  #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  export LDFLAGS="$LDFLAGS -lwinpthread"
   export LIBS="$LIBS -lwinpthread"
   echo "查询1"
   #ld -L/usr/x86_64-w64-mingw32/lib -lwinpthread --verbose
   echo "查询结束1"
-  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
-    --enable-threadsafe \
-    --with-sysroot=${CROSS_PREFIX} \
-    --with-windir=/usr/x86_64-w64-mingw32 \
+  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
