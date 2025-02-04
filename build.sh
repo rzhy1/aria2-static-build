@@ -147,7 +147,7 @@ cd sqlite-*
 ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
 echo "显示内容"
 file $PREFIX/lib/libwinpthread.a
-nm -gD $PREFIX/lib/libwinpthread.a | grep pthread_create
+objdump -t $PREFIX/lib/libwinpthread.a | grep pthread_create
 echo "显示内容"
 LDFLAGS="-L$PREFIX/lib -lwinpthread" \
 LIBS="-lwinpthread" \
