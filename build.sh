@@ -43,11 +43,6 @@ ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 #x86_64-w64-mingw32-gcc -print-search-dirs
-echo "查询"
-find / -name "*pthread.a"
-find / -name "*pthread.h"
-find / -name "*pthread*.pc"
-echo "查询结束"
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
@@ -150,10 +145,6 @@ curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
-#export CFLAGS="-D_REENTRANT"
-#export CXXFLAGS="-D_REENTRANT"
-#export LDFLAGS="-L$PREFIX/lib -lwinpthread"
-#export LIBS="-lwinpthread"
 LDFLAGS="-L$PREFIX/lib -lwinpthread" \
 LIBS="-lwinpthread" \
 ac_cv_search_pthread_create=-lwinpthread \
