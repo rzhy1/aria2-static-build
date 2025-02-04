@@ -167,7 +167,8 @@ export LIBS="-lwinpthread"
     --disable-dynamic-extensions \
     --prefix=$PREFIX \
     --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
+    ac_cv_search_pthread_create=-lwinpthread
 make -j$(nproc) install
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
