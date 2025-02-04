@@ -30,7 +30,7 @@ retry() {
   return 1
 }
 source /etc/os-release
-dpkg --add-architecture i386
+sudo dpkg --add-architecture i386
 
 export DEBIAN_FRONTEND=noninteractive
 # keep debs in container for store cache in docker volume
