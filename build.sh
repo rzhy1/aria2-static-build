@@ -158,7 +158,6 @@ ac_cv_search_pthread_create=-lwinpthread \
     --enable-fts3=no --enable-fts4=no --enable-fts5=no \
     --enable-rtree=no \
     --enable-session=no \
-    --disable-dynamic-extensions \
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
