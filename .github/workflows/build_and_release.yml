@@ -58,13 +58,15 @@ jobs:
           path: "${{ github.workspace }}/build_info.md"
   build-aria2c1:
     runs-on: ubuntu-24.04
+    container:
+      image: ubuntu:devel
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Install prerequisites
         run: |
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends \
+          apt-get update
+          apt-get install -y --no-install-recommends \
               automake  autoconf autopoint jq libtool tcl tcl-dev \
               make pkg-config wget curl g++-mingw-w64-x86-64 \
               ca-certificates libcppunit-dev unzip lld zstd rsync bc
