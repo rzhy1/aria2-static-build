@@ -29,7 +29,7 @@ jobs:
           apt-get install -y --no-install-recommends \
               make binutils autoconf automake autotools-dev libtool \
               patch ca-certificates g++-mingw-w64-x86-64 \
-              pkg-config git wget curl dpkg-dev tcl \
+              pkg-config git wget curl dpkg-dev \
               autopoint libcppunit-dev lzip jq unzip lld zstd rsync bc
       - name: Compile
         env:
@@ -70,7 +70,7 @@ jobs:
         run: |
           apt-get update
           apt-get install -y --no-install-recommends \
-              automake  autoconf autopoint jq libtool \
+              automake  autoconf autopoint jq libtool tcl \
               make pkg-config wget curl g++-mingw-w64-x86-64 \
               ca-certificates libcppunit-dev unzip lld zstd rsync bc
       - name: Compile
