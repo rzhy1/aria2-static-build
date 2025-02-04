@@ -57,7 +57,7 @@ x86_64-w64-mingw32-gcc --version
 (
   git clone https://github.com/mirror/mingw-w64.git
   cd mingw-w64/mingw-w64-libraries/winpthreads
-  ./configure --host=x86_64-w64-mingw32 --prefix=${CROSS_PREFIX}
+  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}"  --enable-static  --disable-shared
   make -j$(nproc)
   make install
 )
