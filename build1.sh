@@ -252,10 +252,11 @@ prepare_sqlite() {
   cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
   export LDFLAGS="$LDFLAGS -lwinpthread"
   export LIBS="$LIBS -lwinpthread"
+  export CFLAGS="$CFLAGS -D_WIN32 -D_WINPTHREADS"
   echo "查询1"
   ld -L${CROSS_PREFIX}/lib -lwinpthread --verbose
   echo "查询2"
-  pkg-config --libs --cflags winpthreads
+  #pkg-config --libs --cflags winpthreads
   echo "查询结束1"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
