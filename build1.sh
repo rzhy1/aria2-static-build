@@ -250,8 +250,8 @@ prepare_sqlite() {
   fi
   ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/libwinpthread.a
   #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  #export LDFLAGS="$LDFLAGS -lwinpthread"
-  #export LIBS="$LIBS -lwinpthread"
+  export LDFLAGS="$LDFLAGS -lwinpthread"
+  export LIBS="$LIBS -lwinpthread"
   echo "查询1"
   #ld -L/usr/x86_64-w64-mingw32/lib -lwinpthread --verbose
   echo "查询结束1"
