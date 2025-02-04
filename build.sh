@@ -145,6 +145,10 @@ curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
+echo "显示内容"
+file $PREFIX/lib/libwinpthread.a
+nm -gD $PREFIX/lib/libwinpthread.a | grep pthread_create
+echo "显示内容"
 LDFLAGS="-L$PREFIX/lib -lwinpthread" \
 LIBS="-lwinpthread" \
 ac_cv_search_pthread_create="-lwinpthread" \
