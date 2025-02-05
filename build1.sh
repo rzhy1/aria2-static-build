@@ -285,9 +285,10 @@ prepare_sqlite() {
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   make install
-  echo "多撒范德萨"
+  echo "检测Makefile里是否启用SQLITE线程安全"
   grep "SQLITE_THREADSAFE=1" Makefile
-  echo "多撒范德萨"
+  echo "查找文件"
+  find / -name "*threadsafe_test*"
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
    # ---  从这里开始是集成的线程安全测试代码  ---
