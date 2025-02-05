@@ -45,11 +45,8 @@ if [ "$USE_GCC15" -eq 1 ]; then
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
     tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
 else
-    #curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
-    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://productionresultssa4.blob.core.windows.net/actions-results/e9ffe14a-e788-4f92-a24e-49660f425687/workflow-job-run-ca395085-040a-526b-2ce8-bdc85f692774/artifacts/2a4ed58212bdaf6fa784ff2be6495500ddd934739215faa1990355e1b00c04df.zip?rscd=attachment%3B+filename%3D%22x86_64-w64-mingw32.tar.xz.zip%22&se=2025-02-05T06%3A26%3A11Z&sig=3XtWb5%2FeuIkIshW9%2Fyg%2F3xyGysgRzL8UGhGXNP4XXkU%3D&ske=2025-02-05T16%3A21%3A07Z&skoid=ca7593d4-ee42-46cd-af88-8b886a2f84eb&sks=b&skt=2025-02-05T04%3A21%3A07Z&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skv=2025-01-05&sp=r&spr=https&sr=b&st=2025-02-05T06%3A16%3A06Z&sv=2025-01-05"
-    #https://productionresultssa4.blob.core.windows.net/actions-results/e9ffe14a-e788-4f92-a24e-49660f425687/workflow-job-run-ca395085-040a-526b-2ce8-bdc85f692774/artifacts/2a4ed58212bdaf6fa784ff2be6495500ddd934739215faa1990355e1b00c04df.zip?rscd=attachment%3B+filename%3D%22x86_64-w64-mingw32.tar.xz.zip%22&se=2025-02-05T06%3A26%3A11Z&sig=3XtWb5%2FeuIkIshW9%2Fyg%2F3xyGysgRzL8UGhGXNP4XXkU%3D&ske=2025-02-05T16%3A21%3A07Z&skoid=ca7593d4-ee42-46cd-af88-8b886a2f84eb&sks=b&skt=2025-02-05T04%3A21%3A07Z&sktid=398a6654-997b-47e9-b12b-9515b896b4de&skv=2025-01-05&sp=r&spr=https&sr=b&st=2025-02-05T06%3A16%3A06Z&sv=2025-01-05
+    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p ${CROSS_ROOT}
-    unzip /tmp/x86_64-w64-mingw32.tar.xz -d ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
