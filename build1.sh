@@ -250,8 +250,8 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  sed -i 's/proj-check-function-in-lib pthread_create pthread/proj-check-function-in-lib pthread_create winpthread/g' autosetup/sqlite-config.tcl
-  sed -i 's/proj-check-function-in-lib pthread_mutexattr_init pthread/proj-check-function-in-lib pthread_mutexattr_init winpthread/g' autosetup/sqlite-config.tcl
+  #sed -i 's/proj-check-function-in-lib pthread_create pthread/proj-check-function-in-lib pthread_create winpthread/g' autosetup/sqlite-config.tcl
+  #sed -i 's/proj-check-function-in-lib pthread_mutexattr_init pthread/proj-check-function-in-lib pthread_mutexattr_init winpthread/g' autosetup/sqlite-config.tcl
   #ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/libwinpthread.a
   cp /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/
   cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
@@ -264,8 +264,8 @@ prepare_sqlite() {
   #export CXXFLAGS="-I${CROSS_PREFIX}/include -mthreads"
   export LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread"
   export LIBS="-lwinpthread"
-  export ac_cv_search_pthread_create="-lwinpthread"
-  export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
+  #export ac_cv_search_pthread_create="-lwinpthread"
+  #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   ./configure \
     --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}"  --enable-static  --disable-shared "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
