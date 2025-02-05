@@ -258,7 +258,7 @@ prepare_sqlite() {
   #file ${CROSS_PREFIX}/lib/libwinpthread.a
   #objdump -t ${CROSS_PREFIX}/lib/libwinpthread.a | grep pthread_create
   echo "显示内容"
-  #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   #export LIBS="-lwinpthread"
   #export ac_cv_search_pthread_create="-lwinpthread"
   #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
