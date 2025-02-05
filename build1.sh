@@ -263,9 +263,9 @@ prepare_sqlite() {
   #export CXXFLAGS="-I${CROSS_PREFIX}/include -mthreads"
   #export LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread"
   #export LIBS="-lwinpthread"
-  export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  export LIBS="-lwinpthread"
-  export ac_cv_search_pthread_create="-lwinpthread"
+  export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lpthread"
+  export LIBS="-lpthread"
+  export ac_cv_search_pthread_create="-lpthread"
   #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   ./configure \
     --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}"  --disable-shared "${SQLITE_EXT_CONF}" \
