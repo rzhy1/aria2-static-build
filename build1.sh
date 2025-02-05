@@ -253,16 +253,10 @@ prepare_sqlite() {
   fi
   #sed -i 's/proj-check-function-in-lib pthread_create pthread/proj-check-function-in-lib pthread_create winpthread/g' autosetup/sqlite-config.tcl
   #sed -i 's/proj-check-function-in-lib pthread_mutexattr_init pthread/proj-check-function-in-lib pthread_mutexattr_init winpthread/g' autosetup/sqlite-config.tcl
-  #ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/libwinpthread.a
-  #cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
-  echo "显示内容"
-  #file ${CROSS_PREFIX}/lib/libwinpthread.a
-  #objdump -t ${CROSS_PREFIX}/lib/libwinpthread.a | grep pthread_create
-  echo "显示内容"
-  #local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  #export LIBS="-lwinpthread"
-  #export ac_cv_search_pthread_create="-lwinpthread"
-  #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
+  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  local LIBS="-lwinpthread"
+  local ac_cv_search_pthread_create="-lwinpthread"
+  local ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   echo "显示configure内容"
   ./configure --help
   echo "显示configure内容"
