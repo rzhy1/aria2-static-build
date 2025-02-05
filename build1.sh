@@ -52,6 +52,7 @@ fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
+/cross_root/bin/x86_64-w64-mingw32-cc --version
 echo "查询"
 find / -name "*pthread.a"
 find / -name "*pthread.h"
@@ -284,18 +285,18 @@ prepare_sqlite() {
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   make install
+  echo "多撒范德萨"
+  find / -name "*sqlite3.*"
+  echo "多撒范德萨"
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
    # ---  从这里开始是集成的线程安全测试代码  ---
 echo "--- 开始线程安全测试 ---"
-
 TEST_FILE="/usr/src/sqlite-3.49.0/threadsafe_test.c"
 EXECUTABLE_NAME="threadsafe_test"
-
 cat > ${TEST_FILE} <<EOF
 #include <stdio.h>
 #include <sqlite3.h>
-
 int main() {
   if (sqlite3_threadsafe()) {
     printf("SQLite is compiled with thread-safe mode.\\n");
@@ -315,9 +316,7 @@ ls -l threadsafe_test
 
 echo "--- 运行线程安全测试程序 ---"
 ./${EXECUTABLE_NAME}
-
 # rm ${TEST_FILE} ${EXECUTABLE_NAME}  # 可选: 清理测试文件
-
 echo "--- 线程安全测试完成 ---"
 }
 
