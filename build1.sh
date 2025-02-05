@@ -47,8 +47,8 @@ if [ "$USE_GCC15" -eq 1 ]; then
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
     tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
 else
-    #curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
-    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64_13.0.0/x86_64-w64-mingw32.tar.xz"
+    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
+    #curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64_13.0.0/x86_64-w64-mingw32.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
     cp /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/
@@ -56,12 +56,6 @@ fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
-
-echo "查询"
-find / -name "*pthread.a"
-find / -name "*pthread.h"
-find / -name "threadsafe_test.c"
-echo "查询结束"
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
@@ -254,12 +248,6 @@ prepare_sqlite() {
   #sed -i 's/proj-check-function-in-lib pthread_create pthread/proj-check-function-in-lib pthread_create winpthread/g' autosetup/sqlite-config.tcl
   #sed -i 's/proj-check-function-in-lib pthread_mutexattr_init pthread/proj-check-function-in-lib pthread_mutexattr_init winpthread/g' autosetup/sqlite-config.tcl
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  local LIBS="-lwinpthread"
-  local ac_cv_search_pthread_create="-lwinpthread"
-  local ac_cv_search_pthread_mutexattr_init="-lwinpthread"
-  echo "显示configure内容"
-  ./configure --help
-  echo "显示configure内容"
   ./configure \
     --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}"  --disable-shared "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
@@ -270,10 +258,6 @@ prepare_sqlite() {
     --disable-session \
     --disable-editline \
     --disable-load-extension
-  echo "显示configure内容1"
-  find / -name "configure"
-  find / -name  "autosetup*"
-  echo "显示configure内容1"
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
@@ -410,7 +394,6 @@ build_aria2() {
     --disable-checking \
     --enable-checking=release \
     ARIA2_STATIC=yes \
-    LDFLAGS="$LDFLAGS -lwinpthread" \
     ${ARIA2_EXT_CONF}
   make -j$(nproc)
   make install
