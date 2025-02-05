@@ -279,7 +279,7 @@ prepare_sqlite() {
     --disable-editline \
     --disable-load-extension
   echo "显示configure内容1"
-  cat configure
+  find / -name "configure"
   echo "显示configure内容1"
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
