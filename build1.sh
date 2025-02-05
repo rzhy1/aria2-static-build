@@ -255,8 +255,8 @@ prepare_sqlite() {
   cp /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/
   #cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
   echo "显示内容"
-  file ${CROSS_PREFIX}/lib/libwinpthread.a
-  objdump -t ${CROSS_PREFIX}/lib/libwinpthread.a | grep pthread_create
+  #file ${CROSS_PREFIX}/lib/libwinpthread.a
+  #objdump -t ${CROSS_PREFIX}/lib/libwinpthread.a | grep pthread_create
   echo "显示内容"
   export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   export LIBS="-lwinpthread"
@@ -289,7 +289,7 @@ prepare_sqlite() {
    # ---  从这里开始是集成的线程安全测试代码  ---
 echo "--- 开始线程安全测试 ---"
 
-TEST_FILE="threadsafe_test.c"
+TEST_FILE="/usr/src/sqlite-3.49.0/threadsafe_test.c"
 EXECUTABLE_NAME="threadsafe_test"
 
 cat > ${TEST_FILE} <<EOF
