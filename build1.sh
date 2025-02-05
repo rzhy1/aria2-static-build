@@ -262,8 +262,10 @@ prepare_sqlite() {
   #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   #export CFLAGS="-I${CROSS_PREFIX}/include -mthreads"
   #export CXXFLAGS="-I${CROSS_PREFIX}/include -mthreads"
-  export LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread"
-  export LIBS="-lwinpthread"
+  #export LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread"
+  #export LIBS="-lwinpthread"
+  export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lpthread -lwinpthread"
+  export LIBS="$LIBS -lpthread -lwinpthread"
   #export ac_cv_search_pthread_create="-lwinpthread"
   #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   ./configure \
