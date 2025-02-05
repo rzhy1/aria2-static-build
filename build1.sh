@@ -400,9 +400,6 @@ build_aria2() {
     --enable-checking=release \
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF}
-  echo "搜索"
-  grep pthread Makefile
-  echo "搜索"
   make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
