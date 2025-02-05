@@ -250,19 +250,17 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  #sed -i 's/proj-check-function-in-lib pthread_create pthread/proj-check-function-in-lib pthread_create winpthread/g' autosetup/sqlite-config.tcl
-  #sed -i 's/proj-check-function-in-lib pthread_mutexattr_init pthread/proj-check-function-in-lib pthread_mutexattr_init winpthread/g' autosetup/sqlite-config.tcl
+  sed -i 's/proj-check-function-in-lib pthread_create pthread/proj-check-function-in-lib pthread_create winpthread/g' autosetup/sqlite-config.tcl
+  sed -i 's/proj-check-function-in-lib pthread_mutexattr_init pthread/proj-check-function-in-lib pthread_mutexattr_init winpthread/g' autosetup/sqlite-config.tcl
   #ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/libwinpthread.a
-  cp /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/
-  cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
+  #cp /usr/x86_64-w64-mingw32/lib/libwinpthread.a ${CROSS_PREFIX}/lib/
+  #cp /usr/x86_64-w64-mingw32/include/pthread.h ${CROSS_PREFIX}/include/
   echo "显示内容"
-  file ${CROSS_PREFIX}/lib/libwinpthread.a
-  objdump -t ${CROSS_PREFIX}/lib/libwinpthread.a | grep pthread_create
+  #file ${CROSS_PREFIX}/lib/libwinpthread.a
+  #objdump -t ${CROSS_PREFIX}/lib/libwinpthread.a | grep pthread_create
   echo "显示内容"
-  #export CFLAGS="-I${CROSS_PREFIX}/include -mthreads"
-  #export CXXFLAGS="-I${CROSS_PREFIX}/include -mthreads"
-  #export LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread"
-  #export LIBS="-lwinpthread"
+  export CFLAGS="-I${CROSS_PREFIX}/include -mthreads"
+  export CXXFLAGS="-I${CROSS_PREFIX}/include -mthreads"
   export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   export LIBS="-lwinpthread"
   #export ac_cv_search_pthread_create="-lpthread"
@@ -277,7 +275,8 @@ prepare_sqlite() {
     --disable-session \
     --disable-editline \
     --disable-load-extension \
-    ac_cv_search_pthread_create="-lpthread"
+    ac_cv_search_pthread_create="-lpthread" \
+    export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
