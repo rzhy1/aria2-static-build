@@ -9,6 +9,9 @@ export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -pipe -flto -g0"
 export CXXFLAGS="$CFLAGS"
+export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
+export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -flto"
+export CFLAGS="-I${CROSS_PREFIX}/include $CFLAGS"
 export LD=x86_64-w64-mingw32-ld.lld
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
@@ -92,9 +95,7 @@ case "${TARGET_HOST}" in
   RUNNER_CHECKER="qemu-${TARGET_ARCH}-static"
   ;;
 esac
-export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -flto"
-export CFLAGS="-I${CROSS_PREFIX}/include $CFLAGS"
+
 
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info1.md"
@@ -399,6 +400,9 @@ build_aria2() {
     --enable-checking=release \
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF}
+  echo "搜索"
+  grep pthread Makefile
+  echo "搜索"
   make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
