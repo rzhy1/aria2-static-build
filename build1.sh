@@ -261,8 +261,8 @@ prepare_sqlite() {
   echo "显示内容"
   #export CFLAGS="-I${CROSS_PREFIX}/include -mthreads"
   #export CXXFLAGS="-I${CROSS_PREFIX}/include -mthreads"
-  #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  #export LIBS="-lwinpthread"
+  export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  export LIBS="-lwinpthread"
   #export ac_cv_search_pthread_create="-lwinpthread"
   #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   ./configure \
@@ -274,9 +274,9 @@ prepare_sqlite() {
     --disable-rtree \
     --disable-session \
     --disable-editline \
-    --disable-load-extension \
-    ac_cv_search_pthread_create="-lpthread" \
-    ac_cv_search_pthread_mutexattr_init="-lwinpthread"
+    --disable-load-extension
+    #ac_cv_search_pthread_create="-lpthread" \
+    #ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
