@@ -306,7 +306,7 @@ int main() {
 }
 EOF
 
-${CROSS_HOST}-cc ${TEST_FILE} \
+/cross_root/bin/x86_64-w64-mingw32-cc ${TEST_FILE} \
   -o ${EXECUTABLE_NAME} \
   -I${CROSS_PREFIX}/include \
   -L${CROSS_PREFIX}/lib \
