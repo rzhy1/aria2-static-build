@@ -265,6 +265,9 @@ prepare_sqlite() {
   export LIBS="-lwinpthread"
   #export ac_cv_search_pthread_create="-lwinpthread"
   #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
+  echo "显示configure内容"
+  cat configure
+  echo "显示configure内容"
   ./configure \
     --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}"  --disable-shared "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
@@ -275,6 +278,10 @@ prepare_sqlite() {
     --disable-session \
     --disable-editline \
     --disable-load-extension
+  echo "显示configure内容1"
+  cat configure
+  echo "显示configure内容1"
+  ./configure \
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
