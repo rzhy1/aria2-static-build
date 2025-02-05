@@ -305,11 +305,6 @@ int main() {
   return 0;
 }
 EOF
-echo "查找"
-find / -name "threadsafe_test.c"
-echo "查找"
-ls -l threadsafe_test  # 添加这行
-pwd                   # 添加这行
 /cross_root/bin/x86_64-w64-mingw32-cc ${TEST_FILE} \
   -o ${EXECUTABLE_NAME} \
   -I${CROSS_PREFIX}/include \
