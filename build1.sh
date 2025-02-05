@@ -55,7 +55,7 @@ x86_64-w64-mingw32-gcc --version
 echo "查询"
 find / -name "*pthread.a"
 find / -name "*pthread.h"
-find / -name "x86_64-w64-mingw32-cc"
+find / -name "threadsafe_test.c"
 echo "查询结束"
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
@@ -305,7 +305,8 @@ int main() {
   return 0;
 }
 EOF
-
+ls -l threadsafe_test  # 添加这行
+pwd                   # 添加这行
 /cross_root/bin/x86_64-w64-mingw32-cc ${TEST_FILE} \
   -o ${EXECUTABLE_NAME} \
   -I${CROSS_PREFIX}/include \
