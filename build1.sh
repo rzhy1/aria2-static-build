@@ -264,8 +264,7 @@ prepare_sqlite() {
   #export ac_cv_search_pthread_create="-lwinpthread"
   #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   echo "显示configure内容"
-  echo "当前路径是: $(pwd)"
-  cat configure
+  configure --help
   echo "显示configure内容"
   ./configure \
     --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}"  --disable-shared "${SQLITE_EXT_CONF}" \
