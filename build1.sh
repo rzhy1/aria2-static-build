@@ -262,10 +262,10 @@ prepare_sqlite() {
   #export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   #export CFLAGS="-I${CROSS_PREFIX}/include -mthreads"
   #export CXXFLAGS="-I${CROSS_PREFIX}/include -mthreads"
-  #export LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread"
-  #export LIBS="-lwinpthread"
-  #export ac_cv_search_pthread_create="-lwinpthread"
-  #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
+  export LDFLAGS="-L${CROSS_PREFIX}/lib -lwinpthread"
+  export LIBS="-lwinpthread"
+  export ac_cv_search_pthread_create="-lwinpthread"
+  export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   ./configure \
     --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}"  --enable-static  --disable-shared "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
@@ -276,9 +276,7 @@ prepare_sqlite() {
     --disable-session \
     --disable-editline \
     --disable-load-extension \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    ac_cv_search_pthread_create="-lwinpthread" \
-    ac_cv_search_pthread_mutexattr_init="-lwinpthread"
+    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) 
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
