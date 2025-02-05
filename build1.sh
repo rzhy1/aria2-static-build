@@ -249,7 +249,7 @@ prepare_sqlite() {
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lpthread"
-  local LIBS="$LIBS -lpthread"
+  #local LIBS="$LIBS -lpthread"
   echo "查询1"
   #ld -L/usr/x86_64-w64-mingw32/lib -lwinpthread --verbose
   echo "查询结束1"
