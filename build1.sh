@@ -266,6 +266,7 @@ prepare_sqlite() {
   #export ac_cv_search_pthread_create="-lwinpthread"
   #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   echo "显示configure内容"
+  echo $pwd
   cat configure
   echo "显示configure内容"
   ./configure \
@@ -280,6 +281,7 @@ prepare_sqlite() {
     --disable-load-extension
   echo "显示configure内容1"
   find / -name "configure"
+  find / -name  "autosetup*"
   echo "显示configure内容1"
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
