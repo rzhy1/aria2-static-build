@@ -145,10 +145,8 @@ curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 sudo ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
-#LDFLAGS="-L$PREFIX/lib -lwinpthread" \
-#LIBS="-lwinpthread" \
-export LDFLAGS="-L$PREFIX/lib -lwinpthread $LDFLAGS"
-export LIBS="-lwinpthread"
+LDFLAGS="-L$PREFIX/lib -lwinpthread -flto" \
+export LIBS="-lwinpthread" \
 ac_cv_search_pthread_create="-lwinpthread" \
 ac_cv_search_pthread_mutexattr_init="-lwinpthread"  \
 ./configure \
@@ -294,6 +292,7 @@ autoreconf -i
     ARIA2_STATIC=yes \
     SQLITE3_LIBS="-L$PREFIX/lib -lsqlite3" \
     CPPFLAGS="-I$PREFIX/include" \
+    LDFLAGS="-L$PREFIX/lib -flto" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$(nproc)
