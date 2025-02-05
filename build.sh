@@ -19,7 +19,7 @@ BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
 export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -pipe -flto -g0"
 export CXXFLAGS="$CFLAGS"
-export LDFLAGS="${LDFLAGS:-} -flto -lwinpthread"
+export LDFLAGS="-flto"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
