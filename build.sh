@@ -294,7 +294,6 @@ autoreconf -i
     ARIA2_STATIC=yes \
     SQLITE3_LIBS="-L$PREFIX/lib -lsqlite3" \
     CPPFLAGS="-I$PREFIX/include" \
-    LDFLAGS="-L$PREFIX/lib $LDFLAGS" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$(nproc)
