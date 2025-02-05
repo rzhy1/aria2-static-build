@@ -261,7 +261,7 @@ prepare_sqlite() {
   echo "显示内容"
   #export CFLAGS="-I${CROSS_PREFIX}/include -mthreads"
   #export CXXFLAGS="-I${CROSS_PREFIX}/include -mthreads"
-  export LDFLAGS="$LDFLAGS -lwinpthread"
+  export LDFLAGS="$LDFLAGS ${CROSS_PREFIX}/lib -lwinpthread"
   export LIBS="-lwinpthread"
   #export ac_cv_search_pthread_create="-lwinpthread"
   #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
