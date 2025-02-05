@@ -273,6 +273,7 @@ prepare_sqlite() {
     --enable-threadsafe \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
+    --disable-tcl \
     --disable-rtree \
     --disable-session \
     --disable-editline \
