@@ -39,7 +39,7 @@ echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/0
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
-USE_GCC15=1
+USE_GCC15=0
 if [ "$USE_GCC15" -eq 1 ]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
@@ -52,11 +52,10 @@ fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
-
 echo "查询"
 find / -name "*pthread.a"
 find / -name "*pthread.h"
-find / -name "*pthread*.pc"
+find / -name "x86_64-w64-mingw32-cc"
 echo "查询结束"
 
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
@@ -287,7 +286,38 @@ prepare_sqlite() {
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
- 
+   # ---  从这里开始是集成的线程安全测试代码  ---
+echo "--- 开始线程安全测试 ---"
+
+TEST_FILE="threadsafe_test.c"
+EXECUTABLE_NAME="threadsafe_test"
+
+cat > ${TEST_FILE} <<EOF
+#include <stdio.h>
+#include <sqlite3.h>
+
+int main() {
+  if (sqlite3_threadsafe()) {
+    printf("SQLite is compiled with thread-safe mode.\\n");
+  } else {
+    printf("SQLite is NOT compiled with thread-safe mode.\\n");
+  }
+  return 0;
+}
+EOF
+
+${CROSS_HOST}-cc ${TEST_FILE} \
+  -o ${EXECUTABLE_NAME} \
+  -I${CROSS_PREFIX}/include \
+  -L${CROSS_PREFIX}/lib \
+  -lsqlite3
+
+echo "--- 运行线程安全测试程序 ---"
+./${EXECUTABLE_NAME}
+
+# rm ${TEST_FILE} ${EXECUTABLE_NAME}  # 可选: 清理测试文件
+
+echo "--- 线程安全测试完成 ---"
 }
 
 prepare_c_ares() {
