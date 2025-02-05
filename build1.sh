@@ -289,6 +289,38 @@ prepare_sqlite() {
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
+  # ---  从这里开始是集成的线程安全测试代码  ---
+echo "--- 开始线程安全测试 ---"
+
+TEST_FILE="threadsafe_test.c"
+EXECUTABLE_NAME="threadsafe_test"
+
+cat > ${TEST_FILE} <<EOF
+#include <stdio.h>
+#include <sqlite3.h>
+
+int main() {
+  if (sqlite3_threadsafe()) {
+    printf("SQLite is compiled with thread-safe mode.\\n");
+  } else {
+    printf("SQLite is NOT compiled with thread-safe mode.\\n");
+  }
+  return 0;
+}
+EOF
+
+${CROSS_HOST}-cc ${TEST_FILE} \
+  -o ${EXECUTABLE_NAME} \
+  -I${CROSS_PREFIX}/include \
+  -L${CROSS_PREFIX}/lib \
+  -lsqlite3
+
+echo "--- 运行线程安全测试程序 ---"
+./${EXECUTABLE_NAME}
+
+# rm ${TEST_FILE} ${EXECUTABLE_NAME}  # 可选: 清理测试文件
+
+echo "--- 线程安全测试完成 ---"
 }
 
 prepare_c_ares() {
