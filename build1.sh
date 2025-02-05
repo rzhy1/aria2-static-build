@@ -276,7 +276,7 @@ prepare_sqlite() {
     --disable-editline \
     --disable-load-extension \
     ac_cv_search_pthread_create="-lpthread" \
-    export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
+    ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
