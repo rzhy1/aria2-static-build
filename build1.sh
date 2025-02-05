@@ -266,7 +266,7 @@ prepare_sqlite() {
   #export ac_cv_search_pthread_create="-lwinpthread"
   #export ac_cv_search_pthread_mutexattr_init="-lwinpthread"
   echo "显示configure内容"
-  echo $pwd
+  echo "当前路径是: $(pwd)"
   cat configure
   echo "显示configure内容"
   ./configure \
