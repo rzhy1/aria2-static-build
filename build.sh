@@ -19,7 +19,7 @@ BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
 export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -pipe -flto -g0"
 export CXXFLAGS="$CFLAGS"
-export LDFLAGS="-flto"
+export LDFLAGS="-flto=$(nproc)"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
@@ -145,9 +145,8 @@ curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 sudo ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
-
-#ac_cv_search_pthread_create="-lwinpthread" \
-#ac_cv_search_pthread_mutexattr_init="-lwinpthread"  \
+ac_cv_search_pthread_create="-lwinpthread" \
+ac_cv_search_pthread_mutexattr_init="-lwinpthread"  \
 LIBS="-lwinpthread" \
 LDFLAGS="-L$PREFIX/lib -lwinpthread -flto" \
 ./configure \
