@@ -23,7 +23,7 @@ export LDFLAGS="-flto"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-USE_GCC15=1
+USE_GCC15=0
 if [[ "$USE_GCC15" -eq 1 ]]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
@@ -145,10 +145,10 @@ curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 sudo ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
+#LIBS="-lwinpthread" \
+#ac_cv_search_pthread_create="-lwinpthread" \
+#ac_cv_search_pthread_mutexattr_init="-lwinpthread"  \
 LDFLAGS="-L$PREFIX/lib -lwinpthread -flto" \
-LIBS="-lwinpthread" \
-ac_cv_search_pthread_create="-lwinpthread" \
-ac_cv_search_pthread_mutexattr_init="-lwinpthread"  \
 ./configure \
     --disable-shared \
     --enable-threadsafe \
