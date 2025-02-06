@@ -145,9 +145,10 @@ curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 sudo ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
-#LIBS="-lwinpthread" \
+
 #ac_cv_search_pthread_create="-lwinpthread" \
 #ac_cv_search_pthread_mutexattr_init="-lwinpthread"  \
+LIBS="-lwinpthread" \
 LDFLAGS="-L$PREFIX/lib -lwinpthread -flto" \
 ./configure \
     --disable-shared \
