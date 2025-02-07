@@ -147,6 +147,7 @@ cd sqlite-*
 sudo ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
 export LDFLAGS="-L$PREFIX/lib -lwinpthread -flto"
 export LIBS="-lpthread"
+export CFLAGS="$CFLAGS -DHAVE_PTHREAD" 
 ./configure \
     --disable-shared \
     --enable-threadsafe \
