@@ -146,7 +146,7 @@ curl -L ${sqlite_latest_url} | tar xz
 cd sqlite-*
 sudo ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
 export LDFLAGS="-L$PREFIX/lib -lwinpthread -flto"
-export LIBS="$LIBS -lpthread"
+export LIBS="-lpthread"
 ./configure \
     --disable-shared \
     --enable-threadsafe \
