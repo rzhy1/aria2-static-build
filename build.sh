@@ -156,9 +156,11 @@ LDFLAGS="-L$PREFIX/lib -lwinpthread -flto" \
     --disable-debug \
     --enable-silent-rules \
     --disable-editline \
-    --enable-fts3=no --enable-fts4=no --enable-fts5=no \
-    --enable-rtree=no \
-    --enable-session=no \
+    --disable-fts3 --disable-fts4 --disable-fts5 \
+    --disable-rtree \
+    --disable-tcl \
+    --disable-session \
+    --disable-load-extension \
     --prefix=$PREFIX \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
