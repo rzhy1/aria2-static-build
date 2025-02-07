@@ -167,7 +167,7 @@ cd ..
 end_time=$(date +%s.%N)
 duration4=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
-export LDFLAGS="-L$PREFIX/lib -flto=$(nproc) -lwinpthread"
+export LDFLAGS="-L$PREFIX/lib -flto=$(nproc)"
 
 # 下载并编译 zlib
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib⭐⭐⭐⭐⭐⭐"
