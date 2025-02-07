@@ -145,7 +145,7 @@ curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 sudo ln -sf /usr/x86_64-w64-mingw32/lib/libwinpthread.a $PREFIX/lib/libwinpthread.a
-export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lpthread"
+export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
 #export LIBS="-lpthread"
 #export CFLAGS="$CFLAGS -DHAVE_PTHREAD" 
 ./configure \
