@@ -158,7 +158,6 @@ LDFLAGS="-L$PREFIX/lib -lwinpthread -flto" \
     --disable-editline \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
-    --disable-tcl \
     --disable-session \
     --disable-load-extension \
     --prefix=$PREFIX \
