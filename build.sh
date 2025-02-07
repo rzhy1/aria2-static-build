@@ -160,6 +160,8 @@ export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
+x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
+cp libsqlite3.a "$PREFIX/lib/" ||  exit 1
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
