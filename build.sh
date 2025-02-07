@@ -155,7 +155,7 @@ LDFLAGS="-L$PREFIX/lib -lwinpthread -flto" \
     --enable-static \
     --disable-debug \
     --enable-silent-rules \
-    --enable-editline=no \
+    --disable-editline \
     --enable-fts3=no --enable-fts4=no --enable-fts5=no \
     --enable-rtree=no \
     --enable-session=no \
