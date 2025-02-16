@@ -26,9 +26,13 @@ jobs:
           # DEBIAN_FRONTEND=noninteractive sudo apt-get upgrade -y
           sudo apt-get install -y --no-install-recommends \
               make binutils autoconf automake autotools-dev libtool \
-              patch ca-certificates mingw-w64-clang-x86-64 \
+              patch ca-certificates \
               pkg-config git wget curl dpkg-dev \
               autopoint libcppunit-dev lzip jq unzip lld zstd rsync bc
+      - name: Search for Clang MinGW-w64 Packages
+        run: |
+          apt-cache search mingw clang | grep mingw | grep clang
+          
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
