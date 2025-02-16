@@ -1,16 +1,42 @@
 #!/bin/bash
+# syntax=docker/dockerfile:1
 
-# Dockerfile to build aria2 Windows binary using ubuntu mingw-w64
-# cross compiler chain.
-#
-# $ sudo docker build -t aria2-mingw - < Dockerfile.mingw
-#
-# After successful build, windows binary is located at
-# /aria2/src/aria2c.exe.  You can copy the binary using following
-# commands:
-#
-# $ sudo docker run --rm -it -v /path/to/dest:/out aria2-mingw cp /aria2/src/aria2c.exe /out
-export LD=x86_64-w64-mingw32-ld.lld
+FROM ubuntu:latest
+
+# 设置为非交互式安装，避免时区选择等交互
+ENV DEBIAN_FRONTEND=noninteractive
+ENV TZ=Etc/UTC
+
+# 更新 apt 源并安装必要的软件包，包括 clang 和 mingw-w64 clang 工具链
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    clang \
+    llvm \
+    mingw-w64 \
+    mingw-w64-tools \
+    pkg-config \
+    curl \
+    wget \
+    tar \
+    xz-utils \
+    zstd \
+    git \
+    autoconf \
+    libtool \
+    make \
+    binutils-mingw-w64 \
+    python3 \
+    python3-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# 设置环境变量，指定 clang 交叉编译工具链
+export LD=x86_64-w64-mingw32-ld.lld # 假设 clang 工具链也使用 lld 链接器，如果不是，请更换为对应的链接器
+export CC=x86_64-w64-mingw32-clang
+export CXX=x86_64-w64-mingw32-clang++
+export AR=x86_64-w64-mingw32-ar
+export RANLIB=x86_64-w64-mingw32-ranlib
+export STRIP=x86_64-w64-mingw32-strip
+
 set -euo pipefail
 HOST=x86_64-w64-mingw32
 PREFIX=$PWD/$HOST
@@ -21,33 +47,14 @@ export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="-Wl,--gc-sections -flto=$(nproc)"
 
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
-start_time=$(date +%s.%N)
-USE_GCC15=0
-if [[ "$USE_GCC15" -eq 1 ]]; then
-    echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
-    curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
-    sudo tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C /usr/
-else
-    echo "使用相对成熟的 mingw-w64-x86_64-toolchain (GCC 14)..."
-    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz"  "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
-    mkdir -p /opt/mingw64
-    tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
-    export PATH="/opt/mingw64/bin:${PATH}"    
-fi
-end_time=$(date +%s.%N)
-duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-# ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-* /usr/bin/ 一次链接所有
-sudo ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 
-echo "x86_64-w64-mingw32-gcc版本是："
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 检查 clang 版本⭐⭐⭐⭐⭐⭐"
+x86_64-w64-mingw32-clang --version
+
+
+echo "x86_64-w64-mingw32-gcc版本 (为了对比，实际上已经切换到 clang 了):"
 x86_64-w64-mingw32-gcc --version
-#x86_64-w64-mingw32-gcc -print-search-dirs
 
-# 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
-#rm -f /etc/apt/apt.conf.d/*
-#echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
-#echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https    
 
 echo "## aria2c.exe （zlib & libexpat） dependencies:" >>"${BUILD_INFO}"
 # 初始化表格
@@ -79,14 +86,13 @@ gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
-#curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
-# patch configure（不检测long long）
+# patch configure（不检测long long），与原脚本相同
 find_and_comment() {
   local file="$1"
   local search_str="Test compile: long long reliability test"
   local current_line=1
-  while read -r start_line; do  
+  while read -r start_line; do
     [[ -z "$start_line" ]] && { echo "在文件 $file 中未找到更多字符串 '$search_str'"; break; }
     local end_line=$((start_line + 37))
     sed -i "${start_line},${end_line}s/^/# /" "$file"
@@ -96,7 +102,8 @@ find_and_comment() {
 }
 find_and_comment "configure"  && echo "configure文件修改完成"
 
-BUILD_CC=gcc BUILD_CXX=g++ ./configure \
+
+BUILD_CC=$CC BUILD_CXX=$CXX ./configure \
     --disable-shared \
     --enable-static \
     --prefix=$PREFIX \
@@ -115,7 +122,6 @@ expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/release
 expat_latest_url=$(retry curl -s "https://api.github.com/repos/libexpat/libexpat/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.bz2$")) | .browser_download_url' | head -n 1)
 echo "libexpat最新版本是${expat_tag} ，下载地址是${expat_latest_url}"
 curl -L ${expat_latest_url} | tar xj
-#curl -L https://github.com/libexpat/libexpat/releases/download/R_2_6_3/expat-2.6.3.tar.bz2 | tar xj
 cd expat-*
 ./configure \
     --disable-shared \
@@ -142,7 +148,6 @@ tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | 
 sqlite_latest_url="https://www.sqlite.org/${tarball_url}"
 echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
-#curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
 ./configure \
@@ -160,7 +165,7 @@ export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
-x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
+x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o # 这里仍然使用 ar 命令，因为上面已经定义了 AR 环境变量
 cp libsqlite3.a "$PREFIX/lib/" ||  exit 1
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -174,17 +179,15 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zli
 start_time=$(date +%s.%N)
 zlib_tag=$(retry curl -s https://api.github.com/repos/madler/zlib/releases/latest | jq -r '.name' | cut -d' ' -f2)
 zlib_latest_url=$(retry curl -s "https://api.github.com/repos/madler/zlib/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.gz$")) | .browser_download_url' | head -n 1)
-#zlib_tag="$(retry wget -qO- --compression=auto https://zlib.net/ \| grep -i "'<FONT.*FONT>'" \| sed -r "'s/.*zlib\s*([^<]+).*/\1/'" \| head -1)"
-#zlib_latest_url="https://zlib.net/zlib-${zlib_tag}.tar.gz"
 echo "zlib最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
 curl -L ${zlib_latest_url} | tar xz
-#curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
 cd zlib-*
-CC=$HOST-gcc \
-AR=$HOST-ar \
-LD=$HOST-ld \
-RANLIB=$HOST-ranlib \
-STRIP=$HOST-strip \
+# 显式指定 clang 工具链
+CC=$HOST-clang
+AR=$HOST-ar
+LD=$HOST-ld
+RANLIB=$HOST-ranlib
+STRIP=$HOST-strip
 ./configure \
     --prefix=$PREFIX \
     --libdir=$PREFIX/lib \
@@ -203,7 +206,6 @@ cares_tag=$(retry curl -s https://api.github.com/repos/c-ares/c-ares/releases/la
 cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
 echo "cares最新版本是${cares_tag} ，下载地址是${cares_latest_url}"
 curl -L ${cares_latest_url} | tar xz
-#curl -L https://github.com/c-ares/c-ares/releases/download/v1.34.1/c-ares-1.34.1.tar.gz | tar xz
 cd c-ares-*
 ./configure \
     --disable-shared \
@@ -228,7 +230,6 @@ libssh2_tag=$(retry curl -s https://libssh2.org/ | sed -nr 's@.*libssh2 ([^<]*).
 libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
 echo "libssh2最新版本是${libssh2_tag} ，下载地址是${libssh2_latest_url}"
 curl -L ${libssh2_latest_url} | tar xz
-#curl -L https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
 cd libssh2-*
 ./configure \
     --disable-shared \
@@ -258,9 +259,7 @@ git clone -j$(nproc) --depth 1 https://github.com/aria2/aria2.git
 cd aria2
 sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
 sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
-#sed -i 's/void sock_state_cb(void\* arg, int fd, int read, int write)/void sock_state_cb(void\* arg, ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
-#sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
-#sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
+
 autoreconf -i
 ./configure \
     --host=$HOST \
@@ -294,7 +293,9 @@ autoreconf -i
     SQLITE3_LIBS="-L$PREFIX/lib -lsqlite3" \
     CPPFLAGS="-I$PREFIX/include" \
     PKG_CONFIG="/usr/bin/pkg-config" \
-    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
+    CC=$CC \  # 显式指定 configure 使用 clang
+    CXX=$CXX # 显式指定 configure 使用 clang++
 make -j$(nproc)
 $HOST-strip src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
