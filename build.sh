@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     llvm \
     mingw-w64 \
     mingw-w64-tools \
+    clang-x86-64-w64-mingw32 \
     pkg-config \
     curl \
     wget \
