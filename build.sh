@@ -1,37 +1,16 @@
 #!/bin/bash
-# syntax=docker/dockerfile:1
 
-FROM ubuntu:latest
-
-# 设置为非交互式安装，避免时区选择等交互
-ENV DEBIAN_FRONTEND=noninteractive
-ENV TZ=Etc/UTC
-
-# 更新 apt 源并安装必要的软件包，包括 clang 和 mingw-w64 clang 工具链
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    clang \
-    llvm \
-    mingw-w64 \
-    mingw-w64-tools \
-    clang-x86-64-w64-mingw32 \
-    pkg-config \
-    curl \
-    wget \
-    tar \
-    xz-utils \
-    zstd \
-    git \
-    autoconf \
-    libtool \
-    make \
-    binutils-mingw-w64 \
-    python3 \
-    python3-dev \
-    && rm -rf /var/lib/apt/lists/*
-
-# 设置环境变量，指定 clang 交叉编译工具链
-export LD=x86_64-w64-mingw32-ld.lld # 假设 clang 工具链也使用 lld 链接器，如果不是，请更换为对应的链接器
+# Dockerfile to build aria2 Windows binary using ubuntu mingw-w64
+# cross compiler chain.
+#
+# $ sudo docker build -t aria2-mingw - < Dockerfile.mingw
+#
+# After successful build, windows binary is located at
+# /aria2/src/aria2c.exe.  You can copy the binary using following
+# commands:
+#
+# $ sudo docker run --rm -it -v /path/to/dest:/out aria2-mingw cp /aria2/src/aria2c.exe /out
+export LD=x86_64-w64-mingw32-ld.lld
 export CC=x86_64-w64-mingw32-clang
 export CXX=x86_64-w64-mingw32-clang++
 export AR=x86_64-w64-mingw32-ar
@@ -48,14 +27,11 @@ export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="-Wl,--gc-sections -flto=$(nproc)"
 
-
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 检查 clang 版本⭐⭐⭐⭐⭐⭐"
 x86_64-w64-mingw32-clang --version
 
-
 echo "x86_64-w64-mingw32-gcc版本 (为了对比，实际上已经切换到 clang 了):"
 x86_64-w64-mingw32-gcc --version
-
 
 echo "## aria2c.exe （zlib & libexpat） dependencies:" >>"${BUILD_INFO}"
 # 初始化表格
@@ -102,7 +78,6 @@ find_and_comment() {
   done < <(awk -v s="$search_str" -v cl="$current_line" 'NR >= cl && !/^# / && $0 ~ s {print NR}' "$file")
 }
 find_and_comment "configure"  && echo "configure文件修改完成"
-
 
 BUILD_CC=$CC BUILD_CXX=$CXX ./configure \
     --disable-shared \
@@ -166,7 +141,7 @@ export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
-x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o # 这里仍然使用 ar 命令，因为上面已经定义了 AR 环境变量
+$AR cr libsqlite3.a sqlite3.o # 使用 AR 变量
 cp libsqlite3.a "$PREFIX/lib/" ||  exit 1
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
 cd ..
@@ -183,12 +158,12 @@ zlib_latest_url=$(retry curl -s "https://api.github.com/repos/madler/zlib/releas
 echo "zlib最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
 curl -L ${zlib_latest_url} | tar xz
 cd zlib-*
-# 显式指定 clang 工具链
-CC=$HOST-clang
-AR=$HOST-ar
-LD=$HOST-ld
-RANLIB=$HOST-ranlib
-STRIP=$HOST-strip
+# 显式指定 clang 工具链 - 实际上这里环境变量已经设置，configure 会自动使用
+# CC=$HOST-clang
+# AR=$HOST-ar
+# LD=$HOST-ld
+# RANLIB=$HOST-ranlib
+# STRIP=$HOST-strip
 ./configure \
     --prefix=$PREFIX \
     --libdir=$PREFIX/lib \
@@ -295,10 +270,10 @@ autoreconf -i
     CPPFLAGS="-I$PREFIX/include" \
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" \
-    CC=$CC \  # 显式指定 configure 使用 clang
-    CXX=$CXX # 显式指定 configure 使用 clang++
+    CC=$CC \ # 确保 configure 也使用 Clang
+    CXX=$CXX # 确保 configure 也使用 Clang++
 make -j$(nproc)
-$HOST-strip src/aria2c.exe
+$STRIP src/aria2c.exe # 使用 STRIP 变量
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
 ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
 aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
