@@ -10,7 +10,8 @@
 # commands:
 #
 # $ sudo docker run --rm -it -v /path/to/dest:/out aria2-mingw cp /aria2/src/aria2c.exe /out
-curl -L https://github.com/llvm/llvm-project/releases/download/llvmorg-19.1.7/LLVM-19.1.7-Linux-X64.tar.xz | tar x --xz
+curl -L https://github.com/mstorsjo/llvm-mingw/releases/download/20250212/llvm-mingw-20250212-ucrt-ubuntu-20.04-x86_64.tar.xz | tar x --xz
+mv llvm-mingw-20250212-ucrt-ubuntu-20.04-x86_64 llvm-mingw
 export PATH=$(pwd)/llvm-mingw/bin:$PATH
 export LD=x86_64-w64-mingw32-ld.lld
 export CC=x86_64-w64-mingw32-clang
