@@ -72,7 +72,7 @@ retry() {
   return 1
 }
 
-# 下载并编译 GMP
+# 1. 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
 gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9.]+\.tar\.(xz)"' | sort -rV | head -n 1 | sed -r 's/href="gmp-(.+)\.tar\..+"/\1/')"
@@ -108,8 +108,8 @@ cd ..
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
-# 下载并编译 Expat
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 Expat⭐⭐⭐⭐⭐⭐"
+# 2.  Expat
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') -  Expat⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
 expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
 expat_latest_url=$(retry curl -s "https://api.github.com/repos/libexpat/libexpat/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.bz2$")) | .browser_download_url' | head -n 1)
@@ -132,8 +132,8 @@ cd ..
 end_time=$(date +%s.%N)
 duration3=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
-# 下载并编译 SQLite
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 SQLite⭐⭐⭐⭐⭐⭐"
+# 3.  SQLite
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') -  SQLite⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
 sqlite_tag=$(retry curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p')
 download_page=$(curl -s "https://www.sqlite.org/download.html")
@@ -169,7 +169,7 @@ duration4=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 export LDFLAGS="-L$PREFIX/lib -flto=$(nproc)"
 
-# 下载并编译 zlib
+# 4. 下载并编译 zlib
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
 zlib_tag=$(retry curl -s https://api.github.com/repos/madler/zlib/releases/latest | jq -r '.name' | cut -d' ' -f2)
@@ -196,7 +196,7 @@ cd ..
 end_time=$(date +%s.%N)
 duration5=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
-# 下载并编译 c-ares
+# 5. 下载并编译 c-ares
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
 cares_tag=$(retry curl -s https://api.github.com/repos/c-ares/c-ares/releases/latest | jq -r '.tag_name | sub("^v"; "")')
@@ -221,7 +221,7 @@ cd ..
 end_time=$(date +%s.%N)
 duration6=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
-# 下载并编译 libssh2
+# 6. 下载并编译 libssh2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
 libssh2_tag=$(retry curl -s https://libssh2.org/ | sed -nr 's@.*libssh2 ([^<]*).*released on.*@\1@p')
@@ -248,7 +248,7 @@ cd ..
 end_time=$(date +%s.%N)
 duration7=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
-# 下载并编译 aria2
+# 7. 下载并编译 aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
 ARIA2_VERSION=master
