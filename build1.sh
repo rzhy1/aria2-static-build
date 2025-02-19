@@ -210,13 +210,13 @@ prepare_xz() {
 }
 
 prepare_libxml2() {
-  response="$(wget -qO- --compression=auto 'https://gitlab.gnome.org/api/graphql' \
-  --header="Content-Type: application/json" \
-  --header="Authorization: Bearer YOUR_ACCESS_TOKEN" \
-  --post-data='{"query":"query {project(fullPath:\\\"GNOME/libxml2\\\"){releases(first:10,sort:RELEASED_AT_DESC){nodes{name,assets{links{nodes{directAssetUrl}}}}}}}"}')"
-  echo "$response"
-  libxml2_tag="$(echo "${libxml2_latest_url}" | sed -r 's/.*libxml2-(.+).tar.*/\1/')"
-  libxml2_filename="$(echo "${libxml2_latest_url}" | sed -r 's/.*(libxml2-(.+).tar.*)/\1/')"
+  libxml2_tag=$(retry wget -qO- https://gitlab.gnome.org/api/v4/projects/GNOME%2Flibxml2/releases \
+      | jq -r '.[].tag_name' \
+      | sed 's/^v//' \
+      | sort -Vr \
+      | head -n1)
+  libxml2_latest_url="https://download.gnome.org/sources/libxml2/${libxml2_tag%.*}/libxml2-${libxml2_tag}.tar.xz"
+  libxml2_filename="libxml2-${libxml2_tag}.tar.xz"
   if [ ! -f "${DOWNLOADS_DIR}/${libxml2_filename}" ]; then
     retry wget -c -O "${DOWNLOADS_DIR}/${libxml2_filename}.part" "${libxml2_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/${libxml2_filename}.part" "${DOWNLOADS_DIR}/${libxml2_filename}"
