@@ -210,7 +210,10 @@ prepare_xz() {
 }
 
 prepare_libxml2() {
-  libxml2_latest_url="$(retry wget -qO- --compression=auto 'https://gitlab.gnome.org/api/graphql' --header="Content-Type: application/json" --post-data='{"query":"query {project(fullPath:\"GNOME/libxml2\"){releases(first:1,sort:VERSION_DESC){nodes{assets{links{nodes{directAssetUrl}}}}}}"}' | jq -r '.data.project.releases.nodes[0].assets.links.nodes[0].directAssetUrl')"
+  libxml2_latest_url="$(retry wget -qO- --compression=auto 'https://gitlab.gnome.org/api/graphql' \
+  --header="Content-Type: application/json" \
+  --post-data='{"query":"query {project(fullPath:\\\"GNOME/libxml2\\\"){releases(first:10,sort:RELEASED_AT_DESC){nodes{name,assets{links{nodes{directAssetUrl}}}}}}}"}' \
+  | jq -r '.data.project.releases.nodes[] | select(.name | startswith("v")) | .assets.links.nodes[0].directAssetUrl' | head -n 1)"
   libxml2_tag="$(echo "${libxml2_latest_url}" | sed -r 's/.*libxml2-(.+).tar.*/\1/')"
   libxml2_filename="$(echo "${libxml2_latest_url}" | sed -r 's/.*(libxml2-(.+).tar.*)/\1/')"
   if [ ! -f "${DOWNLOADS_DIR}/${libxml2_filename}" ]; then
