@@ -210,9 +210,7 @@ prepare_xz() {
 }
 
 prepare_libxml2() {
-  libxml2_latest_url="$(retry wget -qO- --compression=auto 'https://gitlab.gnome.org/api/graphql' \
-  --header="Content-Type: application/json" \
-  --post-data='{"query":"query {project(fullPath:\\\"GNOME/libxml2\\\"){releases(first:10,sort:RELEASED_AT_DESC){nodes{name,assets{links{nodes{directAssetUrl}}}}}}}"}' \
+  libxml2_latest_url="$(retry curl -s -H "Content-Type: application/json" -H "Authorization: Bearer YOUR_ACCESS_TOKEN" -X POST -d '{"query":"query {project(fullPath:\\\"GNOME/libxml2\\\"){releases(first:10,sort:RELEASED_AT_DESC){nodes{name,assets{links{nodes{directAssetUrl}}}}}}}" }' https://gitlab.gnome.org/api/graphql \
   | jq -r '.data.project.releases.nodes[] | select(.name | startswith("v")) | .assets.links.nodes[0].directAssetUrl' | head -n 1)"
   libxml2_tag="$(echo "${libxml2_latest_url}" | sed -r 's/.*libxml2-(.+).tar.*/\1/')"
   libxml2_filename="$(echo "${libxml2_latest_url}" | sed -r 's/.*(libxml2-(.+).tar.*)/\1/')"
