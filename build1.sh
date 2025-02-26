@@ -250,9 +250,20 @@ prepare_sqlite() {
   cd "/usr/src/sqlite-${sqlite_tag}"
   if [ x"${TARGET_HOST}" = x"Windows" ]; then
     ln -sf mksourceid.exe mksourceid
+    SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread -static"
-  CC="x86_64-w64-mingw32-gcc" AR="x86_64-w64-mingw32-ar" RANLIB="x86_64-w64-mingw32-ranlib" CFLAGS="$CFLAGS -D_WIN32 -I${CROSS_PREFIX}/include"./configure 
+  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  echo "查询1"
+  echo "查询结束1"
+  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
+    --enable-threadsafe \
+    --disable-debug \
+    --disable-fts3 --disable-fts4 --disable-fts5 \
+    --disable-rtree \
+    --disable-tcl \
+    --disable-session \
+    --disable-editline \
+    --disable-load-extension
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
