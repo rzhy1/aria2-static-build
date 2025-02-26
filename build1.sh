@@ -400,6 +400,7 @@ build_aria2() {
     --disable-checking \
     --enable-checking=release \
     ARIA2_STATIC=yes \
+    SQLITE3_LIBS="-L${CROSS_PREFIX}/lib -lsqlite3" \
     ${ARIA2_EXT_CONF}
   make -j$(nproc)
   make install
