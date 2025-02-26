@@ -255,7 +255,7 @@ prepare_sqlite() {
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   echo "查询1"
   echo "查询结束1"
-  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
+  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
@@ -267,7 +267,6 @@ prepare_sqlite() {
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
-  cp sqlite3.h "${CROSS_PREFIX}/include/" || exit 1
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
@@ -401,7 +400,6 @@ build_aria2() {
     --disable-checking \
     --enable-checking=release \
     ARIA2_STATIC=yes \
-    SQLITE3_LIBS="-L${CROSS_PREFIX}/lib -lsqlite3" \
     ${ARIA2_EXT_CONF}
   make -j$(nproc)
   make install
