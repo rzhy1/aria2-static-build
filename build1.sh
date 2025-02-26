@@ -252,7 +252,7 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
   fi
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  CFLAGS="$CFLAGS -DHAVE_PTHREAD"./configure  --enable-static \
+  CFLAGS="$CFLAGS -D_WIN32"./configure  \
     --enable-threadsafe \
     --disable-math \
     --disable-debug \
