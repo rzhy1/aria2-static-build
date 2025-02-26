@@ -252,16 +252,7 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
   fi
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  CFLAGS="$CFLAGS -D_WIN32"./configure  \
-    --enable-threadsafe \
-    --disable-math \
-    --disable-debug \
-    --disable-fts3 --disable-fts4 --disable-fts5 \
-    --disable-rtree \
-    --disable-tcl \
-    --disable-session \
-    --disable-editline \
-    --disable-load-extension
+  CFLAGS="$CFLAGS -D_WIN32"./configure 
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
