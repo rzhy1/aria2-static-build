@@ -251,8 +251,8 @@ prepare_sqlite() {
   if [ x"${TARGET_HOST}" = x"Windows" ]; then
     ln -sf mksourceid.exe mksourceid
   fi
-  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  CFLAGS="$CFLAGS -D_WIN32"./configure 
+  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread -static"
+  CC="x86_64-w64-mingw32-gcc" AR="x86_64-w64-mingw32-ar" RANLIB="x86_64-w64-mingw32-ranlib" CFLAGS="$CFLAGS -D_WIN32 -I${CROSS_PREFIX}/include"./configure 
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
