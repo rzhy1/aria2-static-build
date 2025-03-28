@@ -243,7 +243,7 @@ prepare_libxml2() {
     --prefix="${CROSS_PREFIX}" \
     --enable-silent-rules \
     --without-python \
-    --without-libiconv \
+    --without-iconv \
     --without-icu \
     --enable-static \
     --disable-shared
