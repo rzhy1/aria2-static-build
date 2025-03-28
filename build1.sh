@@ -151,6 +151,20 @@ prepare_ninja() {
   echo "Ninja version $(ninja --version)"
 }
 
+prepare_libiconv() {
+  libiconv_tag="$(retry curl -s https://ftp.gnu.org/gnu/libiconv/ | grep -oE 'href="libiconv-[0-9.]+\.tar\.(xz)"' | sort -rV | head -n 1 | sed -r 's/href="libiconv-(.+)\.tar\..+"/\1/')"
+  echo "libiconv最新版本是${libiconv_tag} ，下载地址是https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.xz"
+  curl -L https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.xz | tar x --xz
+  cd libiconv-*
+  ./configure \
+    --host="${CROSS_HOST}" \
+    --prefix="${CROSS_PREFIX}" \
+    --disable-shared \
+    --enable-static \
+make -j$(nproc) install
+echo "| gmp | ${libiconv_tag} | https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.xz |" >>"${BUILD_INFO}"
+cd ..
+
 prepare_zlib_ng() {
     zlib_ng_latest_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/zlib-ng/zlib-ng/releases \| jq -r "'.[0].tag_name'")"
     zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz"
@@ -411,6 +425,8 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 cma
 prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libiconv⭐⭐⭐⭐⭐⭐"
+prepare_libiconv
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib、xz、libxml2、sqlite、c_ares、libssh2⭐⭐⭐⭐⭐⭐"
 prepare_zlib_ng
 prepare_xz
