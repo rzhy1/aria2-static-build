@@ -152,9 +152,9 @@ prepare_ninja() {
 }
 
 prepare_libiconv() {
-  libiconv_tag="$(retry curl -s https://ftp.gnu.org/gnu/libiconv/ | grep -oE 'href="libiconv-[0-9.]+\.tar\.(xz)"' | sort -rV | head -n 1 | sed -r 's/href="libiconv-(.+)\.tar\..+"/\1/')"
+  libiconv_tag="$(retry curl -s https://ftp.gnu.org/gnu/libiconv/ | grep -oE 'href="libiconv-[0-9]+\.[0-9]+(\.[0-9]+)?\.tar\.gz"' | sort -rV | head -n 1 | sed -E 's/href="libiconv-([0-9.]+)\.tar\.gz"/\1/')"
   echo "libiconv最新版本是${libiconv_tag} ，下载地址是https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.xz"
-  curl -L https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.xz | tar x --xz
+  curl -L https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.gz | tar xz
   cd libiconv-*
   ./configure \
     --host="${CROSS_HOST}" \
