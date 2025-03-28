@@ -162,7 +162,7 @@ prepare_libiconv() {
     --disable-shared \
     --enable-static
   make -j$(nproc) install
-  echo "| gmp | ${libiconv_tag} | https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.gz |" >>"${BUILD_INFO}"
+  echo "| libiconv | ${libiconv_tag} | https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.gz |" >>"${BUILD_INFO}"
 }
 
 prepare_zlib_ng() {
@@ -243,6 +243,7 @@ prepare_libxml2() {
     --prefix="${CROSS_PREFIX}" \
     --enable-silent-rules \
     --without-python \
+    --without-libiconv \
     --without-icu \
     --enable-static \
     --disable-shared
@@ -426,7 +427,7 @@ prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libiconv⭐⭐⭐⭐⭐⭐"
-prepare_libiconv
+#prepare_libiconv
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib、xz、libxml2、sqlite、c_ares、libssh2⭐⭐⭐⭐⭐⭐"
 prepare_zlib_ng
 prepare_xz
