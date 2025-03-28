@@ -161,9 +161,9 @@ prepare_libiconv() {
     --prefix="${CROSS_PREFIX}" \
     --disable-shared \
     --enable-static \
-make -j$(nproc) install
-echo "| gmp | ${libiconv_tag} | https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.xz |" >>"${BUILD_INFO}"
-cd ..
+  make -j$(nproc) install
+  echo "| gmp | ${libiconv_tag} | https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.xz |" >>"${BUILD_INFO}"
+}
 
 prepare_zlib_ng() {
     zlib_ng_latest_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/zlib-ng/zlib-ng/releases \| jq -r "'.[0].tag_name'")"
