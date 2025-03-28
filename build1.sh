@@ -228,7 +228,6 @@ prepare_libxml2() {
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
     --enable-silent-rules \
-    --without-iconv \
     --without-python \
     --without-icu \
     --enable-static \
