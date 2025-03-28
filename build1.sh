@@ -153,16 +153,16 @@ prepare_ninja() {
 
 prepare_libiconv() {
   libiconv_tag="$(retry curl -s https://ftp.gnu.org/gnu/libiconv/ | grep -oE 'href="libiconv-[0-9]+\.[0-9]+(\.[0-9]+)?\.tar\.gz"' | sort -rV | head -n 1 | sed -E 's/href="libiconv-([0-9.]+)\.tar\.gz"/\1/')"
-  echo "libiconv最新版本是${libiconv_tag} ，下载地址是https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.xz"
+  echo "libiconv最新版本是${libiconv_tag} ，下载地址是https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.gz"
   curl -L https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.gz | tar xz
   cd libiconv-*
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
     --disable-shared \
-    --enable-static \
+    --enable-static
   make -j$(nproc) install
-  echo "| gmp | ${libiconv_tag} | https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.xz |" >>"${BUILD_INFO}"
+  echo "| gmp | ${libiconv_tag} | https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.gz |" >>"${BUILD_INFO}"
 }
 
 prepare_zlib_ng() {
