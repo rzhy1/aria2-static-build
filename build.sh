@@ -71,7 +71,7 @@ retry() {
   echo "命令 '$command' 执行失败 (已达到最大重试次数)" >&2
   return 1
 }
-sqlite_tag=$(curl -s https://www.sqlite.org/download.html | awk -F'sqlite-autoconf-|\\.tar\\.gz' '/sqlite-autoconf-[0-9]+\\.tar\\.gz/{print $2; exit}')
+sqlite_tag=$(curl -s https://sqlite.org/index.html | awk '/Version [0-9]+\.[0-9]+\.[0-9]+/ {match($0, /Version ([0-9]+\.[0-9]+\.[0-9]+)/, a); print a[1]; exit}')
 echo "sqlite最新版本是${sqlite_tag}"
 
 # 1. 下载并编译 GMP
