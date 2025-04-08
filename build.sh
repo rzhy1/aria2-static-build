@@ -72,7 +72,7 @@ retry() {
   return 1
 }
 #sqlite_tag=$(curl -s https://www.sqlite.org/download.html | grep -oP 'sqlite-autoconf-\K[0-9]+' | head -n1)
-sqlite_tag=$(retry curl -s "https://www.sqlite.org/index.html" | sed -nr 's/.*>Version ([0-9.]+)<.*/\1/p') || exit
+sqlite_tag=$(curl -s "https://www.sqlite.org/download.html" | grep -oE 'sqlite-autoconf-[0-9]+' | head -n1 | sed 's/sqlite-autoconf-//')
 echo "sqlite最新版本是${sqlite_tag}"
 
 # 1. 下载并编译 GMP
