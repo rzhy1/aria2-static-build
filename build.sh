@@ -138,11 +138,8 @@ start_time=$(date +%s.%N)
 sqlite_tag=$(curl -s https://sqlite.org/index.html | awk '/Version [0-9]+\.[0-9]+\.[0-9]+/ {match($0, /Version ([0-9]+\.[0-9]+\.[0-9]+)/, a); print a[1]; exit}')
 echo "sqlite最新版本是${sqlite_tag}"
 download_page=$(curl -sL "https://www.sqlite.org/download.html")
-echo "download_page是${download_page}"
 csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
-echo "csv_data是${csv_data}"
 tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1)
-echo "tarball_url是${tarball_url}"
 sqlite_latest_url="https://www.sqlite.org/${tarball_url}"
 echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
