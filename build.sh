@@ -43,11 +43,6 @@ sudo ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 #x86_64-w64-mingw32-gcc -print-search-dirs
-echo "查询"
-sudo find / -name "*pthread.a"
-sudo find / -name "*pthread.h"
-sudo find / -name "*pthread*.pc"
-echo "查询结束"
 
 # 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
 #rm -f /etc/apt/apt.conf.d/*
