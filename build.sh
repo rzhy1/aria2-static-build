@@ -164,11 +164,6 @@ make -j$(nproc) install
 x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
 cp libsqlite3.a "$PREFIX/lib/" ||  exit 1
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
-echo "查询"
-grep "macro_version" libtool
-grep "macro_revision" libtool
-grep "GNU Libtool" libtool
-echo "查询结束"
 cd ..
 end_time=$(date +%s.%N)
 duration4=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
