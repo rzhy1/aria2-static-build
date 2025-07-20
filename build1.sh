@@ -3,25 +3,11 @@
 export CROSS_HOST="x86_64-w64-mingw32"
 export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
-
-# 添加目标系统库路径
-#export LIBRARY_PATH="/usr/x86_64-w64-mingw32/lib:${CROSS_PREFIX}/lib64:${CROSS_PREFIX}/lib"
-#export CPATH="/usr/x86_64-w64-mingw32/include:${CROSS_PREFIX}/include"
-
-# 设置 LTO 插件
-export LTO_PLUGIN_PATH="${CROSS_ROOT}/libexec/gcc/${CROSS_HOST}/15.1.0/liblto_plugin.so"
-if [ -f "${LTO_PLUGIN_PATH}" ]; then
-    export LDFLAGS="$LDFLAGS -fuse-linker-plugin -fuse-ld=lld"
-fi
-
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export CFLAGS="-I${CROSS_PREFIX}/include -march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -pipe -flto=$(nproc) -g0"
 export CXXFLAGS="$CFLAGS"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-
-# 修复后的 LDFLAGS
 export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc) -Wl,-Bdynamic -Wl,--as-needed -Wl,--start-group -Wl,-Bstatic"
-
 export LD=x86_64-w64-mingw32-ld.lld
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
