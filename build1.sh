@@ -1,19 +1,31 @@
 #!/bin/bash -e
 
-# This scrip is for static cross compiling
-# Please run this scrip in docker image: "rzhy/ubuntu:x86_64-w64-mingw32" or "ubuntu:rolling"
-# Artifacts will copy to the same directory.
 export CROSS_HOST="x86_64-w64-mingw32"
 export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
+
+# 添加目标系统库路径
+export LIBRARY_PATH="/usr/x86_64-w64-mingw32/lib:${CROSS_PREFIX}/lib64:${CROSS_PREFIX}/lib"
+export CPATH="/usr/x86_64-w64-mingw32/include:${CROSS_PREFIX}/include"
+
+# 设置 LTO 插件
+export LTO_PLUGIN_PATH="${CROSS_ROOT}/libexec/gcc/${CROSS_HOST}/15.1.0/liblto_plugin.so"
+if [ -f "${LTO_PLUGIN_PATH}" ]; then
+    export LDFLAGS="$LDFLAGS -fuse-linker-plugin -fuse-ld=lld"
+fi
+
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export CFLAGS="-I${CROSS_PREFIX}/include -march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -pipe -flto=$(nproc) -g0"
 export CXXFLAGS="$CFLAGS"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc)"
+
+# 修复后的 LDFLAGS
+export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc) -Wl,-Bdynamic -Wl,--as-needed -Wl,--start-group -Wl,-Bstatic"
+
 export LD=x86_64-w64-mingw32-ld.lld
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
+
 retry() {
   # max retry 5 times
   try=5
@@ -386,7 +398,7 @@ build_aria2() {
   # else
   #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
-  LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  #LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
@@ -440,19 +452,6 @@ prepare_c_ares
 prepare_libssh2
 #wait
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
-# 在脚本开头添加
-echo "===== 完整环境检查 ====="
-echo "PATH: $PATH"
-echo "CC: $(which ${CROSS_HOST}-gcc)"
-${CROSS_HOST}-gcc -v
-echo "LD: $(which ${LD})"
-${LD} -v
-echo "CFLAGS: $CFLAGS"
-echo "LDFLAGS: $LDFLAGS"
-echo "LIBRARY_PATH: $LIBRARY_PATH"
-echo "CPATH: $CPATH"
-find /usr -name 'crt1.o' 2>/dev/null
-echo "===== 检查结束 ====="
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
 
