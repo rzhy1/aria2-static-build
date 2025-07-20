@@ -386,6 +386,13 @@ build_aria2() {
   # else
   #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
+  # 添加库验证
+  echo "===== 验证 pthread 库 ====="
+  find /usr -name 'libwinpthread.a' 2>/dev/null
+  find /usr -name 'libpthread.a' 2>/dev/null
+  ls -lh /usr/x86_64-w64-mingw32/lib/libwinpthread.a
+  echo "===== 验证结束 ====="
+  export LIBS="$LIBS -lwinpthread"
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
