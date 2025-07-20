@@ -267,8 +267,6 @@ prepare_sqlite() {
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  echo "查询1"
-  echo "查询结束1"
   LIBS="-lwinpthread"  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
@@ -307,7 +305,7 @@ prepare_c_ares() {
   if [ ! -f "./configure" ]; then
     autoreconf -i
   fi
-  LIBS="-lwinpthread" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" \
+  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" \
     --enable-static \
     --disable-shared \
     --enable-silent-rules \
