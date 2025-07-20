@@ -5,8 +5,8 @@ export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 
 # 添加目标系统库路径
-export LIBRARY_PATH="/usr/x86_64-w64-mingw32/lib:${CROSS_PREFIX}/lib64:${CROSS_PREFIX}/lib"
-export CPATH="/usr/x86_64-w64-mingw32/include:${CROSS_PREFIX}/include"
+#export LIBRARY_PATH="/usr/x86_64-w64-mingw32/lib:${CROSS_PREFIX}/lib64:${CROSS_PREFIX}/lib"
+#export CPATH="/usr/x86_64-w64-mingw32/include:${CROSS_PREFIX}/include"
 
 # 设置 LTO 插件
 export LTO_PLUGIN_PATH="${CROSS_ROOT}/libexec/gcc/${CROSS_HOST}/15.1.0/liblto_plugin.so"
