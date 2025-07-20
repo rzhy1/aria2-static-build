@@ -28,7 +28,7 @@ jobs:
               make binutils autoconf automake autotools-dev libtool \
               patch ca-certificates g++-mingw-w64-x86-64 \
               pkg-config git wget curl dpkg-dev \
-              autopoint libcppunit-dev lzip jq unzip lld zstd rsync bc
+              autopoint libcppunit-dev lzip jq unzip lld zstd rsync bc tcl tcl-dev
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
