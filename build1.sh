@@ -305,7 +305,7 @@ prepare_c_ares() {
   if [ ! -f "./configure" ]; then
     autoreconf -i
   fi
-  LIBS="-L${CROSS_PREFIX}/lib -lwinpthread -lws2_32" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" \
+  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" \
     --enable-static \
     --disable-shared \
     --enable-silent-rules \
@@ -327,7 +327,7 @@ prepare_libssh2() {
   mkdir -p "/usr/src/libssh2-${libssh2_tag}"
   tar -zxf "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz" --strip-components=1 -C "/usr/src/libssh2-${libssh2_tag}"
   cd "/usr/src/libssh2-${libssh2_tag}"
-  LIBS="-L${CROSS_PREFIX}/lib -lwinpthread -lws2_32" ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules \
+  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules \
     --disable-examples-build \
     --disable-docker-tests \
     --disable-sshd-tests \
