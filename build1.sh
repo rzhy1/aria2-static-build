@@ -440,6 +440,19 @@ prepare_c_ares
 prepare_libssh2
 #wait
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
+# 在脚本开头添加
+echo "===== 完整环境检查 ====="
+echo "PATH: $PATH"
+echo "CC: $(which ${CROSS_HOST}-gcc)"
+${CROSS_HOST}-gcc -v
+echo "LD: $(which ${LD})"
+${LD} -v
+echo "CFLAGS: $CFLAGS"
+echo "LDFLAGS: $LDFLAGS"
+echo "LIBRARY_PATH: $LIBRARY_PATH"
+echo "CPATH: $CPATH"
+find /usr -name 'crt1.o' 2>/dev/null
+echo "===== 检查结束 ====="
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
 
