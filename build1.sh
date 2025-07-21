@@ -1,8 +1,5 @@
 #!/bin/bash -e
 
-# This scrip is for static cross compiling
-# Please run this scrip in docker image: "rzhy/ubuntu:x86_64-w64-mingw32" or "ubuntu:rolling"
-# Artifacts will copy to the same directory.
 export CROSS_HOST="x86_64-w64-mingw32"
 export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
@@ -14,6 +11,7 @@ export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--g
 export LD=x86_64-w64-mingw32-ld.lld
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
+
 retry() {
   # max retry 5 times
   try=5
@@ -41,9 +39,9 @@ echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/0
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
-USE_GCC15=0
-if [ "$USE_GCC15" -eq 1 ]; then
-    echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 15)..."
+USE_GCC=0
+if [ "$USE_GCC" -eq 1 ]; then
+    echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 16)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
     tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
 else
@@ -56,9 +54,9 @@ ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
-find / -name "*pthread.a"
-find / -name "*pthread.h"
-find / -name "*pthread*.pc"
+#find / -name "*pthread.a"
+#find / -name "*pthread.h"
+#find / -name "*pthread*.pc"
 echo "查询结束"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
@@ -269,9 +267,7 @@ prepare_sqlite() {
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  echo "查询1"
-  echo "查询结束1"
-  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
+  LIBS="-lwinpthread"  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
@@ -386,6 +382,7 @@ build_aria2() {
   # else
   #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
+  LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
