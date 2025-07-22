@@ -65,6 +65,7 @@ else
     
     if ! x86_64-w64-mingw32-gcc /tmp/test_toolchain.c -o /tmp/test_toolchain.exe 2>/dev/null; then
         echo "错误：mingw-w64工具链无法正常工作"
+    fi
 fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
