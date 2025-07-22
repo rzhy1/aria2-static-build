@@ -57,6 +57,18 @@ echo "查询"
 find / -name "*pthread.a"
 find / -name "*pthread.h"
 find / -name "*pthread*.pc"
+echo "=== 检查关键库文件位置 ==="
+echo "CROSS_ROOT中的pthread库："
+find ${CROSS_ROOT} -name "*pthread*" -type f 2>/dev/null | head -10
+
+echo "测试直接链接pthread："
+echo 'int main(){return 0;}' > /tmp/test.c
+${CROSS_HOST}-gcc /tmp/test.c -lwinpthread -L${CROSS_ROOT}/x86_64-w64-mingw32/lib -o /tmp/test.exe 2>&1 && echo "直接链接成功" || echo "直接链接失败"
+
+echo "检查链接器能找到的库："
+${CROSS_HOST}-gcc -print-file-name=libwinpthread.a
+${CROSS_HOST}-gcc -print-file-name=libpthread.a
+
 echo "查询结束"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
@@ -251,6 +263,7 @@ prepare_libxml2() {
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
 }
+
 prepare_sqlite() {
     sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
     sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
@@ -269,15 +282,20 @@ prepare_sqlite() {
         SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
     fi
     
-    # 强制设置pthread相关变量，绕过configure检测
+    # 强制绕过pthread检测 - 关键修复
     export ac_cv_lib_pthread_pthread_create=yes
     export ac_cv_header_pthread_h=yes
     export ac_cv_lib_winpthread_pthread_create=yes
+    export ac_cv_func_pthread_create=yes
     
-    # 修改LDFLAGS和LIBS确保pthread正确链接
-    local SQLITE_LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -L${CROSS_ROOT}/lib"
+    # 确保使用正确的库路径
+    local SQLITE_LDFLAGS="$LDFLAGS -L${CROSS_ROOT}/x86_64-w64-mingw32/lib -L${CROSS_ROOT}/lib"
     local SQLITE_LIBS="-lwinpthread"
-    local SQLITE_CFLAGS="$CFLAGS -DHAVE_PTHREAD -D_REENTRANT"
+    local SQLITE_CFLAGS="$CFLAGS -DHAVE_PTHREAD -D_REENTRANT -DSQLITE_THREADSAFE=1"
+    
+    # 测试链接是否工作
+    echo "测试pthread链接..."
+    echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - $SQLITE_LDFLAGS $SQLITE_LIBS -o /tmp/test_pthread 2>&1 && echo "pthread链接成功" || echo "pthread链接失败"
     
     LDFLAGS="$SQLITE_LDFLAGS" \
     LIBS="$SQLITE_LIBS" \
