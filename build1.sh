@@ -254,26 +254,45 @@ prepare_libxml2() {
 
 prepare_sqlite() {
   sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
-  sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
-  if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
-    retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
-    mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
+  
+  # 使用预生成的 amalgamation 包（包含 sqlite3.c）
+  sqlite_ver=$(echo $sqlite_tag | tr -d '.')  # 例如 3.51.0 -> 3510
+  sqlite_url="https://www.sqlite.org/2024/sqlite-amalgamation-${sqlite_ver}000.zip"
+  
+  # 下载 SQLite amalgamation
+  if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.zip" ]; then
+    echo "=== 下载 SQLite amalgamation ==="
+    retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.zip" "${sqlite_url}"
   fi
-  mkdir -p "/usr/src/sqlite-${sqlite_tag}"
-  tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
-  cd "/usr/src/sqlite-${sqlite_tag}"
-  if [ x"${TARGET_HOST}" = x"Windows" ]; then
-    ln -sf mksourceid.exe mksourceid
-    SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
-  fi
+  
+  # 创建并进入构建目录
+  build_dir="/usr/src/sqlite-${sqlite_tag}"
+  mkdir -p "${build_dir}"
+  cd "${build_dir}"
+  
+  # 解压 amalgamation
+  echo "=== 解压 SQLite amalgamation ==="
+  unzip -o "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.zip"
+  
+  # 进入解压后的目录
+  cd "sqlite-amalgamation-${sqlite_ver}000" || cd "sqlite-amalgamation-${sqlite_tag}"
+  
+  # 直接编译 SQLite
   (
+    echo "=== 直接编译 SQLite ==="
+    
     # 设置编译环境
     export CC="${CROSS_HOST}-gcc"
     export AR="${CROSS_HOST}-ar"
     export RANLIB="${CROSS_HOST}-ranlib"
     
+    # 确保文件存在
+    if [ ! -f "sqlite3.c" ]; then
+      echo "错误: sqlite3.c 文件不存在!"
+      exit 1
+    fi
+    
     # 编译核心 SQLite 库
-    echo "=== 直接编译 SQLite ==="
     $CC -c -O2 -DSQLITE_THREADSAFE=1 -DHAVE_PTHREAD \
         -I. -I/usr/x86_64-w64-mingw32/include \
         -march=tigerlake -mtune=tigerlake -O2 \
@@ -312,10 +331,8 @@ EOF
     # 记录构建信息
     echo "| sqlite | ${sqlite_tag} | direct build |" >>"${BUILD_INFO}"
     
-    echo "=== SQLite 直接编译完成 ==="
+    echo "=== SQLite 编译安装完成 ==="
   )
-  sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
-  echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
 }
 
 prepare_c_ares() {
