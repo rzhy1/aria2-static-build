@@ -268,16 +268,17 @@ prepare_sqlite() {
   fi
   (
   #local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  # 关键修复：使用正确的库路径
-  export LDFLAGS="-L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  # 使用绝对路径指定库文件
+  export LIBS="/usr/x86_64-w64-mingw32/lib/libwinpthread.a"
   export CFLAGS="-DHAVE_PTHREAD -I/usr/x86_64-w64-mingw32/include"
-  # 验证库路径
-  echo "=== 验证库文件存在 ==="
-  ls -l /usr/x86_64-w64-mingw32/lib/libwinpthread.a || true
-  # 手动添加库路径到链接器
-  export LIBRARY_PATH="/usr/x86_64-w64-mingw32/lib:$LIBRARY_PATH"
+    
+  # 添加调试输出
+  echo "=== 配置前环境 ==="
+  echo "LIBS: $LIBS"
+  echo "CFLAGS: $CFLAGS"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
+    --with-pthread="/usr/x86_64-w64-mingw32" \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
@@ -285,6 +286,10 @@ prepare_sqlite() {
     --disable-session \
     --disable-editline \
     --disable-load-extension
+  # 检查配置结果
+  echo "=== 配置后状态 ==="
+  grep 'HAVE_PTHREAD' config.h || true
+  grep 'SQLITE_THREADSAFE' config.h || true
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
