@@ -258,10 +258,7 @@ prepare_sqlite() {
     # 1. 检查pthread.h的位置
     echo "=== 查找pthread.h位置 ==="
     PTHREAD_HEADERS=(
-        "/usr/share/mingw-w64/include/pthread.h"
         "/usr/x86_64-w64-mingw32/include/pthread.h"
-        "${CROSS_ROOT}/x86_64-w64-mingw32/include/pthread.h"
-        "${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/include/pthread.h"
     )
     
     PTHREAD_HEADER_PATH=""
