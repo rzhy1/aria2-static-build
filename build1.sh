@@ -63,7 +63,7 @@ else
         printf("Hello, MinGW World!\n");
         return 0;
     }
-    EOF
+  EOF
     
     # 关键：使用最简单的命令进行编译，并打开详细输出 (-v)
     # 我们不使用任何复杂的 CFLAGS 或 LDFLAGS，只进行最原始的测试
