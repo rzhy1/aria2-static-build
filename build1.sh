@@ -266,14 +266,16 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
+  (
   #local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  unset LIBS
-  export DFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  export CFLAGS="$CFLAGS -DHAVE_PTHREAD -I/usr/x86_64-w64-mingw32/include"
-  echo "=== 验证pthread支持 ==="
-  x86_64-w64-mingw32-gcc $CFLAGS -xc - -o /dev/null -lwinpthread <<<'#include <pthread.h>
-  int main() { pthread_t t; return pthread_create(&t, NULL, NULL, NULL); }'
-  echo "验证结果: $?"
+  # 关键修复：使用正确的库路径
+  export LDFLAGS="-L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  export CFLAGS="-DHAVE_PTHREAD -I/usr/x86_64-w64-mingw32/include"
+  # 验证库路径
+  echo "=== 验证库文件存在 ==="
+  ls -l /usr/x86_64-w64-mingw32/lib/libwinpthread.a || true
+  # 手动添加库路径到链接器
+  export LIBRARY_PATH="/usr/x86_64-w64-mingw32/lib:$LIBRARY_PATH"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
@@ -287,6 +289,7 @@ prepare_sqlite() {
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   make install
+  )
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
 }
