@@ -267,38 +267,52 @@ prepare_sqlite() {
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
   (
-    # 1. 设置必要的环境变量
-    export CFLAGS="-DHAVE_PTHREAD -I/usr/x86_64-w64-mingw32/include"
-    export LDFLAGS="-L/usr/x86_64-w64-mingw32/lib"
-    export LIBS="-lwinpthread"
+    # 设置编译环境
+    export CC="${CROSS_HOST}-gcc"
+    export AR="${CROSS_HOST}-ar"
+    export RANLIB="${CROSS_HOST}-ranlib"
     
-    # 2. 强制修改 configure 脚本以接受 pthread
-    sed -i 's/checking for library containing pthread_create.../echo "forcing pthread support"/' configure
-    sed -i 's/ac_cv_search_pthread_create=no/ac_cv_search_pthread_create="-lwinpthread"/' configure
+    # 编译核心 SQLite 库
+    echo "=== 直接编译 SQLite ==="
+    $CC -c -O2 -DSQLITE_THREADSAFE=1 -DHAVE_PTHREAD \
+        -I. -I/usr/x86_64-w64-mingw32/include \
+        -march=tigerlake -mtune=tigerlake -O2 \
+        -ffunction-sections -fdata-sections -pipe -flto=4 -g0 \
+        sqlite3.c -o sqlite3.o
     
-    ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
-      --enable-threadsafe \
-      --disable-debug \
-      --disable-fts3 --disable-fts4 --disable-fts5 \
-      --disable-rtree \
-      --disable-tcl \
-      --disable-session \
-      --disable-editline \
-      --disable-load-extension
-    # 4. 手动确保正确的配置设置
-    echo "=== 强制设置 pthread 支持 ==="
-    sed -i 's|^/\* #define HAVE_PTHREAD_H \*/|#define HAVE_PTHREAD_H 1|' config.h
-    sed -i 's|^#define HAVE_PTHREAD_H 0|#define HAVE_PTHREAD_H 1|' config.h
-    sed -i 's|^#define SQLITE_THREADSAFE 0|#define SQLITE_THREADSAFE 1|' config.h
+    # 创建静态库
+    echo "=== 创建静态库 ==="
+    $AR cr libsqlite3.a sqlite3.o
+    $RANLIB libsqlite3.a
     
-    # 5. 验证配置
-    echo "=== 配置状态 ==="
-    grep 'HAVE_PTHREAD' config.h
-    grep 'SQLITE_THREADSAFE' config.h
-    make -j$(nproc)
-    x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
-    cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
-    make install
+    # 安装库和头文件
+    echo "=== 安装文件 ==="
+    mkdir -p "${CROSS_PREFIX}/lib"
+    cp libsqlite3.a "${CROSS_PREFIX}/lib/"
+    
+    mkdir -p "${CROSS_PREFIX}/include"
+    cp sqlite3.h sqlite3ext.h "${CROSS_PREFIX}/include/"
+    
+    # 创建 pkg-config 文件
+    mkdir -p "${CROSS_PREFIX}/lib/pkgconfig"
+    cat > "${CROSS_PREFIX}/lib/pkgconfig/sqlite3.pc" <<EOF
+prefix=${CROSS_PREFIX}
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: SQLite
+Description: SQL database engine
+Version: ${sqlite_tag}
+Libs: -L\${libdir} -lsqlite3
+Libs.private: 
+Cflags: -I\${includedir}
+EOF
+    
+    # 记录构建信息
+    echo "| sqlite | ${sqlite_tag} | direct build |" >>"${BUILD_INFO}"
+    
+    echo "=== SQLite 直接编译完成 ==="
   )
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
