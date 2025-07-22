@@ -266,67 +266,15 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  # 测试pthread是否可用
-  echo "Testing pthread linking..."
-  echo '#include <pthread.h>
-int main() { 
-  pthread_t t; 
-  return 0; 
-}' > test_pthread.c
-  
-  # 测试不同的pthread链接方式
-  PTHREAD_WORKS=0
-  for pthread_lib in "-lwinpthread" "-lpthread" "-lwinpthread -static"; do
-    echo "Testing with: $pthread_lib"
-    if x86_64-w64-mingw32-gcc -I/usr/x86_64-w64-mingw32/include test_pthread.c \
-       -L/usr/x86_64-w64-mingw32/lib $pthread_lib -o test_pthread.exe 2>/dev/null; then
-      echo "Pthread linking successful with: $pthread_lib"
-      PTHREAD_LINK="$pthread_lib"
-      PTHREAD_WORKS=1
-      break
-    fi
-  done
-  rm -f test_pthread.c test_pthread.exe
-  
-  if [ $PTHREAD_WORKS -eq 1 ]; then
-    echo "Using threadsafe SQLite with pthread"
-    # 强制设置autoconf缓存变量
-    export ac_cv_lib_pthread_pthread_create=yes
-    export ac_cv_header_pthread_h=yes
-    export ac_cv_func_pthread_create=yes
-    export ac_cv_search_pthread_create="none required"
-    
-    local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib $PTHREAD_LINK"
-    local CFLAGS="$CFLAGS -DHAVE_PTHREAD -DSQLITE_THREADSAFE=1"
-    SQLITE_THREAD_OPT="--enable-threadsafe"
-  else
-    echo "Pthread not working, using non-threadsafe SQLite"
-    local LDFLAGS="$LDFLAGS"
-    local CFLAGS="$CFLAGS -DSQLITE_THREADSAFE=0"
-    SQLITE_THREAD_OPT="--disable-threadsafe"
-  fi
-  
-  # 创建config.cache文件强制跳过pthread检测
-  if [ $PTHREAD_WORKS -eq 1 ]; then
-    cat > config.cache << EOF
-ac_cv_lib_pthread_pthread_create=yes
-ac_cv_header_pthread_h=yes
-ac_cv_func_pthread_create=yes
-ac_cv_search_pthread_create='none required'
-EOF
-    CACHE_OPT="--cache-file=config.cache"
-  fi
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
-    --enable-threadsafe \
+    --disable-threadsafe \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
     --disable-tcl \
     --disable-session \
     --disable-editline \
-    --disable-load-extension \
-    CPPFLAGS="-DPTW32_STATIC_LIB" \
-    LIBS="-lwinpthread"
+    --disable-load-extension
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
