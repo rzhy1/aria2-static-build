@@ -253,14 +253,14 @@ prepare_libxml2() {
 }
 
 prepare_sqlite() {
-    echo "修复pthread头文件路径问题..."
+    echo "智能SQLite编译方案（自动选择最佳模式）..."
     
     # 1. 查找pthread.h的实际位置
-    echo "=== 查找pthread.h位置 ==="
+    echo "=== 检查pthread支持 ==="
     PTHREAD_HEADER_PATHS=(
+        "/usr/share/mingw-w64/include/pthread.h"
         "/usr/x86_64-w64-mingw32/include/pthread.h"
         "${CROSS_ROOT}/x86_64-w64-mingw32/include/pthread.h"
-        "/usr/include/pthread.h"
     )
     
     PTHREAD_INCLUDE_DIR=""
@@ -268,18 +268,11 @@ prepare_sqlite() {
         if [ -f "$header_path" ]; then
             PTHREAD_INCLUDE_DIR="$(dirname "$header_path")"
             echo "✓ 找到pthread.h: $header_path"
-            echo "✓ 头文件目录: $PTHREAD_INCLUDE_DIR"
             break
         fi
     done
     
-    if [ -z "$PTHREAD_INCLUDE_DIR" ]; then
-        echo "错误：找不到pthread.h头文件"
-        exit 1
-    fi
-    
-    # 2. 确认pthread库文件存在
-    echo "=== 确认pthread库文件 ==="
+    # 2. 查找pthread库文件
     PTHREAD_LIB_PATHS=(
         "/usr/x86_64-w64-mingw32/lib/libwinpthread.a"
         "/usr/x86_64-w64-mingw32/lib/libwinpthread.dll.a"
@@ -291,17 +284,31 @@ prepare_sqlite() {
         if [ -f "$lib_path" ]; then
             PTHREAD_LIB_DIR="$(dirname "$lib_path")"
             echo "✓ 找到pthread库: $lib_path"
-            echo "✓ 库文件目录: $PTHREAD_LIB_DIR"
             break
         fi
     done
     
-    if [ -z "$PTHREAD_LIB_DIR" ]; then
-        echo "错误：找不到pthread库文件"
-        exit 1
+    # 3. 测试pthread是否可用
+    USE_PTHREAD=0
+    if [ -n "$PTHREAD_INCLUDE_DIR" ] && [ -n "$PTHREAD_LIB_DIR" ]; then
+        echo "=== 测试pthread编译 ==="
+        cat > test_pthread.c << 'EOF'
+#include <pthread.h>
+int main() { return 0; }
+EOF
+        
+        if x86_64-w64-mingw32-gcc -I${PTHREAD_INCLUDE_DIR} test_pthread.c -L${PTHREAD_LIB_DIR} -lwinpthread -static -o test_pthread.exe 2>/dev/null; then
+            echo "✓ pthread测试成功，使用线程安全模式"
+            USE_PTHREAD=1
+        else
+            echo "⚠ pthread测试失败，使用非线程安全模式"
+        fi
+        rm -f test_pthread.c test_pthread.exe
+    else
+        echo "⚠ pthread组件不完整，使用非线程安全模式"
     fi
     
-    # 3. 下载和解压SQLite
+    # 4. 下载和解压SQLite
     echo "=== 下载SQLite源码 ==="
     sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
     sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
@@ -320,47 +327,38 @@ prepare_sqlite() {
         SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
     fi
     
-    # 4. 设置包含pthread头文件路径的编译参数
-    echo "=== 设置编译参数（包含pthread路径）==="
+    # 5. 根据pthread测试结果设置编译参数
+    if [ $USE_PTHREAD -eq 1 ]; then
+        echo "=== 使用线程安全模式编译 ==="
+        SQLITE_CFLAGS="$CFLAGS -I${PTHREAD_INCLUDE_DIR} -DHAVE_PTHREAD -DSQLITE_THREADSAFE=1"
+        SQLITE_LDFLAGS="$LDFLAGS -L${PTHREAD_LIB_DIR}"
+        SQLITE_LIBS="-lwinpthread"
+        THREADSAFE_OPT="--enable-threadsafe"
+        THREAD_MODE="threadsafe"
+        
+        # 设置环境变量
+        export ac_cv_lib_pthread_pthread_create=yes
+        export ac_cv_header_pthread_h=yes
+        export ac_cv_func_pthread_create=yes
+    else
+        echo "=== 使用非线程安全模式编译 ==="
+        SQLITE_CFLAGS="$CFLAGS -DSQLITE_THREADSAFE=0"
+        SQLITE_LDFLAGS="$LDFLAGS"
+        SQLITE_LIBS=""
+        THREADSAFE_OPT="--disable-threadsafe"
+        THREAD_MODE="non-threadsafe"
+        
+        # 强制跳过pthread检测
+        export ac_cv_lib_pthread_pthread_create=no
+        export ac_cv_header_pthread_h=no
+        export ac_cv_func_pthread_create=no
+    fi
     
-    # 明确指定pthread头文件和库文件路径
-    SQLITE_CFLAGS="$CFLAGS -I${PTHREAD_INCLUDE_DIR} -DHAVE_PTHREAD -DSQLITE_THREADSAFE=1"
-    SQLITE_LDFLAGS="$LDFLAGS -L${PTHREAD_LIB_DIR}"
-    SQLITE_LIBS="-lwinpthread"
-    
-    # 设置环境变量告诉configure pthread可用
-    export ac_cv_lib_pthread_pthread_create=yes
-    export ac_cv_header_pthread_h=yes
-    export ac_cv_func_pthread_create=yes
-    
-    echo "编译参数："
+    echo "最终编译参数："
     echo "CFLAGS: $SQLITE_CFLAGS"
     echo "LDFLAGS: $SQLITE_LDFLAGS"
     echo "LIBS: $SQLITE_LIBS"
-    echo "pthread头文件路径: $PTHREAD_INCLUDE_DIR"
-    echo "pthread库文件路径: $PTHREAD_LIB_DIR"
-    
-    # 5. 测试pthread编译是否工作
-    echo "=== 测试pthread编译 ==="
-    cat > test_pthread.c << 'EOF'
-#include <pthread.h>
-#include <stdio.h>
-int main() {
-    pthread_t thread;
-    pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
-    printf("pthread test ok\n");
-    return 0;
-}
-EOF
-    
-    if x86_64-w64-mingw32-gcc -I${PTHREAD_INCLUDE_DIR} test_pthread.c -L${PTHREAD_LIB_DIR} -lwinpthread -o test_pthread.exe; then
-        echo "✓ pthread编译测试成功"
-        rm -f test_pthread.c test_pthread.exe
-    else
-        echo "错误：pthread编译测试失败"
-        rm -f test_pthread.c test_pthread.exe
-        exit 1
-    fi
+    echo "模式: $THREAD_MODE"
     
     # 6. 运行configure
     echo "=== 运行configure ==="
@@ -372,7 +370,7 @@ EOF
         --disable-shared \
         --enable-static \
         "${SQLITE_EXT_CONF}" \
-        --enable-threadsafe \
+        $THREADSAFE_OPT \
         --disable-debug \
         --disable-fts3 --disable-fts4 --disable-fts5 \
         --disable-rtree \
@@ -401,19 +399,21 @@ EOF
     cp libsqlite3.a "${CROSS_PREFIX}/lib/" || exit 1
     make install
     
-    # 8. 更新pkg-config文件，包含pthread依赖
+    # 8. 更新pkg-config文件
     if [ -f "${CROSS_PREFIX}/lib/pkgconfig/sqlite3.pc" ]; then
-        sed -i "s/Libs: -L\${libdir} -lsqlite3/Libs: -L\${libdir} -lsqlite3 -L${PTHREAD_LIB_DIR} -lwinpthread/" "${CROSS_PREFIX}/lib/pkgconfig/sqlite3.pc"
+        if [ $USE_PTHREAD -eq 1 ]; then
+            sed -i "s/Libs: -L\${libdir} -lsqlite3/Libs: -L\${libdir} -lsqlite3 -L${PTHREAD_LIB_DIR} -lwinpthread/" "${CROSS_PREFIX}/lib/pkgconfig/sqlite3.pc"
+        fi
         
         sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
-        echo "✓ SQLite ${sqlite_ver} 编译成功（线程安全，包含pthread）"
-        echo "| sqlite | ${sqlite_ver} (threadsafe+pthread) | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
+        echo "✓ SQLite ${sqlite_ver} 编译成功（${THREAD_MODE}）"
+        echo "| sqlite | ${sqlite_ver} (${THREAD_MODE}) | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
     else
         echo "错误：SQLite安装验证失败"
         exit 1
     fi
     
-    echo "✓ SQLite编译完成，已正确链接pthread"
+    echo "✓ SQLite编译完成"
 }
 
 prepare_c_ares() {
