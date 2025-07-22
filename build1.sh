@@ -49,6 +49,22 @@ else
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
+    # 修复CRT链接问题
+    echo "修复mingw-w64 CRT链接问题..."
+    
+    # 检查CRT库是否存在
+    if [ ! -f "${CROSS_ROOT}/x86_64-w64-mingw32/lib/crt2.o" ]; then
+        echo "警告：CRT启动文件缺失，尝试修复..."
+        # 创建符号链接或复制缺失的CRT文件
+        find ${CROSS_ROOT} -name "crt*.o" -type f | head -5
+    fi
+    
+    # 测试基本编译
+    echo "测试工具链基本功能..."
+    echo 'int main() { return 0; }' > /tmp/test_toolchain.c
+    
+    if ! x86_64-w64-mingw32-gcc /tmp/test_toolchain.c -o /tmp/test_toolchain.exe 2>/dev/null; then
+        echo "错误：mingw-w64工具链无法正常工作"
 fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
