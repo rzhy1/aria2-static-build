@@ -76,6 +76,12 @@ jobs:
         run: |
           chmod +x "${GITHUB_WORKSPACE}/build1.sh"
           "${GITHUB_WORKSPACE}/build1.sh"
+      - name: Upload sqlite config.log on failure
+        if: failure() # 关键！同样只在失败时运行
+        uses: actions/upload-artifact@v4 # 使用官方的上传工具
+        with:
+          name: sqlite-config-log # 上传后压缩包的名字
+          path: /usr/src/sqlite-*/config.log # 要上传的文件的路径
       - name: Archive aria2c1.exe
         uses: actions/upload-artifact@v4
         with:
