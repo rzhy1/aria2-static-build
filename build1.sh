@@ -254,85 +254,34 @@ prepare_libxml2() {
 
 prepare_sqlite() {
   sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
-  
-  # 使用预生成的 amalgamation 包（包含 sqlite3.c）
-  sqlite_ver=$(echo $sqlite_tag | tr -d '.')  # 例如 3.51.0 -> 3510
-  sqlite_url="https://www.sqlite.org/2024/sqlite-amalgamation-${sqlite_ver}000.zip"
-  
-  # 下载 SQLite amalgamation
-  if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.zip" ]; then
-    echo "=== 下载 SQLite amalgamation ==="
-    retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.zip" "${sqlite_url}"
+  sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
+  if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
+    retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
+    mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
   fi
-  
-  # 创建并进入构建目录
-  build_dir="/usr/src/sqlite-${sqlite_tag}"
-  mkdir -p "${build_dir}"
-  cd "${build_dir}"
-  
-  # 解压 amalgamation
-  echo "=== 解压 SQLite amalgamation ==="
-  unzip -o "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.zip"
-  
-  # 进入解压后的目录
-  cd "sqlite-amalgamation-${sqlite_ver}000" || cd "sqlite-amalgamation-${sqlite_tag}"
-  
-  # 直接编译 SQLite
-  (
-    echo "=== 直接编译 SQLite ==="
-    
-    # 设置编译环境
-    export CC="${CROSS_HOST}-gcc"
-    export AR="${CROSS_HOST}-ar"
-    export RANLIB="${CROSS_HOST}-ranlib"
-    
-    # 确保文件存在
-    if [ ! -f "sqlite3.c" ]; then
-      echo "错误: sqlite3.c 文件不存在!"
-      exit 1
-    fi
-    
-    # 编译核心 SQLite 库
-    $CC -c -O2 -DSQLITE_THREADSAFE=1 -DHAVE_PTHREAD \
-        -I. -I/usr/x86_64-w64-mingw32/include \
-        -march=tigerlake -mtune=tigerlake -O2 \
-        -ffunction-sections -fdata-sections -pipe -flto=4 -g0 \
-        sqlite3.c -o sqlite3.o
-    
-    # 创建静态库
-    echo "=== 创建静态库 ==="
-    $AR cr libsqlite3.a sqlite3.o
-    $RANLIB libsqlite3.a
-    
-    # 安装库和头文件
-    echo "=== 安装文件 ==="
-    mkdir -p "${CROSS_PREFIX}/lib"
-    cp libsqlite3.a "${CROSS_PREFIX}/lib/"
-    
-    mkdir -p "${CROSS_PREFIX}/include"
-    cp sqlite3.h sqlite3ext.h "${CROSS_PREFIX}/include/"
-    
-    # 创建 pkg-config 文件
-    mkdir -p "${CROSS_PREFIX}/lib/pkgconfig"
-    cat > "${CROSS_PREFIX}/lib/pkgconfig/sqlite3.pc" <<EOF
-prefix=${CROSS_PREFIX}
-exec_prefix=\${prefix}
-libdir=\${exec_prefix}/lib
-includedir=\${prefix}/include
-
-Name: SQLite
-Description: SQL database engine
-Version: ${sqlite_tag}
-Libs: -L\${libdir} -lsqlite3
-Libs.private: 
-Cflags: -I\${includedir}
-EOF
-    
-    # 记录构建信息
-    echo "| sqlite | ${sqlite_tag} | direct build |" >>"${BUILD_INFO}"
-    
-    echo "=== SQLite 编译安装完成 ==="
-  )
+  mkdir -p "/usr/src/sqlite-${sqlite_tag}"
+  tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
+  cd "/usr/src/sqlite-${sqlite_tag}"
+  if [ x"${TARGET_HOST}" = x"Windows" ]; then
+    ln -sf mksourceid.exe mksourceid
+    SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
+  fi
+  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
+    --enable-threadsafe \
+    --disable-debug \
+    --disable-fts3 --disable-fts4 --disable-fts5 \
+    --disable-rtree \
+    --disable-tcl \
+    --disable-session \
+    --disable-editline \
+    --disable-load-extension
+  make -j$(nproc)
+  x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
+  cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
+  make install
+  sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
+  echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
 }
 
 prepare_c_ares() {
