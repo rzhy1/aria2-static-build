@@ -269,7 +269,7 @@ prepare_libxml2() {
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
 }
 
-prepare_sqlite() {
+prepare_sqlite1() {
     sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
     sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
     
@@ -348,7 +348,7 @@ prepare_sqlite() {
 }
 
 
-prepare_sqlite1() {
+prepare_sqlite() {
   sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
   sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
