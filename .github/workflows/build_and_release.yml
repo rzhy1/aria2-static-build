@@ -68,7 +68,7 @@ jobs:
           apt-get update
           apt-get install -y --no-install-recommends \
               automake  autoconf autopoint jq libtool tcl tcl-dev \
-              make pkg-config wget curl g++-mingw-w64-x86-64 git \
+              make pkg-config wget curl g++-mingw-w64-x86-64 git mingw-w64 mingw-w64-common mingw-w64-tools gcc-mingw-w64 g++-mingw-w64 binutils-mingw-w64 \
               ca-certificates libcppunit-dev unzip lld zstd rsync bc
       - name: Compile
         env:
