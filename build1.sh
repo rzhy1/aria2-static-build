@@ -276,9 +276,9 @@ prepare_sqlite() {
     --disable-session \
     --disable-editline \
     --disable-load-extension \
-    LIBS="-lwinpthread" \
-    PTHREAD_LIBS="-lwinpthread" \
-    PTHREAD_CFLAGS="-DHAVE_PTHREAD"
+    CPPFLAGS="-DPTW32_STATIC_LIB" \
+    CFLAGS="$CFLAGS -DHAVE_PTHREAD" \
+    LIBS="-lwinpthread"
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
