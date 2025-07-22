@@ -142,7 +142,7 @@ EOF
         return 1
     fi
 }
-
+fix_mingw_toolchain
 # 修改后的SQLite编译函数
 prepare_sqlite() {
     echo "编译SQLite（使用修复后的工具链）..."
