@@ -7,7 +7,8 @@ export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export CFLAGS="-I${CROSS_PREFIX}/include -march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -pipe -flto=$(nproc) -g0"
 export CXXFLAGS="$CFLAGS"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc)"
+#export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc)"
+export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/lib -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/lib -static -s -Wl,--gc-sections -flto=$(nproc)"
 export LD=x86_64-w64-mingw32-ld.lld
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
@@ -282,20 +283,38 @@ prepare_sqlite() {
         SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
     fi
     
-    # 强制绕过pthread检测 - 关键修复
+    # 找到实际的pthread库位置
+    PTHREAD_LIB_PATH=""
+    for path in "${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/lib" \
+                "${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/lib" \
+                "${CROSS_ROOT}/x86_64-w64-mingw32/lib" \
+                "/usr/x86_64-w64-mingw32/lib"; do
+        if [ -f "$path/libwinpthread.a" ]; then
+            PTHREAD_LIB_PATH="$path"
+            echo "找到pthread库在: $PTHREAD_LIB_PATH"
+            break
+        fi
+    done
+    
+    if [ -z "$PTHREAD_LIB_PATH" ]; then
+        echo "错误: 找不到pthread库文件"
+        exit 1
+    fi
+    
+    # 强制绕过pthread检测
     export ac_cv_lib_pthread_pthread_create=yes
     export ac_cv_header_pthread_h=yes
     export ac_cv_lib_winpthread_pthread_create=yes
     export ac_cv_func_pthread_create=yes
     
-    # 确保使用正确的库路径
-    local SQLITE_LDFLAGS="$LDFLAGS -L${CROSS_ROOT}/x86_64-w64-mingw32/lib -L${CROSS_ROOT}/lib"
+    # 使用找到的库路径
+    local SQLITE_LDFLAGS="$LDFLAGS -L${PTHREAD_LIB_PATH}"
     local SQLITE_LIBS="-lwinpthread"
     local SQLITE_CFLAGS="$CFLAGS -DHAVE_PTHREAD -D_REENTRANT -DSQLITE_THREADSAFE=1"
     
-    # 测试链接是否工作
+    # 测试链接
     echo "测试pthread链接..."
-    echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - $SQLITE_LDFLAGS $SQLITE_LIBS -o /tmp/test_pthread 2>&1 && echo "pthread链接成功" || echo "pthread链接失败"
+    echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - -L${PTHREAD_LIB_PATH} -lwinpthread -o /tmp/test_pthread 2>&1 && echo "pthread链接成功" || echo "pthread链接失败"
     
     LDFLAGS="$SQLITE_LDFLAGS" \
     LIBS="$SQLITE_LIBS" \
@@ -323,6 +342,7 @@ prepare_sqlite() {
     sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
     echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
 }
+
 
 prepare_sqlite1() {
   sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
