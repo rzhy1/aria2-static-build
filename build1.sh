@@ -49,24 +49,162 @@ else
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
-    # 修复CRT链接问题
-    echo "修复mingw-w64 CRT链接问题..."
-    
-    # 检查CRT库是否存在
-    if [ ! -f "${CROSS_ROOT}/x86_64-w64-mingw32/lib/crt2.o" ]; then
-        echo "警告：CRT启动文件缺失，尝试修复..."
-        # 创建符号链接或复制缺失的CRT文件
-        find ${CROSS_ROOT} -name "crt*.o" -type f | head -5
-    fi
-    
-    # 测试基本编译
-    echo "测试工具链基本功能..."
-    echo 'int main() { return 0; }' > /tmp/test_toolchain.c
-    
-    if ! x86_64-w64-mingw32-gcc /tmp/test_toolchain.c -o /tmp/test_toolchain.exe 2>/dev/null; then
-        echo "错误：mingw-w64工具链无法正常工作"
-    fi
 fi
+fix_mingw_toolchain() {
+    echo "=== 诊断和修复mingw-w64工具链 ==="
+    
+    # 1. 检查工具链版本
+    echo "工具链版本信息："
+    x86_64-w64-mingw32-gcc --version
+    
+    # 2. 检查关键文件
+    echo "检查关键CRT文件："
+    ls -la "${CROSS_ROOT}/x86_64-w64-mingw32/lib/"crt*.o 2>/dev/null || echo "标准位置无CRT文件"
+    ls -la "${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/lib/"crt*.o 2>/dev/null || echo "sysroot/mingw/lib无CRT文件"
+    
+    # 3. 测试基本编译
+    echo "测试基本编译功能..."
+    cat > /tmp/test_basic.c << 'EOF'
+#include <stdio.h>
+int main() {
+    printf("Hello World\n");
+    return 0;
+}
+EOF
+    
+    # 尝试不同的编译方式
+    COMPILE_SUCCESS=0
+    
+    echo "尝试1: 标准编译"
+    if x86_64-w64-mingw32-gcc /tmp/test_basic.c -o /tmp/test_basic.exe 2>/tmp/compile_error.log; then
+        echo "✓ 标准编译成功"
+        COMPILE_SUCCESS=1
+        WORKING_COMPILE_FLAGS=""
+    else
+        echo "✗ 标准编译失败"
+        cat /tmp/compile_error.log
+    fi
+    
+    if [ $COMPILE_SUCCESS -eq 0 ]; then
+        echo "尝试2: 使用-static-libgcc"
+        if x86_64-w64-mingw32-gcc -static-libgcc /tmp/test_basic.c -o /tmp/test_basic.exe 2>/tmp/compile_error.log; then
+            echo "✓ -static-libgcc编译成功"
+            COMPILE_SUCCESS=1
+            WORKING_COMPILE_FLAGS="-static-libgcc"
+        else
+            echo "✗ -static-libgcc编译失败"
+            cat /tmp/compile_error.log
+        fi
+    fi
+    
+    if [ $COMPILE_SUCCESS -eq 0 ]; then
+        echo "尝试3: 指定CRT路径"
+        CRT_PATH="${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/lib"
+        if x86_64-w64-mingw32-gcc -B"$CRT_PATH" /tmp/test_basic.c -o /tmp/test_basic.exe 2>/tmp/compile_error.log; then
+            echo "✓ 指定CRT路径编译成功"
+            COMPILE_SUCCESS=1
+            WORKING_COMPILE_FLAGS="-B$CRT_PATH"
+        else
+            echo "✗ 指定CRT路径编译失败"
+            cat /tmp/compile_error.log
+        fi
+    fi
+    
+    if [ $COMPILE_SUCCESS -eq 0 ]; then
+        echo "尝试4: 最小化编译选项"
+        if x86_64-w64-mingw32-gcc -nostartfiles -nostdlib -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt -lkernel32 /tmp/test_basic.c -o /tmp/test_basic.exe 2>/tmp/compile_error.log; then
+            echo "✓ 最小化编译成功"
+            COMPILE_SUCCESS=1
+            WORKING_COMPILE_FLAGS="-nostartfiles -nostdlib -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt -lkernel32"
+        else
+            echo "✗ 最小化编译失败"
+            cat /tmp/compile_error.log
+        fi
+    fi
+    
+    # 清理测试文件
+    rm -f /tmp/test_basic.c /tmp/test_basic.exe /tmp/compile_error.log
+    
+    if [ $COMPILE_SUCCESS -eq 1 ]; then
+        echo "✓ 工具链修复成功，可用编译选项: $WORKING_COMPILE_FLAGS"
+        export MINGW_WORKING_FLAGS="$WORKING_COMPILE_FLAGS"
+        
+        # 更新全局编译选项
+        if [ -n "$WORKING_COMPILE_FLAGS" ]; then
+            export CFLAGS="$CFLAGS $WORKING_COMPILE_FLAGS"
+            export LDFLAGS="$LDFLAGS $WORKING_COMPILE_FLAGS"
+        fi
+        
+        return 0
+    else
+        echo "✗ 工具链无法修复，所有编译尝试都失败"
+        echo "建议切换到不同的工具链版本"
+        return 1
+    fi
+}
+
+# 修改后的SQLite编译函数
+prepare_sqlite() {
+    echo "编译SQLite（使用修复后的工具链）..."
+    
+    # 使用SQLite amalgamation避免configure问题
+    sqlite_year="2024"
+    sqlite_version="3450000"
+    sqlite_url="https://www.sqlite.org/${sqlite_year}/sqlite-amalgamation-${sqlite_version}.zip"
+    
+    if [ ! -f "${DOWNLOADS_DIR}/sqlite-amalgamation-${sqlite_version}.zip" ]; then
+        retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-amalgamation-${sqlite_version}.zip" "${sqlite_url}"
+    fi
+    
+    mkdir -p "/usr/src/sqlite-${sqlite_version}"
+    cd "/usr/src/sqlite-${sqlite_version}"
+    unzip -o "${DOWNLOADS_DIR}/sqlite-amalgamation-${sqlite_version}.zip"
+    cd sqlite-amalgamation-${sqlite_version}
+    
+    # 使用修复后的编译选项
+    echo "使用工具链编译SQLite..."
+    
+    # 简化的编译选项，避免复杂优化
+    SQLITE_CFLAGS="-I${CROSS_PREFIX}/include -O2 -DSQLITE_THREADSAFE=1 -DHAVE_PTHREAD_H=1 -DSQLITE_OMIT_LOAD_EXTENSION"
+    
+    if [ -n "$MINGW_WORKING_FLAGS" ]; then
+        echo "使用修复的编译选项: $MINGW_WORKING_FLAGS"
+        SQLITE_CFLAGS="$SQLITE_CFLAGS $MINGW_WORKING_FLAGS"
+    fi
+    
+    x86_64-w64-mingw32-gcc $SQLITE_CFLAGS -c sqlite3.c -o sqlite3.o
+    
+    if [ $? -ne 0 ]; then
+        echo "错误：SQLite编译失败"
+        exit 1
+    fi
+    
+    echo "✓ SQLite编译成功"
+    
+    x86_64-w64-mingw32-ar rcs libsqlite3.a sqlite3.o
+    
+    # 安装
+    cp sqlite3.h "${CROSS_PREFIX}/include/"
+    cp libsqlite3.a "${CROSS_PREFIX}/lib/"
+    
+    # 创建pkg-config文件
+    mkdir -p "${CROSS_PREFIX}/lib/pkgconfig"
+    cat > "${CROSS_PREFIX}/lib/pkgconfig/sqlite3.pc" << EOF
+prefix=${CROSS_PREFIX}
+exec_prefix=\${prefix}
+libdir=\${exec_prefix}/lib
+includedir=\${prefix}/include
+
+Name: SQLite
+Description: SQL database engine (threadsafe)
+Version: 3.45.0
+Libs: -L\${libdir} -lsqlite3 -lwinpthread
+Cflags: -I\${includedir}
+EOF
+
+    echo "✓ SQLite安装成功，已启用线程安全"
+    echo "| sqlite | 3.45.0 (threadsafe) | ${sqlite_url} |" >>"${BUILD_INFO}"
+}
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
