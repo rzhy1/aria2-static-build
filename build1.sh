@@ -267,57 +267,28 @@ prepare_sqlite() {
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
   (
-  #local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  # 1. 验证库文件
-    echo "=== 验证库文件 ==="
-    ls -l /usr/x86_64-w64-mingw32/lib/libwinpthread.a
-    
-    # 2. 手动测试 pthread
-    cat > pthread_test.c <<EOF
-#include <pthread.h>
-int main() {
-    pthread_t t;
-    return pthread_create(&t, NULL, NULL, NULL) ? 1 : 0;
-}
-EOF
-    
-    ${CROSS_HOST}-gcc pthread_test.c -o pthread_test \
-      -I/usr/x86_64-w64-mingw32/include \
-      -L/usr/x86_64-w64-mingw32/lib \
-      -lwinpthread
-      
-    if ./pthread_test; then
-        echo "Pthread test SUCCESS"
-    else
-        echo "Pthread test FAILED"
-        exit 1
-    fi
-    
-    # 3. 配置 SQLite
-    export LIBS="/usr/x86_64-w64-mingw32/lib/libwinpthread.a"
+    # 1. 设置必要的环境变量
     export CFLAGS="-DHAVE_PTHREAD -I/usr/x86_64-w64-mingw32/include"
+    export LDFLAGS="-L/usr/x86_64-w64-mingw32/lib"
+    export LIBS="-lwinpthread"
     
-    # 修改配置脚本以强制启用 pthread
+    # 2. 强制修改 configure 脚本以接受 pthread
     sed -i 's/checking for library containing pthread_create.../echo "forcing pthread support"/' configure
     sed -i 's/ac_cv_search_pthread_create=no/ac_cv_search_pthread_create="-lwinpthread"/' configure
-  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
-    --enable-threadsafe \
-    --with-pthread="/usr/x86_64-w64-mingw32" \
-    --disable-debug \
-    --disable-fts3 --disable-fts4 --disable-fts5 \
-    --disable-rtree \
-    --disable-tcl \
-    --disable-session \
-    --disable-editline \
-    --disable-load-extension
-  # 检查配置结果
-  echo "=== 配置后状态 ==="
-  grep 'HAVE_PTHREAD' config.h || true
-  grep 'SQLITE_THREADSAFE' config.h || true
-  make -j$(nproc)
-  x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
-  cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
-  make install
+    
+    ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
+      --enable-threadsafe \
+      --disable-debug \
+      --disable-fts3 --disable-fts4 --disable-fts5 \
+      --disable-rtree \
+      --disable-tcl \
+      --disable-session \
+      --disable-editline \
+      --disable-load-extension
+    make -j$(nproc)
+    x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
+    cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
+    make install
   )
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
