@@ -255,8 +255,48 @@ prepare_libxml2() {
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
 }
-
 prepare_sqlite() {
+  sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
+  sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
+  if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
+    retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
+    mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
+  fi
+
+  rm -rf "/usr/src/sqlite-${sqlite_tag}"
+  mkdir -p "/usr/src/sqlite-${sqlite_tag}"
+  
+  tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
+  cd "/usr/src/sqlite-${sqlite_tag}"
+  
+  if [ x"${TARGET_HOST}" = x"Windows" ]; then
+    ln -sf mksourceid.exe mksourceid
+    SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
+  fi
+
+  # --- 这是最终的、决定性的配置 ---
+  # 我们告诉 configure 我们想要静态库，并为它提供正确的 pthread 信息
+  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" \
+    --enable-static --disable-shared \
+    --enable-threadsafe \
+    --disable-debug \
+    --disable-fts3 --disable-fts4 --disable-fts5 \
+    --disable-rtree \
+    --disable-tcl \
+    --disable-session \
+    --disable-editline \
+    --disable-load-extension \
+    CPPFLAGS="-DPTW32_STATIC_LIB" \
+    LIBS="-lwinpthread"
+
+  # 依赖 make 和 make install 完成所有工作，不再手动创建库
+  make -j$(nproc)
+  make install
+  
+  sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
+  echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
+}
+prepare_sqlite1() {
   sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
   sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
