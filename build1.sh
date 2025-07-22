@@ -49,6 +49,11 @@ else
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
+    # 在工具链设置后添加
+    echo "复制pthread库到自定义工具链..."
+    cp /usr/x86_64-w64-mingw32/lib/libpthread.a "${CROSS_PREFIX}/lib/" 2>/dev/null || true
+    cp /usr/x86_64-w64-mingw32/lib/libwinpthread.a "${CROSS_PREFIX}/lib/" 2>/dev/null || true
+
 fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
