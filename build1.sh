@@ -253,120 +253,90 @@ prepare_libxml2() {
 }
 
 prepare_sqlite() {
-    echo "深度诊断pthread问题..."
+    echo "修复pthread头文件路径问题..."
     
-    # 1. 检查pthread相关文件
-    echo "=== 检查pthread相关文件 ==="
-    echo "pthread头文件："
-    find /usr -name "pthread.h" -type f 2>/dev/null
-    echo ""
-    echo "pthread库文件："
-    find /usr -name "*pthread*" -type f 2>/dev/null | grep -E "\.(a|so)$"
-    echo ""
+    # 1. 检查pthread.h的位置
+    echo "=== 查找pthread.h位置 ==="
+    PTHREAD_HEADERS=(
+        "/usr/share/mingw-w64/include/pthread.h"
+        "/usr/x86_64-w64-mingw32/include/pthread.h"
+        "${CROSS_ROOT}/x86_64-w64-mingw32/include/pthread.h"
+        "${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/include/pthread.h"
+    )
     
-    # 2. 检查具体的库文件位置
-    echo "=== 检查mingw-w64库目录 ==="
-    ls -la /usr/x86_64-w64-mingw32/lib/ | grep pthread || echo "标准位置无pthread库"
-    ls -la ${CROSS_ROOT}/x86_64-w64-mingw32/lib/ | grep pthread || echo "CROSS_ROOT位置无pthread库"
-    ls -la ${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/lib/ | grep pthread || echo "sysroot位置无pthread库"
-    echo ""
+    PTHREAD_HEADER_PATH=""
+    for header_path in "${PTHREAD_HEADERS[@]}"; do
+        if [ -f "$header_path" ]; then
+            echo "✓ 找到pthread.h: $header_path"
+            PTHREAD_HEADER_PATH="$(dirname "$header_path")"
+            break
+        fi
+    done
     
-    # 3. 详细测试pthread编译
-    echo "=== 详细测试pthread编译 ==="
-    cat > test_pthread_detailed.c << 'EOF'
+    if [ -z "$PTHREAD_HEADER_PATH" ]; then
+        echo "错误：找不到pthread.h头文件"
+        echo "尝试创建符号链接..."
+        
+        # 尝试创建符号链接
+        if [ -f "/usr/share/mingw-w64/include/pthread.h" ]; then
+            mkdir -p "${CROSS_ROOT}/x86_64-w64-mingw32/include"
+            ln -sf "/usr/share/mingw-w64/include/pthread.h" "${CROSS_ROOT}/x86_64-w64-mingw32/include/pthread.h"
+            PTHREAD_HEADER_PATH="${CROSS_ROOT}/x86_64-w64-mingw32/include"
+            echo "✓ 创建pthread.h符号链接到: $PTHREAD_HEADER_PATH"
+        else
+            echo "错误：无法找到或创建pthread.h"
+            exit 1
+        fi
+    fi
+    
+    # 2. 测试修复后的pthread编译
+    echo "=== 测试修复后的pthread编译 ==="
+    cat > test_pthread_fixed.c << 'EOF'
 #include <pthread.h>
 #include <stdio.h>
 
 int main() {
-    printf("Testing pthread...\n");
+    printf("pthread test\n");
     pthread_t thread;
+    pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
     return 0;
 }
 EOF
     
-    # 测试各种可能的pthread库路径和选项
-    PTHREAD_TESTS=(
-        "-lwinpthread"
-        "-lpthread"
-        "-L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-        "-L${CROSS_ROOT}/x86_64-w64-mingw32/lib -lwinpthread"
-        "-L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/lib -lwinpthread"
-        "-static -lwinpthread"
-        "-Wl,-Bstatic -lwinpthread -Wl,-Bdynamic"
-    )
-    
     PTHREAD_SUCCESS=0
     WORKING_PTHREAD=""
     
+    # 使用正确的头文件路径进行测试
+    PTHREAD_TESTS=(
+        "-I$PTHREAD_HEADER_PATH -lwinpthread"
+        "-I$PTHREAD_HEADER_PATH -lpthread"
+        "-I$PTHREAD_HEADER_PATH -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+    )
+    
     for test_option in "${PTHREAD_TESTS[@]}"; do
-        echo "测试: x86_64-w64-mingw32-gcc test_pthread_detailed.c $test_option"
-        if x86_64-w64-mingw32-gcc test_pthread_detailed.c $test_option -o test_pthread.exe 2>pthread_error.log; then
+        echo "测试: x86_64-w64-mingw32-gcc test_pthread_fixed.c $test_option"
+        if x86_64-w64-mingw32-gcc test_pthread_fixed.c $test_option -o test_pthread.exe 2>/dev/null; then
             echo "✓ 成功: $test_option"
             WORKING_PTHREAD="$test_option"
             PTHREAD_SUCCESS=1
             break
         else
             echo "✗ 失败: $test_option"
-            echo "错误信息："
-            cat pthread_error.log | head -3
-            echo ""
         fi
     done
     
-    # 4. 如果所有测试都失败，显示详细错误信息
+    rm -f test_pthread_fixed.c test_pthread.exe
+    
     if [ $PTHREAD_SUCCESS -eq 0 ]; then
-        echo "=== 所有pthread测试都失败，显示详细错误信息 ==="
-        echo "最后一次测试的完整错误："
-        cat pthread_error.log
-        echo ""
-        
-        echo "编译器搜索路径："
-        x86_64-w64-mingw32-gcc -print-search-dirs
-        echo ""
-        
-        echo "尝试最简单的pthread测试："
-        cat > simple_pthread.c << 'EOF'
-#include <pthread.h>
-int main() { return 0; }
-EOF
-        
-        echo "仅编译（不链接）："
-        if x86_64-w64-mingw32-gcc -c simple_pthread.c -o simple_pthread.o 2>compile_only.log; then
-            echo "✓ pthread.h头文件可用"
-        else
-            echo "✗ pthread.h头文件不可用"
-            cat compile_only.log
-        fi
-        
-        echo ""
-        echo "检查是否缺少关键库文件："
-        echo "libwinpthread-1.dll:"
-        find /usr -name "libwinpthread-1.dll" -type f 2>/dev/null || echo "未找到"
-        echo "libwinpthread.dll.a:"
-        find /usr -name "libwinpthread.dll.a" -type f 2>/dev/null || echo "未找到"
-        echo "libwinpthread.a:"
-        find /usr -name "libwinpthread.a" -type f 2>/dev/null || echo "未找到"
-        
-        rm -f test_pthread_detailed.c test_pthread.exe pthread_error.log simple_pthread.c simple_pthread.o compile_only.log
-        
-        echo ""
-        echo "错误：无法找到可用的pthread库配置"
-        echo "可能的解决方案："
-        echo "1. mingw-w64工具链缺少pthread支持"
-        echo "2. 需要安装额外的pthread库"
-        echo "3. 库文件路径配置问题"
-        echo ""
-        echo "建议："
-        echo "- 检查mingw-w64是否完整安装"
-        echo "- 或者使用不同版本的mingw-w64工具链"
+        echo "错误：即使修复头文件路径，pthread仍然无法工作"
         exit 1
     fi
     
-    rm -f test_pthread_detailed.c test_pthread.exe pthread_error.log
+    echo "✓ pthread修复成功: $WORKING_PTHREAD"
     
-    echo "✓ 找到可用的pthread配置: $WORKING_PTHREAD"
+    # 3. 继续SQLite编译，使用修复的pthread配置
+    echo "=== 开始编译SQLite ==="
     
-    # 继续原来的SQLite编译流程...
     sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
     sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
     if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
@@ -382,23 +352,40 @@ EOF
         SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
     fi
     
-    echo "使用找到的pthread配置编译SQLite: $WORKING_PTHREAD"
-    
-    # 强制绕过configure的pthread检测
+    # 4. 强制绕过configure的pthread检测
+    echo "修补configure脚本..."
     cp configure configure.backup
     sed -i '/Error: Missing required pthread libraries/,+3c\
 echo "强制跳过pthread检测 - 已手动验证pthread可用"\
-echo "pthread库: '"$WORKING_PTHREAD"'"\
+echo "pthread配置: '"$WORKING_PTHREAD"'"\
 ac_cv_lib_pthread_pthread_create=yes' configure
     
+    # 设置环境变量
     export ac_cv_lib_pthread_pthread_create=yes
     export ac_cv_header_pthread_h=yes
     export ac_cv_func_pthread_create=yes
-    export LIBS="$WORKING_PTHREAD"
     
-    local LDFLAGS="$LDFLAGS $WORKING_PTHREAD"
-    local CFLAGS="$CFLAGS -DHAVE_PTHREAD -DSQLITE_THREADSAFE=1"
+    # 从WORKING_PTHREAD中提取库和头文件路径
+    PTHREAD_INCLUDE="-I$PTHREAD_HEADER_PATH"
+    PTHREAD_LIB=$(echo "$WORKING_PTHREAD" | grep -o '\-l[^ ]*')
+    PTHREAD_LIBPATH=$(echo "$WORKING_PTHREAD" | grep -o '\-L[^ ]*' || true)
     
+    echo "pthread配置："
+    echo "  头文件: $PTHREAD_INCLUDE"
+    echo "  库路径: $PTHREAD_LIBPATH"
+    echo "  库文件: $PTHREAD_LIB"
+    
+    # 设置编译参数
+    local CFLAGS="$CFLAGS $PTHREAD_INCLUDE -DHAVE_PTHREAD -DSQLITE_THREADSAFE=1"
+    local LDFLAGS="$LDFLAGS $PTHREAD_LIBPATH $PTHREAD_LIB"
+    export LIBS="$PTHREAD_LIB"
+    
+    echo "最终编译参数："
+    echo "CFLAGS: $CFLAGS"
+    echo "LDFLAGS: $LDFLAGS"
+    echo "LIBS: $LIBS"
+    
+    # 5. 运行configure
     ./configure \
         --build="${BUILD_ARCH}" \
         --host="${CROSS_HOST}" \
@@ -414,15 +401,35 @@ ac_cv_lib_pthread_pthread_create=yes' configure
         --disable-editline \
         --disable-load-extension
     
+    if [ $? -ne 0 ]; then
+        echo "错误：configure失败"
+        exit 1
+    fi
+    
+    echo "✓ configure成功"
+    
+    # 6. 编译和安装
     make -j$(nproc)
+    if [ $? -ne 0 ]; then
+        echo "错误：编译失败"
+        exit 1
+    fi
+    
     x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
     cp libsqlite3.a "${CROSS_PREFIX}/lib/" || exit 1
     make install
     
-    sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
-    echo "| sqlite | ${sqlite_ver} (threadsafe) | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
+    # 7. 更新pkg-config文件
+    if [ -f "${CROSS_PREFIX}/lib/pkgconfig/sqlite3.pc" ]; then
+        sed -i "s/Libs: -L\${libdir} -lsqlite3/Libs: -L\${libdir} -lsqlite3 $PTHREAD_LIB/" "${CROSS_PREFIX}/lib/pkgconfig/sqlite3.pc"
+        sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
+        echo "✓ SQLite ${sqlite_ver} 编译成功（线程安全版本）"
+        echo "| sqlite | ${sqlite_ver} (threadsafe) | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
+    else
+        echo "错误：SQLite安装验证失败"
+        exit 1
+    fi
 }
-
 
 prepare_c_ares() {
   cares_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
