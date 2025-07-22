@@ -57,6 +57,7 @@ echo "查询"
 find / -name "*pthread.a"
 find / -name "*pthread.h"
 find / -name "*pthread*.pc"
+cat /usr/x86_64-w64-mingw32/include/pthread.h
 echo "查询结束"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
