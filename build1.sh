@@ -364,6 +364,25 @@ EOF
     --disable-session \
     --disable-editline \
     --disable-load-extension
+  if [ $? -ne 0 ]; then
+        echo "错误：configure失败"
+        echo "查看configure.backup和当前configure的差异："
+        diff -u configure.backup configure | head -20
+        exit 1
+    fi
+    
+    echo "✓ configure成功"
+    
+    # 编译
+    echo "开始编译..."
+    make -j$(nproc)
+    
+    if [ $? -ne 0 ]; then
+        echo "错误：编译失败"
+        exit 1
+    fi
+    
+    echo "✓ 编译成功"
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
