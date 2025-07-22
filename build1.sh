@@ -54,32 +54,9 @@ ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
-echo "查询pthread相关文件及其MD5值"
-echo "=== pthread.a 文件 ==="
-find / -name "*pthread.a" -exec md5sum {} \; 2>/dev/null
-echo "=== pthread.h 文件 ==="
-find / -name "*pthread.h" -exec md5sum {} \; 2>/dev/null
-echo "=== pthread*.pc 文件 ==="
-find / -name "*pthread*.pc" -exec md5sum {} \; 2>/dev/null
-echo "=== 工具链调试信息 ==="
-echo "GCC版本详细信息："
-x86_64-w64-mingw32-gcc -v 2>&1
-
-echo "链接器版本："
-x86_64-w64-mingw32-ld --version 2>&1
-
-echo "库搜索路径："
-x86_64-w64-mingw32-gcc -print-search-dirs
-
-echo "预定义宏："
-x86_64-w64-mingw32-gcc -dM -E - < /dev/null | grep -i pthread
-
-echo "链接器脚本："
-x86_64-w64-mingw32-ld --verbose | head -20
-
-echo "检查pthread库链接："
-echo 'int main(){return 0;}' | x86_64-w64-mingw32-gcc -x c - -lpthread -v 2>&1 || echo "pthread链接失败"
-
+find / -name "*pthread.a"
+find / -name "*pthread.h"
+find / -name "*pthread*.pc"
 echo "查询结束"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
