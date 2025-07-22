@@ -49,6 +49,39 @@ else
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
+    # ===================================================================
+    #                      工具链试金石测试
+    # ===================================================================
+    echo "************************************************************"
+    echo ">>> 开始执行工具链核心功能测试..."
+    echo "************************************************************"
+    
+    # 创建一个最简单的 C 程序
+    cat > hello_world.c << 'EOF'
+    #include <stdio.h>
+    int main() {
+        printf("Hello, MinGW World!\n");
+        return 0;
+    }
+    EOF
+    
+    # 关键：使用最简单的命令进行编译，并打开详细输出 (-v)
+    # 我们不使用任何复杂的 CFLAGS 或 LDFLAGS，只进行最原始的测试
+    echo ">>> 尝试编译: x86_64-w64-mingw32-gcc -v -static hello_world.c -o hello.exe"
+    x86_64-w64-mingw32-gcc -v -static hello_world.c -o hello.exe
+    
+    # 检查测试是否成功
+    if [ $? -eq 0 ]; then
+        echo "✓✓✓【测试通过】✓✓✓ 工具链核心功能正常。"
+    else
+        echo "XXX【测试失败】XXX 工具链无法链接最简单的程序！"
+        echo "------------------- 以上的详细错误日志是所有问题的根源 -------------------"
+        # 直接退出，让我们能清晰地看到错误
+        exit 1
+    fi
+    
+    echo "************************************************************"
+    # ===================================================================
 fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
