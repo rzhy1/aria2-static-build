@@ -253,167 +253,35 @@ prepare_libxml2() {
 }
 
 prepare_sqlite() {
-    echo "智能SQLite编译方案（自动选择最佳模式）..."
-    
-    # 1. 查找pthread.h的实际位置
-    echo "=== 检查pthread支持 ==="
-    PTHREAD_HEADER_PATHS=(
-        "/usr/share/mingw-w64/include/pthread.h"
-        "/usr/x86_64-w64-mingw32/include/pthread.h"
-        "${CROSS_ROOT}/x86_64-w64-mingw32/include/pthread.h"
-    )
-    
-    PTHREAD_INCLUDE_DIR=""
-    for header_path in "${PTHREAD_HEADER_PATHS[@]}"; do
-        if [ -f "$header_path" ]; then
-            PTHREAD_INCLUDE_DIR="$(dirname "$header_path")"
-            echo "✓ 找到pthread.h: $header_path"
-            break
-        fi
-    done
-    
-    # 2. 查找pthread库文件
-    PTHREAD_LIB_PATHS=(
-        "/usr/x86_64-w64-mingw32/lib/libwinpthread.a"
-        "/usr/x86_64-w64-mingw32/lib/libwinpthread.dll.a"
-        "${CROSS_ROOT}/x86_64-w64-mingw32/lib/libwinpthread.a"
-    )
-    
-    PTHREAD_LIB_DIR=""
-    for lib_path in "${PTHREAD_LIB_PATHS[@]}"; do
-        if [ -f "$lib_path" ]; then
-            PTHREAD_LIB_DIR="$(dirname "$lib_path")"
-            echo "✓ 找到pthread库: $lib_path"
-            break
-        fi
-    done
-    
-    # 3. 测试pthread是否可用
-    USE_PTHREAD=0
-    if [ -n "$PTHREAD_INCLUDE_DIR" ] && [ -n "$PTHREAD_LIB_DIR" ]; then
-        echo "=== 测试pthread编译 ==="
-        cat > test_pthread.c << 'EOF'
-#include <pthread.h>
-int main() { return 0; }
-EOF
-        
-        if x86_64-w64-mingw32-gcc -I${PTHREAD_INCLUDE_DIR} test_pthread.c -L${PTHREAD_LIB_DIR} -lwinpthread -static -o test_pthread.exe 2>/dev/null; then
-            echo "✓ pthread测试成功，使用线程安全模式"
-            USE_PTHREAD=1
-        else
-            echo "⚠ pthread测试失败，使用非线程安全模式"
-        fi
-        rm -f test_pthread.c test_pthread.exe
-    else
-        echo "⚠ pthread组件不完整，使用非线程安全模式"
-    fi
-    
-    # 4. 下载和解压SQLite
-    echo "=== 下载SQLite源码 ==="
-    sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
-    sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
-    
-    if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
-        retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
-        mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
-    fi
-    
-    mkdir -p "/usr/src/sqlite-${sqlite_tag}"
-    tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
-    cd "/usr/src/sqlite-${sqlite_tag}"
-    
-    if [ x"${TARGET_HOST}" = x"Windows" ]; then
-        ln -sf mksourceid.exe mksourceid
-        SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
-    fi
-    
-    # 5. 根据pthread测试结果设置编译参数
-    if [ $USE_PTHREAD -eq 1 ]; then
-        echo "=== 使用线程安全模式编译 ==="
-        SQLITE_CFLAGS="$CFLAGS -I${PTHREAD_INCLUDE_DIR} -DHAVE_PTHREAD -DSQLITE_THREADSAFE=1"
-        SQLITE_LDFLAGS="$LDFLAGS -L${PTHREAD_LIB_DIR}"
-        SQLITE_LIBS="-lwinpthread"
-        THREADSAFE_OPT="--enable-threadsafe"
-        THREAD_MODE="threadsafe"
-        
-        # 设置环境变量
-        export ac_cv_lib_pthread_pthread_create=yes
-        export ac_cv_header_pthread_h=yes
-        export ac_cv_func_pthread_create=yes
-    else
-        echo "=== 使用非线程安全模式编译 ==="
-        SQLITE_CFLAGS="$CFLAGS -DSQLITE_THREADSAFE=0"
-        SQLITE_LDFLAGS="$LDFLAGS"
-        SQLITE_LIBS=""
-        THREADSAFE_OPT="--disable-threadsafe"
-        THREAD_MODE="non-threadsafe"
-        
-        # 强制跳过pthread检测
-        export ac_cv_lib_pthread_pthread_create=no
-        export ac_cv_header_pthread_h=no
-        export ac_cv_func_pthread_create=no
-    fi
-    
-    echo "最终编译参数："
-    echo "CFLAGS: $SQLITE_CFLAGS"
-    echo "LDFLAGS: $SQLITE_LDFLAGS"
-    echo "LIBS: $SQLITE_LIBS"
-    echo "模式: $THREAD_MODE"
-    
-    # 6. 运行configure
-    echo "=== 运行configure ==="
-    CFLAGS="$SQLITE_CFLAGS" LDFLAGS="$SQLITE_LDFLAGS" LIBS="$SQLITE_LIBS" \
-    ./configure \
-        --build="${BUILD_ARCH}" \
-        --host="${CROSS_HOST}" \
-        --prefix="${CROSS_PREFIX}" \
-        --disable-shared \
-        --enable-static \
-        "${SQLITE_EXT_CONF}" \
-        $THREADSAFE_OPT \
-        --disable-debug \
-        --disable-fts3 --disable-fts4 --disable-fts5 \
-        --disable-rtree \
-        --disable-tcl \
-        --disable-session \
-        --disable-editline \
-        --disable-load-extension
-    
-    if [ $? -ne 0 ]; then
-        echo "错误：configure失败"
-        exit 1
-    fi
-    
-    echo "✓ configure成功"
-    
-    # 7. 编译和安装
-    echo "=== 编译SQLite ==="
-    make -j$(nproc)
-    if [ $? -ne 0 ]; then
-        echo "错误：编译失败"
-        exit 1
-    fi
-    
-    # 创建静态库
-    x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
-    cp libsqlite3.a "${CROSS_PREFIX}/lib/" || exit 1
-    make install
-    
-    # 8. 更新pkg-config文件
-    if [ -f "${CROSS_PREFIX}/lib/pkgconfig/sqlite3.pc" ]; then
-        if [ $USE_PTHREAD -eq 1 ]; then
-            sed -i "s/Libs: -L\${libdir} -lsqlite3/Libs: -L\${libdir} -lsqlite3 -L${PTHREAD_LIB_DIR} -lwinpthread/" "${CROSS_PREFIX}/lib/pkgconfig/sqlite3.pc"
-        fi
-        
-        sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
-        echo "✓ SQLite ${sqlite_ver} 编译成功（${THREAD_MODE}）"
-        echo "| sqlite | ${sqlite_ver} (${THREAD_MODE}) | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
-    else
-        echo "错误：SQLite安装验证失败"
-        exit 1
-    fi
-    
-    echo "✓ SQLite编译完成"
+  sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
+  sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
+  if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
+    retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
+    mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
+  fi
+  mkdir -p "/usr/src/sqlite-${sqlite_tag}"
+  tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
+  cd "/usr/src/sqlite-${sqlite_tag}"
+  if [ x"${TARGET_HOST}" = x"Windows" ]; then
+    ln -sf mksourceid.exe mksourceid
+    SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
+  fi
+  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  LIBS="-lwinpthread"  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
+    --enable-threadsafe \
+    --disable-debug \
+    --disable-fts3 --disable-fts4 --disable-fts5 \
+    --disable-rtree \
+    --disable-tcl \
+    --disable-session \
+    --disable-editline \
+    --disable-load-extension
+  make -j$(nproc)
+  x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
+  cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
+  make install
+  sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
+  echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
 }
 
 prepare_c_ares() {
