@@ -267,9 +267,13 @@ prepare_sqlite() {
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
   #local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread" \
-  LIBS="$LIBS -lwinpthread" \
-  CFLAGS="$CFLAGS -DHAVE_PTHREAD -I/usr/x86_64-w64-mingw32/include" \
+  unset LIBS
+  export DFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  export CFLAGS="$CFLAGS -DHAVE_PTHREAD -I/usr/x86_64-w64-mingw32/include"
+  echo "=== 验证pthread支持 ==="
+  x86_64-w64-mingw32-gcc $CFLAGS -xc - -o /dev/null -lwinpthread <<<'#include <pthread.h>
+  int main() { pthread_t t; return pthread_create(&t, NULL, NULL, NULL); }'
+  echo "验证结果: $?"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
