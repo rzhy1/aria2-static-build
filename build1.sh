@@ -50,161 +50,6 @@ else
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
-fix_mingw_toolchain() {
-    echo "=== 诊断和修复mingw-w64工具链 ==="
-    
-    # 1. 检查工具链版本
-    echo "工具链版本信息："
-    x86_64-w64-mingw32-gcc --version
-    
-    # 2. 检查关键文件
-    echo "检查关键CRT文件："
-    ls -la "${CROSS_ROOT}/x86_64-w64-mingw32/lib/"crt*.o 2>/dev/null || echo "标准位置无CRT文件"
-    ls -la "${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/lib/"crt*.o 2>/dev/null || echo "sysroot/mingw/lib无CRT文件"
-    
-    # 3. 测试基本编译
-    echo "测试基本编译功能..."
-    cat > /tmp/test_basic.c << 'EOF'
-#include <stdio.h>
-int main() {
-    printf("Hello World\n");
-    return 0;
-}
-EOF
-    
-    # 尝试不同的编译方式
-    COMPILE_SUCCESS=0
-    
-    echo "尝试1: 标准编译"
-    if x86_64-w64-mingw32-gcc /tmp/test_basic.c -o /tmp/test_basic.exe 2>/tmp/compile_error.log; then
-        echo "✓ 标准编译成功"
-        COMPILE_SUCCESS=1
-        WORKING_COMPILE_FLAGS=""
-    else
-        echo "✗ 标准编译失败"
-        cat /tmp/compile_error.log
-    fi
-    
-    if [ $COMPILE_SUCCESS -eq 0 ]; then
-        echo "尝试2: 使用-static-libgcc"
-        if x86_64-w64-mingw32-gcc -static-libgcc /tmp/test_basic.c -o /tmp/test_basic.exe 2>/tmp/compile_error.log; then
-            echo "✓ -static-libgcc编译成功"
-            COMPILE_SUCCESS=1
-            WORKING_COMPILE_FLAGS="-static-libgcc"
-        else
-            echo "✗ -static-libgcc编译失败"
-            cat /tmp/compile_error.log
-        fi
-    fi
-    
-    if [ $COMPILE_SUCCESS -eq 0 ]; then
-        echo "尝试3: 指定CRT路径"
-        CRT_PATH="${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/lib"
-        if x86_64-w64-mingw32-gcc -B"$CRT_PATH" /tmp/test_basic.c -o /tmp/test_basic.exe 2>/tmp/compile_error.log; then
-            echo "✓ 指定CRT路径编译成功"
-            COMPILE_SUCCESS=1
-            WORKING_COMPILE_FLAGS="-B$CRT_PATH"
-        else
-            echo "✗ 指定CRT路径编译失败"
-            cat /tmp/compile_error.log
-        fi
-    fi
-    
-    if [ $COMPILE_SUCCESS -eq 0 ]; then
-        echo "尝试4: 最小化编译选项"
-        if x86_64-w64-mingw32-gcc -nostartfiles -nostdlib -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt -lkernel32 /tmp/test_basic.c -o /tmp/test_basic.exe 2>/tmp/compile_error.log; then
-            echo "✓ 最小化编译成功"
-            COMPILE_SUCCESS=1
-            WORKING_COMPILE_FLAGS="-nostartfiles -nostdlib -lmingw32 -lgcc -lmoldname -lmingwex -lmsvcrt -lkernel32"
-        else
-            echo "✗ 最小化编译失败"
-            cat /tmp/compile_error.log
-        fi
-    fi
-    
-    # 清理测试文件
-    rm -f /tmp/test_basic.c /tmp/test_basic.exe /tmp/compile_error.log
-    
-    if [ $COMPILE_SUCCESS -eq 1 ]; then
-        echo "✓ 工具链修复成功，可用编译选项: $WORKING_COMPILE_FLAGS"
-        export MINGW_WORKING_FLAGS="$WORKING_COMPILE_FLAGS"
-        
-        # 更新全局编译选项
-        if [ -n "$WORKING_COMPILE_FLAGS" ]; then
-            export CFLAGS="$CFLAGS $WORKING_COMPILE_FLAGS"
-            export LDFLAGS="$LDFLAGS $WORKING_COMPILE_FLAGS"
-        fi
-        
-        return 0
-    else
-        echo "✗ 工具链无法修复，所有编译尝试都失败"
-        echo "建议切换到不同的工具链版本"
-        return 1
-    fi
-}
-fix_mingw_toolchain
-# 修改后的SQLite编译函数
-prepare_sqlite() {
-    echo "编译SQLite（使用修复后的工具链）..."
-    
-    # 使用SQLite amalgamation避免configure问题
-    sqlite_year="2024"
-    sqlite_version="3450000"
-    sqlite_url="https://www.sqlite.org/${sqlite_year}/sqlite-amalgamation-${sqlite_version}.zip"
-    
-    if [ ! -f "${DOWNLOADS_DIR}/sqlite-amalgamation-${sqlite_version}.zip" ]; then
-        retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-amalgamation-${sqlite_version}.zip" "${sqlite_url}"
-    fi
-    
-    mkdir -p "/usr/src/sqlite-${sqlite_version}"
-    cd "/usr/src/sqlite-${sqlite_version}"
-    unzip -o "${DOWNLOADS_DIR}/sqlite-amalgamation-${sqlite_version}.zip"
-    cd sqlite-amalgamation-${sqlite_version}
-    
-    # 使用修复后的编译选项
-    echo "使用工具链编译SQLite..."
-    
-    # 简化的编译选项，避免复杂优化
-    SQLITE_CFLAGS="-I${CROSS_PREFIX}/include -O2 -DSQLITE_THREADSAFE=1 -DHAVE_PTHREAD_H=1 -DSQLITE_OMIT_LOAD_EXTENSION"
-    
-    if [ -n "$MINGW_WORKING_FLAGS" ]; then
-        echo "使用修复的编译选项: $MINGW_WORKING_FLAGS"
-        SQLITE_CFLAGS="$SQLITE_CFLAGS $MINGW_WORKING_FLAGS"
-    fi
-    
-    x86_64-w64-mingw32-gcc $SQLITE_CFLAGS -c sqlite3.c -o sqlite3.o
-    
-    if [ $? -ne 0 ]; then
-        echo "错误：SQLite编译失败"
-        exit 1
-    fi
-    
-    echo "✓ SQLite编译成功"
-    
-    x86_64-w64-mingw32-ar rcs libsqlite3.a sqlite3.o
-    
-    # 安装
-    cp sqlite3.h "${CROSS_PREFIX}/include/"
-    cp libsqlite3.a "${CROSS_PREFIX}/lib/"
-    
-    # 创建pkg-config文件
-    mkdir -p "${CROSS_PREFIX}/lib/pkgconfig"
-    cat > "${CROSS_PREFIX}/lib/pkgconfig/sqlite3.pc" << EOF
-prefix=${CROSS_PREFIX}
-exec_prefix=\${prefix}
-libdir=\${exec_prefix}/lib
-includedir=\${prefix}/include
-
-Name: SQLite
-Description: SQL database engine (threadsafe)
-Version: 3.45.0
-Libs: -L\${libdir} -lsqlite3 -lwinpthread
-Cflags: -I\${includedir}
-EOF
-
-    echo "✓ SQLite安装成功，已启用线程安全"
-    echo "| sqlite | 3.45.0 (threadsafe) | ${sqlite_url} |" >>"${BUILD_INFO}"
-}
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
@@ -421,23 +266,95 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-   # 强制修改configure脚本，跳过pthread检测
-    echo "强制修改configure脚本..."
+  # 强制验证pthread支持
+    echo "验证pthread支持（必须成功）..."
+    cat > test_pthread.c << 'EOF'
+#include <pthread.h>
+int main() {
+    pthread_t thread;
+    pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+    return 0;
+}
+EOF
+    
+    PTHREAD_SUCCESS=0
+    PTHREAD_LIB=""
+    
+    for pthread_flag in "-lwinpthread" "-lpthread"; do
+        echo "测试pthread链接: $pthread_flag"
+        if x86_64-w64-mingw32-gcc test_pthread.c $pthread_flag -o test_pthread.exe 2>/dev/null; then
+            echo "✓ pthread链接成功: $pthread_flag"
+            PTHREAD_LIB="$pthread_flag"
+            PTHREAD_SUCCESS=1
+            break
+        fi
+    done
+    
+    rm -f test_pthread.c test_pthread.exe
+    
+    if [ $PTHREAD_SUCCESS -eq 0 ]; then
+        echo "错误：pthread链接失败！无法编译线程安全的SQLite"
+        echo "这将导致aria2会话管理出现严重问题"
+        exit 1
+    fi
+    
+    echo "✓ pthread验证成功，使用: $PTHREAD_LIB"
+    
+    # 强制绕过configure的pthread检测
+    echo "修补configure脚本以绕过pthread检测..."
     cp configure configure.backup
     
-    # 替换pthread检测的错误退出为成功
+    # 方法1: 直接替换pthread检测的错误退出
     sed -i '/Error: Missing required pthread libraries/,+3c\
-echo "强制跳过pthread检测（已手动配置）"\
+echo "强制跳过pthread检测 - 已手动验证pthread可用"\
+echo "pthread库: '"$PTHREAD_LIB"'"\
 ac_cv_lib_pthread_pthread_create=yes' configure
     
-    # 设置环境变量强制通过所有检测
+    # 方法2: 设置所有相关的autoconf缓存变量
     export ac_cv_lib_pthread_pthread_create=yes
     export ac_cv_header_pthread_h=yes
     export ac_cv_func_pthread_create=yes
-    export LIBS="-lwinpthread"
+    export ac_cv_search_pthread_create="none required"
     
-    local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+    # 方法3: 创建config.cache文件强制所有检测结果
+    cat > config.cache << 'EOF'
+# 强制pthread检测通过
+ac_cv_lib_pthread_pthread_create=yes
+ac_cv_header_pthread_h=yes
+ac_cv_func_pthread_create=yes
+ac_cv_search_pthread_create='none required'
+
+# 其他可能失败的检测设为合理默认值
+ac_cv_func_gmtime_r=no
+ac_cv_func_isnan=no
+ac_cv_func_localtime_r=no
+ac_cv_func_localtime_s=no
+ac_cv_func_strchrnul=no
+ac_cv_func_usleep=no
+ac_cv_func_utime=no
+ac_cv_func_pread=no
+ac_cv_func_pread64=no
+ac_cv_func_pwrite=no
+ac_cv_func_pwrite64=no
+ac_cv_search_fdatasync=no
+ac_cv_search_nanosleep=no
+ac_cv_header_dlfcn_h=no
+ac_cv_search_deflate=no
+EOF
+    
+    # 设置编译和链接参数
+    local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib $PTHREAD_LIB"
     local CFLAGS="$CFLAGS -DHAVE_PTHREAD -DSQLITE_THREADSAFE=1"
+    
+    # 设置LIBS环境变量确保pthread库被链接
+    export LIBS="$PTHREAD_LIB"
+    export PTHREAD_LIBS="$PTHREAD_LIB"
+    export PTHREAD_CFLAGS="-DHAVE_PTHREAD"
+    
+    echo "开始configure..."
+    echo "CFLAGS: $CFLAGS"
+    echo "LDFLAGS: $LDFLAGS"
+    echo "LIBS: $LIBS"
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
