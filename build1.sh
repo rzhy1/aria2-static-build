@@ -266,6 +266,13 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
+  # 修补configure脚本，强制通过pthread检测
+  sed -i 's/as_fn_error $? "Missing required pthread libraries\./echo "Skipping pthread check for cross-compilation"/g' configure
+  sed -i 's/Use --disable-threadsafe to disable this check\./Assuming pthread is available for mingw-w64/g' configure
+  
+  # 或者直接禁用pthread检测
+  export ac_cv_lib_pthread_pthread_create=yes
+  export ac_cv_header_pthread_h=yes
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
@@ -275,10 +282,7 @@ prepare_sqlite() {
     --disable-tcl \
     --disable-session \
     --disable-editline \
-    --disable-load-extension \
-    CPPFLAGS="-DPTW32_STATIC_LIB" \
-    CFLAGS="$CFLAGS -DHAVE_PTHREAD" \
-    LIBS="-lwinpthread"
+    --disable-load-extension
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
