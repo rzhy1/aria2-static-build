@@ -285,6 +285,16 @@ prepare_sqlite() {
       --disable-session \
       --disable-editline \
       --disable-load-extension
+    # 4. 手动确保正确的配置设置
+    echo "=== 强制设置 pthread 支持 ==="
+    sed -i 's|^/\* #define HAVE_PTHREAD_H \*/|#define HAVE_PTHREAD_H 1|' config.h
+    sed -i 's|^#define HAVE_PTHREAD_H 0|#define HAVE_PTHREAD_H 1|' config.h
+    sed -i 's|^#define SQLITE_THREADSAFE 0|#define SQLITE_THREADSAFE 1|' config.h
+    
+    # 5. 验证配置
+    echo "=== 配置状态 ==="
+    grep 'HAVE_PTHREAD' config.h
+    grep 'SQLITE_THREADSAFE' config.h
     make -j$(nproc)
     x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
     cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
