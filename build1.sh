@@ -54,10 +54,13 @@ ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
-find / -name "*pthread.a"
-find / -name "*pthread.h"
-find / -name "*pthread*.pc"
-cat /usr/x86_64-w64-mingw32/lib/libwinpthread.a
+echo "查询pthread相关文件及其MD5值"
+echo "=== pthread.a 文件 ==="
+find / -name "*pthread.a" -exec md5sum {} \; 2>/dev/null
+echo "=== pthread.h 文件 ==="
+find / -name "*pthread.h" -exec md5sum {} \; 2>/dev/null
+echo "=== pthread*.pc 文件 ==="
+find / -name "*pthread*.pc" -exec md5sum {} \; 2>/dev/null
 echo "查询结束"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
