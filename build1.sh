@@ -266,9 +266,32 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  # 确保一个纯净的编译环境
-  rm -rf "/usr/src/sqlite-${sqlite_tag}"
-  mkdir -p "/usr/src/sqlite-${sqlite_tag}"
+  # 强制设置pthread检测结果，跳过configure的pthread检测
+  export ac_cv_lib_pthread_pthread_create=yes
+  export ac_cv_header_pthread_h=yes
+  export ac_cv_func_pthread_create=yes
+  
+  # 设置编译和链接参数
+  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  local CFLAGS="$CFLAGS -DHAVE_PTHREAD -DSQLITE_THREADSAFE=1"
+  
+  # 创建一个简单的pthread测试，确保链接正常
+  echo "Testing pthread linking..."
+  echo '#include <pthread.h>
+int main() { 
+  pthread_t t; 
+  pthread_create(&t, NULL, NULL, NULL);
+  return 0; 
+}' > test_pthread.c
+  
+  if x86_64-w64-mingw32-gcc $CFLAGS test_pthread.c $LDFLAGS -o test_pthread.exe 2>/dev/null; then
+    echo "Pthread linking test passed"
+    rm -f test_pthread.c test_pthread.exe
+  else
+    echo "Pthread linking test failed, disabling threadsafe"
+    export SQLITE_DISABLE_THREADSAFE="--disable-threadsafe"
+    local CFLAGS="$CFLAGS -DSQLITE_THREADSAFE=0"
+  fi
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
