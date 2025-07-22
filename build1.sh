@@ -268,14 +268,38 @@ prepare_sqlite() {
   fi
   (
   #local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  # 使用绝对路径指定库文件
-  export LIBS="/usr/x86_64-w64-mingw32/lib/libwinpthread.a"
-  export CFLAGS="-DHAVE_PTHREAD -I/usr/x86_64-w64-mingw32/include"
+  # 1. 验证库文件
+    echo "=== 验证库文件 ==="
+    ls -l /usr/x86_64-w64-mingw32/lib/libwinpthread.a
     
-  # 添加调试输出
-  echo "=== 配置前环境 ==="
-  echo "LIBS: $LIBS"
-  echo "CFLAGS: $CFLAGS"
+    # 2. 手动测试 pthread
+    cat > pthread_test.c <<EOF
+#include <pthread.h>
+int main() {
+    pthread_t t;
+    return pthread_create(&t, NULL, NULL, NULL) ? 1 : 0;
+}
+EOF
+    
+    ${CROSS_HOST}-gcc pthread_test.c -o pthread_test \
+      -I/usr/x86_64-w64-mingw32/include \
+      -L/usr/x86_64-w64-mingw32/lib \
+      -lwinpthread
+      
+    if ./pthread_test; then
+        echo "Pthread test SUCCESS"
+    else
+        echo "Pthread test FAILED"
+        exit 1
+    fi
+    
+    # 3. 配置 SQLite
+    export LIBS="/usr/x86_64-w64-mingw32/lib/libwinpthread.a"
+    export CFLAGS="-DHAVE_PTHREAD -I/usr/x86_64-w64-mingw32/include"
+    
+    # 修改配置脚本以强制启用 pthread
+    sed -i 's/checking for library containing pthread_create.../echo "forcing pthread support"/' configure
+    sed -i 's/ac_cv_search_pthread_create=no/ac_cv_search_pthread_create="-lwinpthread"/' configure
   ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --with-pthread="/usr/x86_64-w64-mingw32" \
