@@ -272,7 +272,7 @@ prepare_libxml2() {
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
 }
 
-prepare_sqlite1() {
+prepare_sqlite() {
     sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
     sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
     
@@ -307,29 +307,12 @@ if [ -z "$PTHREAD_LIB_PATH" ]; then
     exit 1
 fi
 
-# --- 关键修改 ---
-# 移除或注释掉强制绕过的 ac_cv_* 变量 (让 configure 自行检测，或至少确保 LIBS 正确)
-# export ac_cv_lib_pthread_pthread_create=yes
-# export ac_cv_header_pthread_h=yes
-# export ac_cv_lib_winpthread_pthread_create=yes
-# export ac_cv_func_pthread_create=yes
-
 local SQLITE_CFLAGS="$CFLAGS -DHAVE_PTHREAD -D_REENTRANT -DSQLITE_THREADSAFE=1"
-# LDFLAGS 通常已经包含了 -L${CROSS_PREFIX}/lib 等路径，通常足够
-local SQLITE_LDFLAGS="$LDFLAGS" # 保持原样或微调
-# 关键：在 LIBS 中添加 -lmingw32 和 -lwinpthread
-# -lmingw32 通常需要在 -lwinpthread 之前，或者让 gcc 驱动处理顺序
-# 尝试这个顺序： -lmingw32 -lwinpthread
-local SQLITE_LIBS="-lmingw32 -lwinpthread"
-
 # (可选) 更新测试链接命令以反映新的库列表
 echo "测试pthread链接 (使用调整后的库)..."
 echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - ${SQLITE_LDFLAGS} ${SQLITE_LIBS} -o /tmp/test_pthread 2>&1 && echo "pthread链接成功" || echo "pthread链接失败 (调整后)"
 
-# 使用调整后的变量调用 configure
-LDFLAGS="$SQLITE_LDFLAGS" \
-LIBS="$SQLITE_LIBS" \        # 使用包含 -lmingw32 的 LIBS
-CFLAGS="$SQLITE_CFLAGS" \
+local SQLITE_LIBS="-lmingw32 -lmsvcrt -lwinpthread"
 ./configure \
     --build="${BUILD_ARCH}" \
     --host="${CROSS_HOST}" \
@@ -355,7 +338,7 @@ CFLAGS="$SQLITE_CFLAGS" \
 }
 
 
-prepare_sqlite() {
+prepare_sqlite1() {
   sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
   sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
