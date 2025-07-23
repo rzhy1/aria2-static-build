@@ -39,7 +39,7 @@ echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/0
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
-USE_GCC=1
+USE_GCC=0
 if [ "$USE_GCC" -eq 1 ]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 16)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
@@ -49,11 +49,6 @@ else
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
-    # 在工具链设置后添加
-    echo "复制pthread库到自定义工具链..."
-    cp /usr/x86_64-w64-mingw32/lib/libpthread.a "${CROSS_PREFIX}/lib/" 2>/dev/null || true
-    cp /usr/x86_64-w64-mingw32/lib/libwinpthread.a "${CROSS_PREFIX}/lib/" 2>/dev/null || true
-
 fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
