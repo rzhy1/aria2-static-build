@@ -63,7 +63,7 @@ find ${CROSS_ROOT} -name "*pthread*" -type f 2>/dev/null | head -10
 
 echo "测试直接链接pthread："
 echo 'int main(){return 0;}' > /tmp/test.c
-${CROSS_HOST}-gcc /tmp/test.c -lwinpthread -L${CROSS_ROOT}/x86_64-w64-mingw32/lib -o /tmp/test.exe 2>&1 && echo "直接链接成功" || echo "直接链接失败"
+${CROSS_HOST}-gcc /tmp/test.c -lwinpthread -Lusr/x86_64-w64-mingw32/lib -o /tmp/test.exe 2>&1 && echo "直接链接成功" || echo "直接链接失败"
 
 echo "检查链接器能找到的库："
 ${CROSS_HOST}-gcc -print-file-name=libwinpthread.a
