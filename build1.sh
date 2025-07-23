@@ -75,6 +75,14 @@ ${CROSS_HOST}-gcc -print-file-name=libwinpthread.a
 ${CROSS_HOST}-gcc -print-file-name=libpthread.a
 
 echo "查询结束"
+find ${CROSS_ROOT} -name "libmingw32.a"
+find ${CROSS_ROOT} -name "libcmt.a"
+find ${CROSS_ROOT} -name "libmsvcrt.a"
+find ${CROSS_ROOT} -name "libucrt.a"
+find ${CROSS_ROOT} -name "libgcc.a"
+find ${CROSS_ROOT} -name "libwinpthread.a"
+find ${CROSS_ROOT} -name "crt2.o"
+echo "查询结束1111"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
 TARGET_HOST="${CROSS_HOST#*-}"
