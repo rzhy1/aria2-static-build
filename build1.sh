@@ -307,53 +307,39 @@ if [ -z "$PTHREAD_LIB_PATH" ]; then
     exit 1
 fi
 
-local SQLITE_CFLAGS="$CFLAGS -DHAVE_PTHREAD -D_REENTRANT -DSQLITE_THREADSAFE=1"
-# (可选) 更新测试链接命令以反映新的库列表
-echo "测试pthread链接 (使用调整后的库)..."
-echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - ${SQLITE_LDFLAGS} ${SQLITE_LIBS} -o /tmp/test_pthread 2>&1 && echo "pthread链接成功" || echo "pthread链接失败 (调整后)"
+# 更健壮的做法是 unset 它们，以防万一 configure 内部名称有变
+unset ac_cv_lib_pthread_pthread_create
+unset ac_cv_header_pthread_h
+unset ac_cv_lib_winpthread_pthread_create
+unset ac_cv_func_pthread_create
 
+local SQLITE_CFLAGS="$CFLAGS -DHAVE_PTHREAD -D_REENTRANT -DSQLITE_THREADSAFE=1"
+# 确保 LDFLAGS 包含了 pthread 库的路径
+local SQLITE_LDFLAGS="$LDFLAGS -L${PTHREAD_LIB_PATH}" # 或者直接用 -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib
+
+# --- 关键：显式指定所有必要的库和顺序 ---
+# 顺序尝试：mingw32 (CRT 启动) -> msvcrt (C库) -> winpthread (线程)
+# 或者 mingw32 -> ucrt -> winpthread (如果 msvcrt 不行)
+# -Bstatic 确保这些库被静态链接
+# 注意：libgcc 通常由 gcc 驱动自动添加
 local SQLITE_LIBS="-lmingw32 -lmsvcrt -lwinpthread"
+# 如果上面用 msvcrt 失败，可以尝试 ucrt:
+# local SQLITE_LIBS="-lmingw32 -lucrt -lwinpthread"
+
+# (可选) 更新测试链接命令以反映新的库列表 (这有助于调试)
+echo "测试pthread链接 (使用调整后的库 - mingw32 + msvcrt + winpthread)..."
+echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - ${SQLITE_LDFLAGS} ${SQLITE_LIBS} -o /tmp/test_pthread_v13 2>&1 && echo "pthread链接成功 (调整后)" || echo "pthread链接失败 (调整后)"
+
+# 使用调整后的变量调用 configure
+LDFLAGS="$SQLITE_LDFLAGS" \
+LIBS="$SQLITE_LIBS" \        # 使用包含完整 CRT 链接的 LIBS
+CFLAGS="$SQLITE_CFLAGS" \
 ./configure \
     --build="${BUILD_ARCH}" \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
     --disable-shared \
     "${SQLITE_EXT_CONF}" \
-    --enable-threadsafe \
-    --disable-debug \
-    --disable-fts3 --disable-fts4 --disable-fts5 \
-    --disable-rtree \
-    --disable-tcl \
-    --disable-session \
-    --disable-editline \
-    --disable-load-extension
-    
-    make -j$(nproc)
-    x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
-    cp libsqlite3.a "${CROSS_PREFIX}/lib/" || exit 1
-    make install
-    
-    sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
-    echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
-}
-
-
-prepare_sqlite1() {
-  sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
-  sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
-  if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
-    retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
-    mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
-  fi
-  mkdir -p "/usr/src/sqlite-${sqlite_tag}"
-  tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
-  cd "/usr/src/sqlite-${sqlite_tag}"
-  if [ x"${TARGET_HOST}" = x"Windows" ]; then
-    ln -sf mksourceid.exe mksourceid
-    SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
-  fi
-  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  LIBS="-lwinpthread"  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
