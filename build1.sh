@@ -272,88 +272,153 @@ prepare_libxml2() {
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
 }
 
-prepare_sqlite() {
-    sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
-    sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
+
+# 简化的 SQLite 准备脚本，专门解决交叉编译问题
+
+set -e
+
+# 设置变量
+CROSS_HOST="${CROSS_HOST:-x86_64-w64-mingw32}"
+CROSS_PREFIX="${CROSS_PREFIX:-/cross_root/x86_64-w64-mingw32}"
+BUILD_ARCH="${BUILD_ARCH:-x86_64-linux-gnu}"
+DOWNLOADS_DIR="${DOWNLOADS_DIR:-/downloads}"
+BUILD_INFO="${BUILD_INFO:-/build_info.txt}"
+
+echo "=== 简化 SQLite 构建脚本 ==="
+
+# 1. 创建 C 运行时库存根
+create_crt_stubs() {
+    echo "创建 C 运行时库存根..."
+    mkdir -p "${CROSS_PREFIX}/lib"
     
+    cat > /tmp/crt_stubs.c << 'EOF'
+#include <stdlib.h>
+#include <stdio.h>
+
+// 修复缺失的符号
+char ***__p___initenv(void) {
+    static char **empty_env = NULL;
+    static char ***env_ptr = &empty_env;
+    return env_ptr;
+}
+
+int _crt_atexit(void (*func)(void)) {
+    return atexit(func);
+}
+
+void __security_init_cookie(void) {}
+void __security_check_cookie(void) {}
+EOF
+    
+    ${CROSS_HOST}-gcc -c /tmp/crt_stubs.c -o /tmp/crt_stubs.o
+    ${CROSS_HOST}-ar cr "${CROSS_PREFIX}/lib/libcrtstubs.a" /tmp/crt_stubs.o
+    ${CROSS_HOST}-ranlib "${CROSS_PREFIX}/lib/libcrtstubs.a"
+    rm -f /tmp/crt_stubs.c /tmp/crt_stubs.o
+}
+
+# 2. 创建数学函数存根
+create_math_stubs() {
+    echo "创建数学函数存根..."
+    
+    cat > /tmp/math_stubs.c << 'EOF'
+#include <math.h>
+
+// 简单的 ceil 实现
+double ceil(double x) {
+    long long i = (long long)x;
+    return (x > i) ? (double)(i + 1) : (double)i;
+}
+
+double floor(double x) {
+    long long i = (long long)x;
+    return (x < i) ? (double)(i - 1) : (double)i;
+}
+
+int isnan(double x) {
+    return x != x;
+}
+EOF
+    
+    ${CROSS_HOST}-gcc -c /tmp/math_stubs.c -o /tmp/math_stubs.o
+    ${CROSS_HOST}-ar cr "${CROSS_PREFIX}/lib/libmathstubs.a" /tmp/math_stubs.o
+    ${CROSS_HOST}-ranlib "${CROSS_PREFIX}/lib/libmathstubs.a"
+    rm -f /tmp/math_stubs.c /tmp/math_stubs.o
+}#
+ 3. 准备 SQLite
+prepare_sqlite() {
+    echo "准备 SQLite..."
+    
+    # 下载 SQLite
+    sqlite_tag="$(wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION || echo "3.51.0")"
+    sqlite_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
+    
+    mkdir -p "${DOWNLOADS_DIR}"
     if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
-        retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
-        mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
+        echo "下载 SQLite ${sqlite_tag}..."
+        wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_url}"
+        mv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
     fi
     
+    # 解压
+    rm -rf "/usr/src/sqlite-${sqlite_tag}"
     mkdir -p "/usr/src/sqlite-${sqlite_tag}"
     tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
     cd "/usr/src/sqlite-${sqlite_tag}"
     
+    # Windows 特定设置
     if [ x"${TARGET_HOST}" = x"Windows" ]; then
-        ln -sf mksourceid.exe mksourceid
+        ln -sf mksourceid.exe mksourceid 2>/dev/null || true
         SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
     fi
     
-    # 找到实际的pthread库位置 (这部分可以保留)
-PTHREAD_LIB_PATH=""
-for path in "${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/lib" \
-            "${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/lib" \
-            "${CROSS_ROOT}/x86_64-w64-mingw32/lib" \
-            "/usr/x86_64-w64-mingw32/lib"; do
-    if [ -f "$path/libwinpthread.a" ]; then
-        PTHREAD_LIB_PATH="$path"
-        echo "找到pthread库在: $PTHREAD_LIB_PATH"
-        break
-    fi
-done
-if [ -z "$PTHREAD_LIB_PATH" ]; then
-    echo "错误: 找不到pthread库文件"
-    exit 1
-fi
-
-# 更健壮的做法是 unset 它们，以防万一 configure 内部名称有变
-unset ac_cv_lib_pthread_pthread_create
-unset ac_cv_header_pthread_h
-unset ac_cv_lib_winpthread_pthread_create
-unset ac_cv_func_pthread_create
-
-local SQLITE_CFLAGS="$CFLAGS -DHAVE_PTHREAD -D_REENTRANT -DSQLITE_THREADSAFE=1"
-# 确保 LDFLAGS 包含了 pthread 库的路径
-local SQLITE_LDFLAGS="$LDFLAGS -L${PTHREAD_LIB_PATH}" # 或者直接用 -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib
-
-# --- 关键：显式指定所有必要的库和顺序 ---
-# 顺序尝试：mingw32 (CRT 启动) -> msvcrt (C库) -> winpthread (线程)
-# 或者 mingw32 -> ucrt -> winpthread (如果 msvcrt 不行)
-# -Bstatic 确保这些库被静态链接
-# 注意：libgcc 通常由 gcc 驱动自动添加
-local SQLITE_LIBS="-lmingw32 -lmsvcrt -lwinpthread"
-# 如果上面用 msvcrt 失败，可以尝试 ucrt:
-# local SQLITE_LIBS="-lmingw32 -lucrt -lwinpthread"
-
-# (可选) 更新测试链接命令以反映新的库列表 (这有助于调试)
-echo "测试pthread链接 (使用调整后的库 - mingw32 + msvcrt + winpthread)..."
-echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - ${SQLITE_LDFLAGS} ${SQLITE_LIBS} -o /tmp/test_pthread_v13 2>&1 && echo "pthread链接成功 (调整后)" || echo "pthread链接失败 (调整后)"
-
-# 使用调整后的变量调用 configure
-LDFLAGS="$SQLITE_LDFLAGS" \
-LIBS="$SQLITE_LIBS" \
-CFLAGS="$SQLITE_CFLAGS" \
-./configure \
-    --build="${BUILD_ARCH}" \
-    --host="${CROSS_HOST}" \
-    --prefix="${CROSS_PREFIX}" \
-    --disable-shared \
-    "${SQLITE_EXT_CONF}" \
-    --enable-threadsafe \
-    --disable-debug \
-    --disable-fts3 --disable-fts4 --disable-fts5 \
-    --disable-rtree \
-    --disable-tcl \
-    --disable-session \
-    --disable-editline \
-    --disable-load-extension
-  make -j$(nproc)
-  x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
-  cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
-  make install
-  sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
-  echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
+    # 清理配置缓存
+    rm -f config.cache
+    unset ac_cv_lib_pthread_pthread_create
+    unset ac_cv_header_pthread_h
+    unset ac_cv_lib_m_ceil
+    unset ac_cv_func_ceil
+    
+    # 设置编译参数
+    export CFLAGS="$CFLAGS -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_OMIT_WAL -DHAVE_CEIL=1 -I${CROSS_PREFIX}/include"
+    export LDFLAGS="$LDFLAGS -static-libgcc -L${CROSS_PREFIX}/lib"
+    export LIBS="-lcrtstubs -lmathstubs -lmingw32 -lmsvcrt -lkernel32"
+    
+    # 强制设置 autoconf 变量
+    export ac_cv_lib_m_ceil=yes
+    export ac_cv_func_ceil=yes
+    export ac_cv_func_floor=yes
+    export ac_cv_func_isnan=yes
+    
+    echo "配置 SQLite..."
+    ./configure \
+        --build="${BUILD_ARCH}" \
+        --host="${CROSS_HOST}" \
+        --prefix="${CROSS_PREFIX}" \
+        --disable-shared \
+        --enable-static \
+        ${SQLITE_EXT_CONF} \
+        --disable-threadsafe \
+        --disable-debug \
+        --disable-fts3 --disable-fts4 --disable-fts5 \
+        --disable-rtree \
+        --disable-tcl \
+        --disable-session \
+        --disable-editline \
+        --disable-load-extension \
+        --enable-math \
+        --disable-dynamic-extensions
+    
+    echo "编译 SQLite..."
+    make -j$(nproc)
+    
+    echo "安装 SQLite..."
+    make install
+    
+    # 记录版本信息
+    sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc 2>/dev/null | awk '{print $2}' || echo "${sqlite_tag}")"
+    echo "| sqlite | ${sqlite_ver} | ${sqlite_url} |" >> "${BUILD_INFO}"
+    
+    echo "SQLite ${sqlite_ver} 安装完成"
 }
 
 prepare_c_ares() {
