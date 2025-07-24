@@ -340,7 +340,7 @@ CFLAGS="$SQLITE_CFLAGS" \
     --prefix="${CROSS_PREFIX}" \
     --disable-shared \
     "${SQLITE_EXT_CONF}" \
-    --enable-threadsafe \
+    --disable-threadsafe \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
