@@ -343,7 +343,7 @@ EOF
     ${CROSS_HOST}-ar cr "${CROSS_PREFIX}/lib/libmathstubs.a" /tmp/math_stubs.o
     ${CROSS_HOST}-ranlib "${CROSS_PREFIX}/lib/libmathstubs.a"
     rm -f /tmp/math_stubs.c /tmp/math_stubs.o
-}#
+}
  3. 准备 SQLite
 prepare_sqlite() {
     echo "准备 SQLite..."
