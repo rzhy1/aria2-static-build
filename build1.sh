@@ -332,7 +332,7 @@ echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - ${SQLITE_LDFLAGS} ${SQLI
 
 # 使用调整后的变量调用 configure
 LDFLAGS="$SQLITE_LDFLAGS" \
-LIBS="$SQLITE_LIBS" \        # 使用包含完整 CRT 链接的 LIBS
+LIBS="$SQLITE_LIBS" \
 CFLAGS="$SQLITE_CFLAGS" \
 ./configure \
     --build="${BUILD_ARCH}" \
