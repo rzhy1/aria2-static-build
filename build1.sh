@@ -46,7 +46,7 @@ if [ "$USE_GCC" -eq 1 ]; then
     tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
 else
     echo "使用相对成熟的 musl-cros (GCC 15)..."
-    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32-1.tar.xz"
+    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
@@ -253,39 +253,23 @@ prepare_libxml2() {
 }
 
 prepare_sqlite() {
-    sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
-    sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
-    
-    if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
-        retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
-        mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
-    fi
-    
-    mkdir -p "/usr/src/sqlite-${sqlite_tag}"
-    tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
-    cd "/usr/src/sqlite-${sqlite_tag}"
-    
-    if [ x"${TARGET_HOST}" = x"Windows" ]; then
-        ln -sf mksourceid.exe mksourceid
-        SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
-    fi
-    
+  sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
+  sqlite_latest_url="https://www.sqlite.org/src/tarball/sqlite.tar.gz"
+  if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
+    retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
+    mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
+  fi
+  mkdir -p "/usr/src/sqlite-${sqlite_tag}"
+  tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
+  cd "/usr/src/sqlite-${sqlite_tag}"
+  if [ x"${TARGET_HOST}" = x"Windows" ]; then
+    ln -sf mksourceid.exe mksourceid
+    SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
+  fi
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  local export CFLAGS="$CFLAGS \
-    -DSQLITE_OS_WIN=1 \
-    -DSQLITE_OMIT_LOAD_EXTENSION \
-    -DSQLITE_OMIT_WAL \
-    -DSQLITE_TEMP_STORE=3 \
-    -DSQLITE_OMIT_DISKIO \
-    -DSQLITE_OMIT_MMAP \
-    -I${CROSS_PREFIX}/include"
-  local export LIBS="-lmingw32 -lwinpthread -lmsvcrt -lkernel32 -lcrtstubs -lz"
-  ./configure \
-    --build="${BUILD_ARCH}" \
-    --host="${CROSS_HOST}" \
-    --prefix="${CROSS_PREFIX}" \
-    --disable-shared \
-    "${SQLITE_EXT_CONF}" \
+  echo "查询1"
+  echo "查询结束1"
+  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
@@ -293,7 +277,6 @@ prepare_sqlite() {
     --disable-tcl \
     --disable-session \
     --disable-editline \
-    --disable-rpath \
     --disable-load-extension
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
@@ -401,7 +384,6 @@ build_aria2() {
   # else
   #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
-  #LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
