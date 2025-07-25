@@ -46,7 +46,7 @@ if [ "$USE_GCC" -eq 1 ]; then
     tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
 else
     echo "使用相对成熟的 musl-cros (GCC 15)..."
-    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
+    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32-1.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
@@ -267,8 +267,7 @@ prepare_sqlite() {
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  echo "查询1"
-  echo "查询结束1"
+  local export ac_cv_sizeof_off_t=8  # 关键修复
   CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
@@ -277,6 +276,7 @@ prepare_sqlite() {
     --disable-tcl \
     --disable-session \
     --disable-editline \
+    --disable-math \
     --disable-load-extension
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
