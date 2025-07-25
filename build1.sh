@@ -399,8 +399,7 @@ prepare_libxml2() {
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
 }
 
-
-# 简化的 SQLite 准备脚本，专门解决交叉编译问题
+# SQLite 准备脚本，使用Unix VFS避免Windows VFS问题
 
 set -e
 
@@ -411,7 +410,7 @@ BUILD_ARCH="${BUILD_ARCH:-x86_64-linux-gnu}"
 DOWNLOADS_DIR="${DOWNLOADS_DIR:-/downloads}"
 BUILD_INFO="${BUILD_INFO:-/build_info.txt}"
 
-echo "=== 简化 SQLite 构建脚本 ==="
+echo "=== SQLite 构建脚本（Unix VFS）==="
 
 # 1. 创建 C 运行时库存根
 create_crt_stubs() {
@@ -441,58 +440,10 @@ EOF
     ${CROSS_HOST}-ar cr "${CROSS_PREFIX}/lib/libcrtstubs.a" /tmp/crt_stubs.o
     ${CROSS_HOST}-ranlib "${CROSS_PREFIX}/lib/libcrtstubs.a"
     rm -f /tmp/crt_stubs.c /tmp/crt_stubs.o
+    echo "✓ C 运行时库存根创建完成"
 }
 
-# 2. 创建数学函数存根
-create_math_stubs() {
-    echo "创建数学函数存根..."
-    
-    cat > /tmp/math_stubs.c << 'EOF'
-// 不包含 math.h 以避免宏冲突
-
-// 简单的数学函数实现
-double ceil(double x) {
-    long long i = (long long)x;
-    return (x > i) ? (double)(i + 1) : (double)i;
-}
-
-double floor(double x) {
-    long long i = (long long)x;
-    return (x < i) ? (double)(i - 1) : (double)i;
-}
-
-// 简单的 isnan 实现（避免与宏冲突）
-int my_isnan(double x) {
-    return x != x;
-}
-
-// 其他可能需要的数学函数
-double fabs(double x) {
-    return x < 0 ? -x : x;
-}
-
-double sqrt(double x) {
-    // 简单的牛顿法实现
-    if (x < 0) return x; // NaN
-    if (x == 0) return 0;
-    
-    double guess = x;
-    double prev;
-    do {
-        prev = guess;
-        guess = (guess + x / guess) / 2.0;
-    } while (fabs(guess - prev) > 1e-10);
-    
-    return guess;
-}
-EOF
-    
-    ${CROSS_HOST}-gcc -c /tmp/math_stubs.c -o /tmp/math_stubs.o
-    ${CROSS_HOST}-ar cr "${CROSS_PREFIX}/lib/libmathstubs.a" /tmp/math_stubs.o
-    ${CROSS_HOST}-ranlib "${CROSS_PREFIX}/lib/libmathstubs.a"
-    rm -f /tmp/math_stubs.c /tmp/math_stubs.o
-}
-#3. 准备 SQLite
+# 2. 准备 SQLite
 prepare_sqlite() {
     echo "准备 SQLite..."
     
@@ -521,31 +472,30 @@ prepare_sqlite() {
     
     # 清理配置缓存
     rm -f config.cache
-    unset ac_cv_lib_pthread_pthread_create
-    unset ac_cv_header_pthread_h
-    unset ac_cv_lib_m_ceil
-    unset ac_cv_func_ceil
     
-    # 设置编译参数 - 修复库链接顺序
-    export CFLAGS="$CFLAGS -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_OMIT_WAL -DHAVE_CEIL=1 -I${CROSS_PREFIX}/include"
+    # 设置编译参数 - 强制使用Unix VFS，完全禁用Windows VFS
+    export CFLAGS="$CFLAGS -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_OMIT_WAL -DSQLITE_OS_UNIX=1 -DSQLITE_OS_WIN=0 -DSQLITE_OS_OTHER=0 -I${CROSS_PREFIX}/include"
     export LDFLAGS="$LDFLAGS -static-libgcc -L${CROSS_PREFIX}/lib"
-    # 关键：正确的库链接顺序，mingw32必须在最前面
-    export LIBS="-lmingw32 -lcrtstubs -lmathstubs -lmsvcrt -lkernel32 -luser32 -ladvapi32"
+    export LIBS="-lmingw32 -lcrtstubs -lmsvcrt -lkernel32"
     
-    # 强制设置 autoconf 变量
-    export ac_cv_lib_m_ceil=yes
-    export ac_cv_func_ceil=yes
-    export ac_cv_func_floor=yes
-    export ac_cv_func_isnan=yes
-    export ac_cv_func_fabs=yes
-    export ac_cv_func_sqrt=yes
-    export ac_cv_header_math_h=yes
+    # 强制设置autoconf变量以避免检测问题
+    export ac_cv_func_fdatasync=no
+    export ac_cv_func_usleep=yes
+    export ac_cv_func_localtime_r=no
+    export ac_cv_func_gmtime_r=no
+    export ac_cv_func_localtime_s=no
     
-    echo "配置 SQLite..."
-    # 添加测试链接以确保库顺序正确
+    # 测试库链接
     echo "测试库链接顺序..."
-    echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - $LIBS -o /tmp/test_link 2>&1 && echo "✓ 库链接测试成功" || echo "✗ 库链接测试失败"
+    if echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - $LIBS -o /tmp/test_link 2>/dev/null; then
+        echo "✓ 库链接测试成功"
+        rm -f /tmp/test_link
+    else
+        echo "✗ 库链接测试失败"
+        exit 1
+    fi
     
+    echo "配置 SQLite（强制Unix VFS）..."
     ./configure \
         --build="${BUILD_ARCH}" \
         --host="${CROSS_HOST}" \
@@ -582,7 +532,6 @@ main() {
     echo "前缀: ${CROSS_PREFIX}"
     
     create_crt_stubs
-    create_math_stubs
     prepare_sqlite
     
     echo "=== SQLite 构建完成 ==="
