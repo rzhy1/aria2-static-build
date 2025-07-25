@@ -400,17 +400,6 @@ prepare_libxml2() {
 }
 
 
-# 简化的 SQLite 准备脚本，专门解决交叉编译问题
-
-set -e
-
-# 设置变量
-CROSS_HOST="${CROSS_HOST:-x86_64-w64-mingw32}"
-CROSS_PREFIX="${CROSS_PREFIX:-/cross_root/x86_64-w64-mingw32}"
-BUILD_ARCH="${BUILD_ARCH:-x86_64-linux-gnu}"
-DOWNLOADS_DIR="${DOWNLOADS_DIR:-/downloads}"
-BUILD_INFO="${BUILD_INFO:-/build_info.txt}"
-
 echo "=== 简化 SQLite 构建脚本 ==="
 
 # 1. 创建 C 运行时库存根
@@ -470,8 +459,8 @@ EOF
     ${CROSS_HOST}-ar cr "${CROSS_PREFIX}/lib/libmathstubs.a" /tmp/math_stubs.o
     ${CROSS_HOST}-ranlib "${CROSS_PREFIX}/lib/libmathstubs.a"
     rm -f /tmp/math_stubs.c /tmp/math_stubs.o
-}
- #3. 准备 SQLite
+}#
+ 3. 准备 SQLite
 prepare_sqlite() {
     echo "准备 SQLite..."
     
@@ -505,10 +494,11 @@ prepare_sqlite() {
     unset ac_cv_lib_m_ceil
     unset ac_cv_func_ceil
     
-    # 设置编译参数
+    # 设置编译参数 - 修复库链接顺序
     export CFLAGS="$CFLAGS -DSQLITE_THREADSAFE=0 -DSQLITE_OMIT_LOAD_EXTENSION -DSQLITE_OMIT_WAL -DHAVE_CEIL=1 -I${CROSS_PREFIX}/include"
     export LDFLAGS="$LDFLAGS -static-libgcc -L${CROSS_PREFIX}/lib"
-    export LIBS="-lcrtstubs -lmathstubs -lmingw32 -lmsvcrt -lkernel32"
+    # 关键：正确的库链接顺序，mingw32必须在最前面
+    export LIBS="-lmingw32 -lcrtstubs -lmathstubs -lmsvcrt -lkernel32 -luser32 -ladvapi32"
     
     # 强制设置 autoconf 变量
     export ac_cv_lib_m_ceil=yes
@@ -517,6 +507,10 @@ prepare_sqlite() {
     export ac_cv_func_isnan=yes
     
     echo "配置 SQLite..."
+    # 添加测试链接以确保库顺序正确
+    echo "测试库链接顺序..."
+    echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - $LIBS -o /tmp/test_link 2>&1 && echo "✓ 库链接测试成功" || echo "✗ 库链接测试失败"
+    
     ./configure \
         --build="${BUILD_ARCH}" \
         --host="${CROSS_HOST}" \
@@ -531,7 +525,9 @@ prepare_sqlite() {
         --disable-tcl \
         --disable-session \
         --disable-editline \
-        --disable-load-extension
+        --disable-load-extension \
+        --enable-math \
+        --disable-dynamic-extensions
     
     echo "编译 SQLite..."
     make -j$(nproc)
@@ -545,6 +541,22 @@ prepare_sqlite() {
     
     echo "SQLite ${sqlite_ver} 安装完成"
 }
+
+# 主执行流程
+main() {
+    echo "目标: ${TARGET_HOST:-Windows}"
+    echo "编译器: ${CROSS_HOST}"
+    echo "前缀: ${CROSS_PREFIX}"
+    
+    create_crt_stubs
+    create_math_stubs
+    prepare_sqlite
+    
+    echo "=== SQLite 构建完成 ==="
+}
+
+# 执行
+main "$@"
 
 prepare_c_ares() {
   cares_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
