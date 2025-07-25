@@ -8,7 +8,7 @@ export CFLAGS="-I${CROSS_PREFIX}/include -march=tigerlake -mtune=tigerlake -O2 -
 export CXXFLAGS="$CFLAGS"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
 export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc)"
-#export LD=x86_64-w64-mingw32-ld.lld
+export LD=x86_64-w64-mingw32-ld.lld
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
 
@@ -269,6 +269,8 @@ prepare_sqlite() {
         ln -sf mksourceid.exe mksourceid
         SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
     fi
+    
+  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   ./configure \
     --build="${BUILD_ARCH}" \
     --host="${CROSS_HOST}" \
@@ -284,8 +286,8 @@ prepare_sqlite() {
     --disable-editline \
     --disable-load-extension
   make -j$(nproc)
-  x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
-  cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
+  #x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
+  #cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
