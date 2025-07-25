@@ -46,7 +46,7 @@ if [ "$USE_GCC" -eq 1 ]; then
     tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
 else
     echo "使用相对成熟的 musl-cros (GCC 15)..."
-    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
+    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32-1.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
@@ -270,7 +270,28 @@ prepare_sqlite() {
         SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
     fi
     
-  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  #local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  export CFLAGS="$CFLAGS \
+    -DSQLITE_OS_WIN=1 \
+    -DSQLITE_OMIT_LOAD_EXTENSION \
+    -DSQLITE_OMIT_WAL \
+    -DSQLITE_TEMP_STORE=3 \
+    -DSQLITE_OMIT_DISKIO \
+    -DSQLITE_OMIT_MMAP \
+    -I${CROSS_PREFIX}/include"
+  
+  export LDFLAGS="$LDFLAGS -static-libgcc"
+  export LIBS="-lmingw32 -lwinpthread -lmsvcrt -lkernel32 -lcrtstubs -lz"
+  
+  # 关键修复：设置这些变量避免配置失败
+  export ac_cv_lib_z_deflate=yes
+  export ac_cv_search_deflate="-lz"
+  
+  cd "/usr/src/sqlite-${sqlite_tag}"
+  
+  # 清理之前的配置
+  make distclean >/dev/null 2>&1 || true
+  rm -f config.status config.log
   ./configure \
     --build="${BUILD_ARCH}" \
     --host="${CROSS_HOST}" \
@@ -284,6 +305,7 @@ prepare_sqlite() {
     --disable-tcl \
     --disable-session \
     --disable-editline \
+    --disable-rpath \
     --disable-load-extension
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
