@@ -322,9 +322,9 @@ local SQLITE_LDFLAGS="$LDFLAGS -L${PTHREAD_LIB_PATH}" # 或者直接用 -L${CROS
 # 或者 mingw32 -> ucrt -> winpthread (如果 msvcrt 不行)
 # -Bstatic 确保这些库被静态链接
 # 注意：libgcc 通常由 gcc 驱动自动添加
-local SQLITE_LIBS="-lmingw32 -lmsvcrt -lwinpthread"
+#local SQLITE_LIBS="-lmingw32 -lmsvcrt -lwinpthread"
 # 如果上面用 msvcrt 失败，可以尝试 ucrt:
-# local SQLITE_LIBS="-lmingw32 -lucrt -lwinpthread"
+local SQLITE_LIBS="-lmingw32 -lucrt -lwinpthread"
 
 # (可选) 更新测试链接命令以反映新的库列表 (这有助于调试)
 echo "测试pthread链接 (使用调整后的库 - mingw32 + msvcrt + winpthread)..."
