@@ -78,6 +78,133 @@ find ${CROSS_ROOT} -name "libgcc.a"
 find ${CROSS_ROOT} -name "libwinpthread.a"
 find ${CROSS_ROOT} -name "crt2.o"
 echo "查询结束1111"
+#!/bin/bash
+
+# SQLite 构建问题诊断脚本
+
+set -e
+
+# 设置默认值
+CROSS_HOST="${CROSS_HOST:-x86_64-w64-mingw32}"
+CROSS_PREFIX="${CROSS_PREFIX:-/cross_root/x86_64-w64-mingw32}"
+
+echo "=== SQLite 构建问题诊断 ==="
+echo "交叉编译器: $CROSS_HOST"
+echo "安装前缀: $CROSS_PREFIX"
+echo
+
+# 1. 检查交叉编译器
+echo "1. 检查交叉编译器..."
+if command -v ${CROSS_HOST}-gcc >/dev/null 2>&1; then
+    echo "✓ ${CROSS_HOST}-gcc 可用"
+    ${CROSS_HOST}-gcc --version | head -1
+else
+    echo "✗ ${CROSS_HOST}-gcc 不可用"
+    exit 1
+fi
+
+# 2. 检查链接器搜索路径
+echo
+echo "2. 链接器搜索路径:"
+${CROSS_HOST}-gcc -print-search-dirs | grep libraries
+
+# 3. 查找关键库文件
+echo
+echo "3. 查找关键库文件:"
+echo "pthread 相关库:"
+find /usr /cross_root 2>/dev/null | grep -E "lib.*pthread.*\.a$" | head -5 || echo "未找到 pthread 库"
+
+echo "C 运行时库:"
+find /usr /cross_root 2>/dev/null | grep -E "lib.*(mingw32|msvcrt|ucrt).*\.a$" | head -5 || echo "未找到 C 运行时库"
+
+echo "数学库:"
+find /usr /cross_root 2>/dev/null | grep -E "libm\.a$" | head -3 || echo "未找到数学库"
+
+# 4. 测试基本链接
+echo
+echo "4. 测试基本链接:"
+test_code='#include <stdio.h>
+int main() { 
+    printf("Hello World\n"); 
+    return 0; 
+}'
+
+echo "测试最简单的程序..."
+if echo "$test_code" | ${CROSS_HOST}-gcc -x c - -o /tmp/test_basic 2>/dev/null; then
+    echo "✓ 基本链接成功"
+else
+    echo "✗ 基本链接失败"
+    echo "尝试详细错误信息:"
+    echo "$test_code" | ${CROSS_HOST}-gcc -x c - -o /tmp/test_basic -v 2>&1 | tail -10
+fi
+
+# 5. 测试不同的库组合
+echo
+echo "5. 测试库组合:"
+lib_combinations=(
+    ""
+    "-lmingw32"
+    "-lmingw32 -lmsvcrt"
+    "-lmingw32 -lmsvcrt -lkernel32"
+    "-lmingw32 -lucrt -lkernel32"
+    "-static-libgcc -lmingw32 -lmsvcrt -lkernel32"
+)
+
+for libs in "${lib_combinations[@]}"; do
+    echo -n "测试: ${libs:-"(无额外库)"} ... "
+    if echo "$test_code" | ${CROSS_HOST}-gcc -x c - $libs -o /tmp/test_libs 2>/dev/null; then
+        echo "✓"
+    else
+        echo "✗"
+    fi
+done
+
+# 6. 测试数学函数
+echo
+echo "6. 测试数学函数:"
+math_test='#include <stdio.h>
+#include <math.h>
+int main() { 
+    printf("ceil(1.1) = %f\n", ceil(1.1)); 
+    return 0; 
+}'
+
+echo -n "测试 ceil 函数 ... "
+if echo "$math_test" | ${CROSS_HOST}-gcc -x c - -lm -o /tmp/test_math 2>/dev/null; then
+    echo "✓"
+elif echo "$math_test" | ${CROSS_HOST}-gcc -x c - -o /tmp/test_math 2>/dev/null; then
+    echo "✓ (无需 -lm)"
+else
+    echo "✗"
+    echo "数学函数链接失败，尝试详细错误:"
+    echo "$math_test" | ${CROSS_HOST}-gcc -x c - -lm -o /tmp/test_math 2>&1 | tail -5
+fi
+
+# 7. 检查 SQLite 特定问题
+echo
+echo "7. SQLite 特定测试:"
+sqlite_test='#include <stdio.h>
+#define SQLITE_THREADSAFE 0
+#define SQLITE_OMIT_LOAD_EXTENSION 1
+int main() { 
+    printf("SQLite config test\n"); 
+    return 0; 
+}'
+
+echo -n "测试 SQLite 配置 ... "
+if echo "$sqlite_test" | ${CROSS_HOST}-gcc -x c - -lmingw32 -lmsvcrt -lkernel32 -o /tmp/test_sqlite 2>/dev/null; then
+    echo "✓"
+else
+    echo "✗"
+fi
+
+# 8. 清理临时文件
+rm -f /tmp/test_basic /tmp/test_libs /tmp/test_math /tmp/test_sqlite
+
+echo
+echo "=== 诊断完成 ==="
+echo "如果看到多个 ✗，说明交叉编译环境存在问题"
+echo "建议运行 fix_sqlite_build.sh 来应用修复"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
 TARGET_HOST="${CROSS_HOST#*-}"
