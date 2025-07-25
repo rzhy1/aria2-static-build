@@ -46,7 +46,7 @@ if [ "$USE_GCC" -eq 1 ]; then
     tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
 else
     echo "使用相对成熟的 musl-cros (GCC 15)..."
-    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32-1.tar.xz"
+    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
@@ -286,8 +286,8 @@ prepare_sqlite() {
     --disable-editline \
     --disable-load-extension
   make -j$(nproc)
-  #x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
-  #cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
+  x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
+  cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
