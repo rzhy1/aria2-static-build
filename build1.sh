@@ -54,30 +54,10 @@ ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
-find / -name "*pthread.a"
-find / -name "*pthread.h"
-find / -name "*pthread*.pc"
-echo "=== 检查关键库文件位置 ==="
-echo "CROSS_ROOT中的pthread库："
-find ${CROSS_ROOT} -name "*pthread*" -type f 2>/dev/null | head -10
-
-echo "测试直接链接pthread："
-echo 'int main(){return 0;}' > /tmp/test.c
-${CROSS_HOST}-gcc /tmp/test.c -lwinpthread -L/usr/x86_64-w64-mingw32/lib -o /tmp/test.exe 2>&1 && echo "直接链接成功" || echo "直接链接失败"
-
-echo "检查链接器能找到的库："
-${CROSS_HOST}-gcc -print-file-name=libwinpthread.a
-${CROSS_HOST}-gcc -print-file-name=libpthread.a
-
+#find / -name "*pthread.a"
+#find / -name "*pthread.h"
+#find / -name "*pthread*.pc"
 echo "查询结束"
-find ${CROSS_ROOT} -name "libmingw32.a"
-find ${CROSS_ROOT} -name "libcmt.a"
-find ${CROSS_ROOT} -name "libmsvcrt.a"
-find ${CROSS_ROOT} -name "libucrt.a"
-find ${CROSS_ROOT} -name "libgcc.a"
-find ${CROSS_ROOT} -name "libwinpthread.a"
-find ${CROSS_ROOT} -name "crt2.o"
-echo "查询结束1111"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
 TARGET_HOST="${CROSS_HOST#*-}"
@@ -289,52 +269,7 @@ prepare_sqlite() {
         ln -sf mksourceid.exe mksourceid
         SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
     fi
-    
-    # 找到实际的pthread库位置 (这部分可以保留)
-PTHREAD_LIB_PATH=""
-for path in "${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/mingw/lib" \
-            "${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/lib" \
-            "${CROSS_ROOT}/x86_64-w64-mingw32/lib" \
-            "/usr/x86_64-w64-mingw32/lib"; do
-    if [ -f "$path/libwinpthread.a" ]; then
-        PTHREAD_LIB_PATH="$path"
-        echo "找到pthread库在: $PTHREAD_LIB_PATH"
-        break
-    fi
-done
-if [ -z "$PTHREAD_LIB_PATH" ]; then
-    echo "错误: 找不到pthread库文件"
-    exit 1
-fi
-
-# 更健壮的做法是 unset 它们，以防万一 configure 内部名称有变
-unset ac_cv_lib_pthread_pthread_create
-unset ac_cv_header_pthread_h
-unset ac_cv_lib_winpthread_pthread_create
-unset ac_cv_func_pthread_create
-
-local SQLITE_CFLAGS="$CFLAGS -DHAVE_PTHREAD -D_REENTRANT -DSQLITE_THREADSAFE=1"
-# 确保 LDFLAGS 包含了 pthread 库的路径
-local SQLITE_LDFLAGS="$LDFLAGS -L${PTHREAD_LIB_PATH}" # 或者直接用 -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib
-
-# --- 关键：显式指定所有必要的库和顺序 ---
-# 顺序尝试：mingw32 (CRT 启动) -> msvcrt (C库) -> winpthread (线程)
-# 或者 mingw32 -> ucrt -> winpthread (如果 msvcrt 不行)
-# -Bstatic 确保这些库被静态链接
-# 注意：libgcc 通常由 gcc 驱动自动添加
-#local SQLITE_LIBS="-lmingw32 -lmsvcrt -lwinpthread"
-# 如果上面用 msvcrt 失败，可以尝试 ucrt:
-local SQLITE_LIBS="-lmingw32 -lucrt -lwinpthread"
-
-# (可选) 更新测试链接命令以反映新的库列表 (这有助于调试)
-echo "测试pthread链接 (使用调整后的库 - mingw32 + msvcrt + winpthread)..."
-echo 'int main(){return 0;}' | ${CROSS_HOST}-gcc -x c - ${SQLITE_LDFLAGS} ${SQLITE_LIBS} -o /tmp/test_pthread_v13 2>&1 && echo "pthread链接成功 (调整后)" || echo "pthread链接失败 (调整后)"
-
-# 使用调整后的变量调用 configure
-LDFLAGS="$SQLITE_LDFLAGS" \
-LIBS="$SQLITE_LIBS" \
-CFLAGS="$SQLITE_CFLAGS" \
-./configure \
+  ./configure \
     --build="${BUILD_ARCH}" \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
