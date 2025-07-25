@@ -270,8 +270,8 @@ prepare_sqlite() {
         SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
     fi
     
-  #local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  export CFLAGS="$CFLAGS \
+  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  local export CFLAGS="$CFLAGS \
     -DSQLITE_OS_WIN=1 \
     -DSQLITE_OMIT_LOAD_EXTENSION \
     -DSQLITE_OMIT_WAL \
@@ -279,19 +279,7 @@ prepare_sqlite() {
     -DSQLITE_OMIT_DISKIO \
     -DSQLITE_OMIT_MMAP \
     -I${CROSS_PREFIX}/include"
-  
-  export LDFLAGS="$LDFLAGS -static-libgcc"
-  export LIBS="-lmingw32 -lwinpthread -lmsvcrt -lkernel32 -lcrtstubs -lz"
-  
-  # 关键修复：设置这些变量避免配置失败
-  export ac_cv_lib_z_deflate=yes
-  export ac_cv_search_deflate="-lz"
-  
-  cd "/usr/src/sqlite-${sqlite_tag}"
-  
-  # 清理之前的配置
-  make distclean >/dev/null 2>&1 || true
-  rm -f config.status config.log
+  local export LIBS="-lmingw32 -lwinpthread -lmsvcrt -lkernel32 -lcrtstubs -lz"
   ./configure \
     --build="${BUILD_ARCH}" \
     --host="${CROSS_HOST}" \
