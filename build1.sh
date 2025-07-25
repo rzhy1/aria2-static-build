@@ -400,6 +400,17 @@ prepare_libxml2() {
 }
 
 
+# 简化的 SQLite 准备脚本，专门解决交叉编译问题
+
+set -e
+
+# 设置变量
+CROSS_HOST="${CROSS_HOST:-x86_64-w64-mingw32}"
+CROSS_PREFIX="${CROSS_PREFIX:-/cross_root/x86_64-w64-mingw32}"
+BUILD_ARCH="${BUILD_ARCH:-x86_64-linux-gnu}"
+DOWNLOADS_DIR="${DOWNLOADS_DIR:-/downloads}"
+BUILD_INFO="${BUILD_INFO:-/build_info.txt}"
+
 echo "=== 简化 SQLite 构建脚本 ==="
 
 # 1. 创建 C 运行时库存根
@@ -437,9 +448,9 @@ create_math_stubs() {
     echo "创建数学函数存根..."
     
     cat > /tmp/math_stubs.c << 'EOF'
-#include <math.h>
+// 不包含 math.h 以避免宏冲突
 
-// 简单的 ceil 实现
+// 简单的数学函数实现
 double ceil(double x) {
     long long i = (long long)x;
     return (x > i) ? (double)(i + 1) : (double)i;
@@ -450,8 +461,29 @@ double floor(double x) {
     return (x < i) ? (double)(i - 1) : (double)i;
 }
 
-int isnan(double x) {
+// 简单的 isnan 实现（避免与宏冲突）
+int my_isnan(double x) {
     return x != x;
+}
+
+// 其他可能需要的数学函数
+double fabs(double x) {
+    return x < 0 ? -x : x;
+}
+
+double sqrt(double x) {
+    // 简单的牛顿法实现
+    if (x < 0) return x; // NaN
+    if (x == 0) return 0;
+    
+    double guess = x;
+    double prev;
+    do {
+        prev = guess;
+        guess = (guess + x / guess) / 2.0;
+    } while (fabs(guess - prev) > 1e-10);
+    
+    return guess;
 }
 EOF
     
@@ -460,7 +492,7 @@ EOF
     ${CROSS_HOST}-ranlib "${CROSS_PREFIX}/lib/libmathstubs.a"
     rm -f /tmp/math_stubs.c /tmp/math_stubs.o
 }
-# 3. 准备 SQLite
+#3. 准备 SQLite
 prepare_sqlite() {
     echo "准备 SQLite..."
     
@@ -505,6 +537,9 @@ prepare_sqlite() {
     export ac_cv_func_ceil=yes
     export ac_cv_func_floor=yes
     export ac_cv_func_isnan=yes
+    export ac_cv_func_fabs=yes
+    export ac_cv_func_sqrt=yes
+    export ac_cv_header_math_h=yes
     
     echo "配置 SQLite..."
     # 添加测试链接以确保库顺序正确
