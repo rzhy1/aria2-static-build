@@ -404,9 +404,7 @@ prepare_sqlite() {
         --disable-tcl \
         --disable-session \
         --disable-editline \
-        --disable-load-extension \
-        --enable-math \
-        --disable-dynamic-extensions
+        --disable-load-extension
     
     echo "编译 SQLite..."
     make -j$(nproc)
