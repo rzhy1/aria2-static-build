@@ -54,12 +54,12 @@ elif [ "$USE_GCC" -eq 3 ]; then
     curl -SLf -o "/tmp/winlibs.7z" "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.1.0posix-13.0.0-ucrt-r3/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r3.7z"
     temp_dir=$(mktemp -d)
     7z x "/tmp/winlibs.7z" -o"${temp_dir}"
+    echo "解压后的目录结构："
+    find "${temp_dir}" -maxdepth 3 -type d | head -10
     mkdir -p /usr/
     echo "x86_64-w64-mingw32-gcc版本是："
     x86_64-w64-mingw32-gcc --version
     rsync -a --ignore-times --no-owner --no-group "${temp_dir}"/*/* /usr/
-    echo "x86_64-w64-mingw32-gcc版本是："
-    x86_64-w64-mingw32-gcc --version
     rm -rf "${temp_dir}" "/tmp/winlibs.7z"
 else
     echo "无效的 USE_GCC 值"
