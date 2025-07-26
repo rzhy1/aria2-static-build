@@ -55,16 +55,11 @@ elif [ "$USE_GCC" -eq 3 ]; then
     temp_dir=$(mktemp -d)
     7z x "/tmp/winlibs.7z" -o"${temp_dir}"
     mkdir -p /usr/
-    # 仅删除 MinGW 相关目录（而不是整个 /usr）
-    mingw_dirs=("bin" "include" "lib" "libexec" "share" "x86_64-w64-mingw32")
-    for dir in "${mingw_dirs[@]}"; do
-        if [[ -d "/usr/${dir}" ]]; then
-            find "/usr/${dir}" -delete  # 清空目录但不删除目录本身
-        fi
-    done
-    
-    # 再使用 rsync 或 cp 覆盖
-    rsync -a "${temp_dir}"/*/* /usr/
+    echo "x86_64-w64-mingw32-gcc版本是："
+    x86_64-w64-mingw32-gcc --version
+    rsync -a --ignore-times --no-owner --no-group "${temp_dir}"/*/* /usr/
+    echo "x86_64-w64-mingw32-gcc版本是："
+    x86_64-w64-mingw32-gcc --version
     rm -rf "${temp_dir}" "/tmp/winlibs.7z"
 else
     echo "无效的 USE_GCC 值"
