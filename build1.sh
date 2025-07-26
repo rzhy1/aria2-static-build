@@ -54,9 +54,9 @@ elif [ "$USE_GCC" -eq 3 ]; then
     curl -SLf -o "/tmp/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r3.7z" "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.1.0posix-13.0.0-ucrt-r3/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r3.7z"
     temp_dir=$(mktemp -d)
     7z x "/tmp/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r3.7z" -o"${temp_dir}"
-    mkdir -p "${CROSS_ROOT}"
-    mv "${temp_dir}"/*/* "${CROSS_ROOT}/"
-    rm -rf "${temp_dir}"
+    # 打包成 .tar 再用 zstd 压缩
+    tar -cf - -C ${temp_dir} . | zstd -o winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r3.tar.zst
+    tar --zstd -xf  "/${temp_dir}/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r3.tar.zst" --strip-components=1  -C ${CROSS_ROOT}
 else
     echo "无效的 USE_GCC 值"
     exit 1
