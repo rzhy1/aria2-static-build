@@ -53,10 +53,23 @@ elif [ "$USE_GCC" -eq 3 ]; then
     echo "使用 winlibs_mingw (GCC 15.1.0)..."
     curl -SLf -o "/tmp/winlibs.7z" "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.1.0posix-13.0.0-msvcrt-r3/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64msvcrt-13.0.0-r3.7z"
     temp_dir=$(mktemp -d)
-    7z x "/tmp/winlibs.7z"
-    echo "x86_64-w64-mingw32-gcc版本是："
-    find / -name "x86_64-w64-mingw32-gcc"
-    /tmp/mingw64/bin/x86_64-w64-mingw32-gcc --version
+    7z x "/tmp/winlibs.7z" -o"${temp_dir}"
+    
+    # 调试信息
+    echo "临时目录: ${temp_dir}"
+    echo "目录结构:"
+    find "${temp_dir}" -maxdepth 3 -type d
+    
+    echo "查找 gcc:"
+    find "${temp_dir}" -name "*gcc*" -type f
+    
+    # 正确的测试方式
+    if [ -f "${temp_dir}/mingw64/bin/x86_64-w64-mingw32-gcc" ]; then
+        echo "找到 gcc，测试版本:"
+        "${temp_dir}/mingw64/bin/x86_64-w64-mingw32-gcc" --version
+    else
+        echo "未找到 gcc 可执行文件"
+    fi
     rsync -a --ignore-times --no-owner --no-group "/tmp//mingw64/" /usr/
     rm -rf "${temp_dir}" "/tmp/winlibs.7z"
 else
