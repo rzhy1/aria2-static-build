@@ -55,7 +55,7 @@ elif [ "$USE_GCC" -eq 3 ]; then
     temp_dir=$(mktemp -d)
     7z x "/tmp/winlibs.7z" -o"${temp_dir}"
     mkdir -p /usr/
-    mv -f "${temp_dir}"/*/* /usr/ 2>/dev/null
+    mv -f "${temp_dir}"/*/* /usr/
     rm -rf "${temp_dir}" "/tmp/winlibs.7z"
 else
     echo "无效的 USE_GCC 值"
