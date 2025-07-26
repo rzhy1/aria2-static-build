@@ -61,15 +61,11 @@ elif [ "$USE_GCC" -eq 3 ]; then
     find "${temp_dir}" -maxdepth 3 -type d
     
     echo "查找 gcc:"
-    find "${temp_dir}" -name "*gcc*" -type f
+    # 查找可执行文件（.exe 文件）
+    find "${temp_dir}" -name "*gcc*.exe" -type f
     
-    # 正确的测试方式
-    if [ -f "${temp_dir}/mingw64/bin/x86_64-w64-mingw32-gcc" ]; then
-        echo "找到 gcc，测试版本:"
-        "${temp_dir}/mingw64/bin/x86_64-w64-mingw32-gcc" --version
-    else
-        echo "未找到 gcc 可执行文件"
-    fi
+    # 测试版本（需要使用 Wine 或其他 Windows 兼容层）
+    wine "${temp_dir}/mingw64/bin/x86_64-w64-mingw32-gcc.exe" --version
     rsync -a --ignore-times --no-owner --no-group "/tmp//mingw64/" /usr/
     rm -rf "${temp_dir}" "/tmp/winlibs.7z"
 else
