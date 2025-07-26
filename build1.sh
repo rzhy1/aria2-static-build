@@ -55,7 +55,7 @@ elif [ "$USE_GCC" -eq 3 ]; then
     temp_dir=$(mktemp -d)
     7z x "/tmp/winlibs.7z" -o"${temp_dir}"
     mkdir -p /usr/
-    rsync -a --ignore-times --no-owner --no-group "${temp_dir}"/*/* /usr/
+    find "${temp_dir}"/*/* -type f -exec cp -f {} /usr/ \;
     rm -rf "${temp_dir}" "/tmp/winlibs.7z"
 else
     echo "无效的 USE_GCC 值"
@@ -65,7 +65,6 @@ ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
-find / -name "x86_64-w64-mingw32-gcc"
 #find / -name "*pthread.a"
 #find / -name "*pthread.h"
 #find / -name "*pthread*.pc"
