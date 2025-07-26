@@ -51,12 +51,12 @@ elif [ "$USE_GCC" -eq 2 ]; then
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 elif [ "$USE_GCC" -eq 3 ]; then
     echo "使用 winlibs_mingw (GCC 15.1.0)..."
-    curl -SLf -o "/tmp/winlibs.7z" "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.1.0posix-13.0.0-ucrt-r3/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r3.7z"
+    curl -SLf -o "/tmp/winlibs.7z" "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.1.0posix-13.0.0-msvcrt-r3/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64msvcrt-13.0.0-r3.7z"
     temp_dir=$(mktemp -d)
     7z x "/tmp/winlibs.7z" -o"${temp_dir}"
     mkdir -p /usr/
     echo "x86_64-w64-mingw32-gcc版本是："
-    find / -name "x86_64-w64-mingw32-gcc"
+    find /${temp_dir} -name "x86_64-w64-mingw32-gcc"
     ${temp_dir}/mingw64/bin/x86_64-w64-mingw32-gcc --version
     rsync -a --ignore-times --no-owner --no-group "${temp_dir}/mingw64/" /usr/
     rm -rf "${temp_dir}" "/tmp/winlibs.7z"
