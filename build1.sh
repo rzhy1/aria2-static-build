@@ -52,7 +52,11 @@ elif [ "$USE_GCC" -eq 2 ]; then
 elif [ "$USE_GCC" -eq 3 ]; then
     echo "使用 winlibs_mingw (GCC 15.1.0)..."
     curl -SLf -o "/tmp/winlibs.7z" "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.1.0posix-13.0.0-ucrt-r3/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r3.7z"
-    7z x "/tmp/winlibs.7z" -o"/usr/"
+    temp_dir=$(mktemp -d)
+    7z x "/tmp/winlibs.7z" -o"${temp_dir}"
+    mkdir -p /usr/
+    mv "${temp_dir}"/*/* /usr/
+    rm -rf "${temp_dir}" "/tmp/winlibs.7z"
 else
     echo "无效的 USE_GCC 值"
     exit 1
