@@ -39,17 +39,28 @@ echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/0
 echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
-USE_GCC=0
+USE_GCC=3
 if [ "$USE_GCC" -eq 1 ]; then
     echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 16)..."
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
     tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
-else
+elif [ "$USE_GCC" -eq 2 ]; then
     echo "使用相对成熟的 musl-cros (GCC 15)..."
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
-fi
+elif [ "$USE_GCC" -eq 3 ]; then
+    echo "使用 winlibs_mingw (GCC 15.1.0)..."
+    curl -SLf -o "/tmp/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r3.7z" "https://github.com/brechtsanders/winlibs_mingw/releases/download/15.1.0posix-13.0.0-ucrt-r3/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r3.7z"
+    temp_dir=$(mktemp -d)
+    7z x "/tmp/winlibs-x86_64-posix-seh-gcc-15.1.0-mingw-w64ucrt-13.0.0-r3.7z" -o"${temp_dir}"
+    mkdir -p "${CROSS_ROOT}"
+    mv "${temp_dir}"/*/* "${CROSS_ROOT}/"
+    rm -rf "${temp_dir}"
+else
+    echo "无效的 USE_GCC 值"
+    exit 1
+fii
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
