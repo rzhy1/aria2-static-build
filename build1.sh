@@ -60,7 +60,7 @@ elif [ "$USE_GCC" -eq 3 ]; then
 else
     echo "无效的 USE_GCC 值"
     exit 1
-fii
+fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
