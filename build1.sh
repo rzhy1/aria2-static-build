@@ -57,7 +57,7 @@ elif [ "$USE_GCC" -eq 3 ]; then
     mkdir -p /usr/
     echo "x86_64-w64-mingw32-gcc版本是："
     x86_64-w64-mingw32-gcc --version
-    rsync -a --ignore-times --no-owner --no-group "${temp_dir}"/*/ /usr/
+    rsync -a --ignore-times --no-owner --no-group "${temp_dir}/mingw64/" /usr/
     rm -rf "${temp_dir}" "/tmp/winlibs.7z"
 else
     echo "无效的 USE_GCC 值"
