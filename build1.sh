@@ -54,8 +54,8 @@ fi
 # 下载并复制libwinpthread
 wget https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-winpthreads-13.0.0.r72.g7010671fa-1-any.pkg.tar.zst
 tar -xf mingw-w64-x86_64-winpthreads-13.0.0.r72.g7010671fa-1-any.pkg.tar.zst
-cp mingw64/lib/libwinpthread* ${CROSS_PREFIX}/lib/
-cp -r mingw64/include/* ${CROSS_PREFIX}/include/
+cp mingw64/lib/libwinpthread* ${CROSS_ROOT}/lib/
+cp -r mingw64/include/* ${CROSS_ROOT}/include/
 
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
@@ -275,7 +275,7 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  local LDFLAGS="$LDFLAGS -L${CROSS_ROOT}/lib -lwinpthread -lmsvcrt"
+  local LDFLAGS="${LDFLAGS} -L${CROSS_ROOT}/lib -lwinpthread -lmsvcrt"
   CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
