@@ -275,12 +275,7 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  #local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
-  local LDFLAGS_BASE="-static -s -Wl,--gc-sections -flto=4"
-  local LDFLAGS_PATHS="-L${CROSS_ROOT}/lib"
-  local LDFLAGS_LIBS="-lwinpthread -lmsvcrt"
-  
-  export LDFLAGS="${LDFLAGS_BASE} ${LDFLAGS_PATHS} ${LDFLAGS_LIBS}"
+  local LDFLAGS="$LDFLAGS -L${CROSS_ROOT}/lib -lwinpthread -lmsvcrt"
   CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
