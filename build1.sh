@@ -50,20 +50,11 @@ else
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
-
-# 下载并复制libwinpthread
-wget https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-winpthreads-13.0.0.r72.g7010671fa-1-any.pkg.tar.zst
-tar -xf mingw-w64-x86_64-winpthreads-13.0.0.r72.g7010671fa-1-any.pkg.tar.zst
-cp mingw64/lib/libwinpthread* ${CROSS_ROOT}/lib/
-cp -r mingw64/include/* ${CROSS_ROOT}/include/
-
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
-x86_64-w64-mingw32-gcc -v 2>&1 | grep "Thread model"
-gcc -v 2>&1 | grep "Thread model"
-find / -name "*pthread.a"
+find / -name "libwinpthread.a"
 find / -name "*pthread.h"
 find / -name "*pthread*.pc"
 echo "查询结束"
