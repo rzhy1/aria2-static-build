@@ -54,8 +54,8 @@ fi
 # 下载并复制libwinpthread
 wget https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-winpthreads-13.0.0.r72.g7010671fa-1-any.pkg.tar.zst
 tar -xf mingw-w64-x86_64-winpthreads-13.0.0.r72.g7010671fa-1-any.pkg.tar.zst
-cp mingw64/lib/libwinpthread* ${CROSS_ROOT}/x86_64-w64-mingw32/lib/
-cp -r mingw64/include/* ${CROSS_ROOT}/include/
+cp mingw64/lib/libwinpthread* /cross_root/x86_64-w64-mingw32/x86_64-w64-mingw32/lib/
+cp -r mingw64/include/* /cross_root/x86_64-w64-mingw32/x86_64-w64-mingw32/include/
 
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
