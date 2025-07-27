@@ -50,6 +50,13 @@ else
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
+
+# 下载并复制libwinpthread
+wget https://repo.msys2.org/mingw/mingw64/mingw-w64-x86_64-winpthreads-13.0.0.r72.g7010671fa-1-any.pkg.tar.zst
+tar -xf mingw-w64-x86_64-winpthreads-13.0.0.r72.g7010671fa-1-any.pkg.tar.zst
+sudo cp mingw64/lib/libwinpthread* ${CROSS_ROOT}/x86_64-w64-mingw32/lib/
+sudo cp -r mingw64/include/* ${CROSS_ROOT}/include/
+
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
@@ -270,7 +277,7 @@ prepare_sqlite() {
   fi
   #local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   local LDFLAGS_BASE="-static -s -Wl,--gc-sections -flto=4"
-  local LDFLAGS_PATHS="-L/cross_root/x86_64-w64-mingw32/x86_64-w64-mingw32/lib"
+  local LDFLAGS_PATHS="-L${CROSS_ROOT}/lib"
   local LDFLAGS_LIBS="-lwinpthread -lmsvcrt"
   
   export LDFLAGS="${LDFLAGS_BASE} ${LDFLAGS_PATHS} ${LDFLAGS_LIBS}"
