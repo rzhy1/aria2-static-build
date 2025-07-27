@@ -54,7 +54,8 @@ ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
-x86_64-w64-mingw32-gcc -v
+x86_64-w64-mingw32-gcc -v 2>&1 | grep "Thread model"
+gcc -v 2>&1 | grep "Thread model"
 find / -name "*pthread.a"
 find / -name "*pthread.h"
 find / -name "*pthread*.pc"
