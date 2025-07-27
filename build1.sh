@@ -55,9 +55,9 @@ echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
 x86_64-w64-mingw32-gcc -v
-#find / -name "*pthread.a"
-#find / -name "*pthread.h"
-#find / -name "*pthread*.pc"
+find / -name "*pthread.a"
+find / -name "*pthread.h"
+find / -name "*pthread*.pc"
 echo "查询结束"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
