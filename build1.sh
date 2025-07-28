@@ -54,14 +54,22 @@ else
 fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 
-# 创建标准库名链接
-ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${WINPTHREAD_LIB}/libpthread.a"
-ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${CROSS_PREFIX}/lib/libpthread.a"
-ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${CROSS_PREFIX}/lib64/libpthread.a"
 
 
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
+echo "查询"
+find / -path '/proc' -prune -o -path '/sys' -prune -o -name "*pthread.a" -print
+echo "查询1"
+find / -iname "*pthread.a"
+echo "查询2"
+find / -type l -name "*pthread.a" -exec ls -l {} \;
+echo "查询3"
+find / -type f -name "*pthread.a"
+echo "查询4"
+time  find / -xdev -name "*pthread.a" 2>/dev/null | grep -v "Permission denied"
+echo "查询5"
+find /cross_root /usr -path '*mingw*' -name "*pthread.a"
 echo "查询"
 find / -name "*pthread.a"
 find / -name "*pthread.h"
