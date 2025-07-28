@@ -53,7 +53,7 @@ else
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
     echo "查询31"
     apt-get install -y tree
-    tree -L 3 ${CROSS_ROOT} | head -20
+    tree -a ${CROSS_ROOT}
     # 或检查关键文件是否存在
     ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc 
     ls -l ${CROSS_ROOT}/lib/libwinpthread.a
