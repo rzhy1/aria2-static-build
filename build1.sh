@@ -52,28 +52,13 @@ else
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
+
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
-
-
-
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
-echo "查询"
-find / -path '/proc' -prune -o -path '/sys' -prune -o -name "*pthread.a" -print
-echo "查询1"
-find / -iname "*pthread.a"
-echo "查询2"
-find / -type l -name "*pthread.a" -exec ls -l {} \;
-echo "查询3"
-find / -type f -name "*pthread.a"
-echo "查询4"
-time  find / -xdev -name "*pthread.a" 2>/dev/null | grep -v "Permission denied"
-echo "查询5"
-find /cross_root /usr -path '*mingw*' -name "*pthread.a"
-echo "查询"
-find / -name "*pthread.a"
-find / -name "*pthread.h"
-find / -name "*pthread*.pc"
+#find / -name "*pthread.a"
+#find / -name "*pthread.h"
+#find / -name "*pthread*.pc"
 echo "查询结束"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
