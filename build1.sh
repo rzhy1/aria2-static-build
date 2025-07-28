@@ -7,7 +7,7 @@ export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export CFLAGS="-I${CROSS_PREFIX}/include -march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -pipe -flto=$(nproc) -g0"
 export CXXFLAGS="$CFLAGS"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-export WINPTHREAD_LIB="${CROSS_ROOT}/x86_64-w64-mingw32/x86_64-w64-mingw32/usr/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib"
+export WINPTHREAD_LIB="${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib"
 export LDFLAGS="-L${WINPTHREAD_LIB} -L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc)"
 export LD=x86_64-w64-mingw32-ld.lld
 set -o pipefail
@@ -50,14 +50,7 @@ else
     echo "使用相对成熟的 musl-cros (GCC 15)..."
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32-1.tar.xz"
     mkdir -p ${CROSS_ROOT}
-    tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
-    echo "查询31"
-    apt-get install -y tree
-    tree -a ${CROSS_ROOT}
-    # 或检查关键文件是否存在
-    ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc 
-    ls -l ${CROSS_ROOT}/lib/libwinpthread.a
-    echo "查询32"
+    tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}"
 fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 
