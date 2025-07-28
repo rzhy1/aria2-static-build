@@ -51,8 +51,12 @@ else
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
-    echo "查询444"
-    find /cross_root  -name "*pthread.a"
+    echo "查询31"
+    tree -L 3 ${CROSS_ROOT} | head -20
+    # 或检查关键文件是否存在
+    ls -l ${CROSS_ROOT}/bin/x86_64-w64-mingw32-gcc 
+    ls -l ${CROSS_ROOT}/lib/libwinpthread.a
+    echo "查询32"
 fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
 
