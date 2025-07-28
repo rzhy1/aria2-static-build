@@ -7,15 +7,12 @@ export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export CFLAGS="-I${CROSS_PREFIX}/include -march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -pipe -flto=$(nproc) -g0"
 export CXXFLAGS="$CFLAGS"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc)"
+export WINPTHREAD_LIB="${CROSS_ROOT}/x86_64-w64-mingw32/usr/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib"
+export LDFLAGS="-L${WINPTHREAD_LIB} -L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc)"
 export LD=x86_64-w64-mingw32-ld.lld
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
-export WINPTHREAD_LIB="${CROSS_ROOT}/x86_64-w64-mingw32/usr/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib"
-# 创建标准库名链接
-ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${WINPTHREAD_LIB}/libpthread.a"
-ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${CROSS_PREFIX}/lib/libpthread.a"
-ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${CROSS_PREFIX}/lib64/libpthread.a"
+
 
 retry() {
   # max retry 5 times
@@ -56,6 +53,13 @@ else
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
 ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
+
+# 创建标准库名链接
+ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${WINPTHREAD_LIB}/libpthread.a"
+ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${CROSS_PREFIX}/lib/libpthread.a"
+ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${CROSS_PREFIX}/lib64/libpthread.a"
+
+
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
 echo "查询"
