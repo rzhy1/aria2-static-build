@@ -11,6 +11,11 @@ export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--g
 export LD=x86_64-w64-mingw32-ld.lld
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
+export WINPTHREAD_LIB="${CROSS_ROOT}/x86_64-w64-mingw32/x86_64-w64-mingw32/usr/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib"
+# 创建标准库名链接
+ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${WINPTHREAD_LIB}/libpthread.a"
+ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${CROSS_PREFIX}/lib/libpthread.a"
+ln -sf "${WINPTHREAD_LIB}/libwinpthread.a" "${CROSS_PREFIX}/lib64/libpthread.a"
 
 retry() {
   # max retry 5 times
