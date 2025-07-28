@@ -30,7 +30,7 @@ if [[ "$USE_GCC" -eq 1 ]]; then
     sudo tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C /usr/
 else
     echo "使用相对成熟的 musl-cross (GCC 15)..."
-    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz"  "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32.tar.xz"
+    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz"  "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32-1.tar.xz"
     mkdir -p /opt/mingw64
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
     export PATH="/opt/mingw64/bin:${PATH}"    
@@ -145,7 +145,7 @@ echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
-export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lpthread"
+export LDFLAGS="$LDFLAGS -L/opt/mingw64/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lpthread"
 ./configure \
     --disable-shared \
     --enable-threadsafe \
