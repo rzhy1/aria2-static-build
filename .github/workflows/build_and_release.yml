@@ -102,7 +102,7 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v5
         with:
-           name: release-folder1
+           name: build-info1
            path: release-folder1
         continue-on-error: true
       - name: Create Release Notes File
