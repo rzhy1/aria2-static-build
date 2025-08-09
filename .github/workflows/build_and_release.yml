@@ -1,4 +1,4 @@
-download-artifactname: "Build and Release"
+name: "Build and Release"
 #dsafghj
 on:
   workflow_dispatch:
