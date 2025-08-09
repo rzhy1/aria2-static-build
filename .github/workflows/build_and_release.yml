@@ -1,4 +1,4 @@
-name: "Build and Release"
+download-artifactname: "Build and Release"
 #dsafghj
 on:
   workflow_dispatch:
@@ -102,11 +102,14 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v5
         with:
-           path: ${{ github.workspace }}/release-folder
-        continue-on-error: true
+          name: build-info1
+          path: release-folder1
+          merge-multiple: true
+          continue-on-error: true
       - name: Create Release Notes File
         run: |
-          find ${{ github.workspace }}/release-folder -type f -exec mv {} ${{ github.workspace }}/release-folder \;
+          mkdir -p release-folder
+          find release-folder1 -type f -exec sh -c 'mv {} release-folder' \;
           cat release-folder/*.md > ${{ github.workspace }}/release-folder/release_notes.md
       - name: Get Aria2 Version
         run: |
