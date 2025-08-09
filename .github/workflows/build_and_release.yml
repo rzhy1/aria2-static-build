@@ -111,6 +111,7 @@ jobs:
           find release-folder1 -type f -exec sh -c 'mv {} release-folder' \;
           cat release-folder/*.md > ${{ github.workspace }}/release-folder/release_notes.md
           ls -alh ${{ github.workspace }}/release-folder
+          find . -name "aria2c1.exe" -type f -print
       - name: Get Aria2 Version
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
