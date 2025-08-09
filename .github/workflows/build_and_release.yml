@@ -105,12 +105,12 @@ jobs:
           name: build-info1
           path: release-folder1
           merge-multiple: true
-          continue-on-error: true
       - name: Create Release Notes File
         run: |
           mkdir -p release-folder
           find release-folder1 -type f -exec sh -c 'mv {} release-folder' \;
           cat release-folder/*.md > ${{ github.workspace }}/release-folder/release_notes.md
+          ls -alh ${{ github.workspace }}/release-folder
       - name: Get Aria2 Version
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
