@@ -99,23 +99,49 @@ jobs:
     needs: [build-aria2c, build-aria2c1]
     if: always()
     steps:
-      - name: Download Artifacts
+      # 下载 aria2c.exe
+      - name: Download aria2c.exe
+        uses: actions/download-artifact@v5
+        with:
+          name: aria2c.exe
+          path: release-folder
+          merge-multiple: true
+  
+      # 下载 aria2c1.exe
+      - name: Download aria2c1.exe
+        uses: actions/download-artifact@v5
+        with:
+          name: aria2c1.exe
+          path: release-folder
+          merge-multiple: true
+  
+      # 下载 build-info
+      - name: Download build-info
+        uses: actions/download-artifact@v5
+        with:
+          name: build-info
+          path: release-folder
+          merge-multiple: true
+  
+      # 下载 build-info1
+      - name: Download build-info1
         uses: actions/download-artifact@v5
         with:
           name: build-info1
-          path: release-folder1
+          path: release-folder
           merge-multiple: true
+  
+      # 合并 release notes
       - name: Create Release Notes File
         run: |
-          mkdir -p release-folder
-          find release-folder1 -type f -exec sh -c 'mv {} release-folder' \;
           cat release-folder/*.md > ${{ github.workspace }}/release-folder/release_notes.md
           ls -alh ${{ github.workspace }}/release-folder
-          find . -name "aria2c1.exe" -type f -print
+  
       - name: Get Aria2 Version
         run: |
           VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
           echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
+  
       - name: Create Release
         uses: ncipollo/release-action@v1
         with:
