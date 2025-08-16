@@ -95,55 +95,30 @@ jobs:
 
 
   Release:
-      runs-on: ubuntu-24.04
-      needs: [build-aria2c, build-aria2c1]
-      if: always()  # 始终运行，无论依赖任务状态
-      steps:
-        - name: Create release folder
-          run: mkdir -p release-folder
-          
-        # 下载所有工件（忽略单一下载失败）
-        - name: Download all artifacts
-          uses: actions/download-artifact@v5
-          with:
-            path: release-folder
-            merge-multiple: true
-          continue-on-error: true
-  
-        # 检查是否存在可执行文件
-        - name: Check artifacts existence
-          id: check_artifacts
-          run: |
-            if ls release-folder/*.exe 1>/dev/null 2>&1; then
-              echo "has_artifacts=true" >> $GITHUB_OUTPUT
-            else
-              echo "has_artifacts=false" >> $GITHUB_OUTPUT
-            fi
-  
-        # 合并发布说明（安全处理空文件）
-        - name: Create Release Notes File
-          run: |
-            find release-folder -name "*.md" -exec cat {} + > release-folder/release_notes.md 2>/dev/null || true
-            touch release-folder/release_notes.md  # 确保文件存在
-            find release-folder -mindepth 1 -type d -exec rm -rf {} +
-  
-        - name: Get Aria2 Version
-          run: |
-            VERSION=$(curl -sL https://api.github.com/repos/aria2/aria2/releases/latest | jq -r '.tag_name | sub("release-"; "")')
-            echo "ARIA2_VERSION=$VERSION" >> $GITHUB_ENV
-  
-        # 条件发布：仅当存在至少一个可执行文件
-        - name: Create Release
-          if: steps.check_artifacts.outputs.has_artifacts == 'true'
-          uses: ncipollo/release-action@v1
-          with:
-            tag: aria2c-${{ env.ARIA2_VERSION }}
-            allowUpdates: true
-            artifacts: ${{ github.workspace }}/release-folder/*.exe
-            bodyFile: "release-folder/release_notes.md"
-            token: ${{ secrets.GITHUB_TOKEN }}
-  
-        # 友好提示无工件情况
-        - name: Skip release (no artifacts)
-          if: steps.check_artifacts.outputs.has_artifacts == 'false'
-          run: echo "⚠️ No executable artifacts found. Release skipped."
+    runs-on: ubuntu-24.04
+    needs: [build-aria2c, build-aria2c1]
+    if: always()
+    steps:
+      - name: Download Artifacts
+        uses: actions/download-artifact@v5
+        with:
+           path: release-folder1
+           merge-multiple: true
+        continue-on-error: true
+      - name: Create Release Notes File
+        run: |
+          mkdir -p release-folder
+          find release-folder1 -type f -exec sh -c 'mv {} release-folder' \;
+          cat release-folder/*.md > ${{ github.workspace }}/release-folder/release_notes.md
+      - name: Get Aria2 Version
+        run: |
+          VERSION=$(wget -qO- https://raw.githubusercontent.com/aria2/aria2/master/NEWS | grep -oP 'aria2 \K\d+(\.\d+)*')
+          echo "ARIA2_VERSION=${VERSION}" >> $GITHUB_ENV
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        with:
+          tag: aria2c-${{ env.ARIA2_VERSION }}
+          allowUpdates: true
+          artifacts: ${{ github.workspace }}/release-folder/*.exe
+          bodyFile: ${{ github.workspace }}/release-folder/release_notes.md
+          token: ${{ secrets.GITHUB_TOKEN }}
