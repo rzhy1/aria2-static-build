@@ -107,7 +107,8 @@ jobs:
           uses: actions/download-artifact@v5
           with:
             path: release-folder
-          continue-on-error: true  # 关键：允许部分下载失败
+            merge-multiple: true
+            continue-on-error: true
   
         # 检查是否存在可执行文件
         - name: Check artifacts existence
