@@ -108,6 +108,7 @@ jobs:
       - name: Create Release Notes File
         run: |
           find release-folder -type f -exec echo "Found file: {}" \;
+          ls -lh release-folder
           cat release-folder/*.md > ${{ github.workspace }}/release-folder/release_notes.md
       - name: Get Aria2 Version
         run: |
