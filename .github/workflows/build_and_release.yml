@@ -108,7 +108,7 @@ jobs:
           with:
             path: release-folder
             merge-multiple: true
-            continue-on-error: true
+          continue-on-error: true
   
         # 检查是否存在可执行文件
         - name: Check artifacts existence
