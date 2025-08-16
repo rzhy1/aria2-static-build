@@ -125,6 +125,7 @@ jobs:
           run: |
             find release-folder -name "*.md" -exec cat {} + > release-folder/release_notes.md 2>/dev/null || true
             touch release-folder/release_notes.md  # 确保文件存在
+            find release-folder -mindepth 1 -type d -exec rm -rf {} +
   
         - name: Get Aria2 Version
           run: |
