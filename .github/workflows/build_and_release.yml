@@ -102,21 +102,11 @@ jobs:
       - name: Download Artifacts
         uses: actions/download-artifact@v5
         with:
-           path: release-folder1
+           path: release-folder
            merge-multiple: true
         continue-on-error: true
       - name: Create Release Notes File
         run: |
-          mkdir -p release-folder
-          echo "1"
-          find release-folder1 -type f -exec echo "Found file: {}" \;
-          find release-folder1 -type f -print0 | xargs -0 mv -t release-folder
-          echo "2"
-          find release-folder1 -type f -exec echo "Found file: {}" \;
-          echo "3"
-          find release-folder -type f -exec echo "Found file: {}" \;
-          ls -lh release-folder1
-          ls -lh release-folder
           cat release-folder/*.md > ${{ github.workspace }}/release-folder/release_notes.md
       - name: Get Aria2 Version
         run: |
