@@ -167,7 +167,7 @@ prepare_libiconv() {
 }
 
 prepare_zlib_ng() {
-    zlib_ng_latest_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/zlib-ng/zlib-ng/releases \| jq -r "'.[0].tag_name'")"
+    zlib_ng_latest_tag="$(retry wget -qO- https://raw.githubusercontent.com/zlib-ng/zlib-ng/master/Makefile.in | grep '^VER=' | cut -d= -f2 | tr -d '"')"
     zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz"
     mkdir -p "/usr/src/zlib-ng"
     cd "/usr/src/zlib-ng"
