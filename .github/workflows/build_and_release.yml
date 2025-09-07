@@ -29,9 +29,6 @@ jobs:
               patch ca-certificates g++-mingw-w64-x86-64 \
               pkg-config git wget curl dpkg-dev \
               autopoint libcppunit-dev lzip jq unzip lld zstd rsync bc
-          echo "测试"
-          sudo netselect -s 20 -t 40 $(wget -qO - mirrors.ubuntu.com/mirrors.txt)
-          echo "测试完成"
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
