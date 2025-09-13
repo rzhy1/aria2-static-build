@@ -20,6 +20,8 @@ export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgc
 export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -flto=$(nproc) -pipe  -g0"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="-Wl,--gc-sections -flto=$(nproc)"
+libssh2_tag=$(retry curl -s https://libssh2.org/ | sed -nr 's@.*libssh2 ([^<]*).*released on.*@\1@p')
+echo "libssh2的版本是：$libssh2_tag"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
