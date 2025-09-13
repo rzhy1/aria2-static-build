@@ -321,7 +321,7 @@ prepare_c_ares() {
 }
 
 prepare_libssh2() {
-  libssh2_tag="$(retry wget -qO- --compression=auto https://libssh2.org/ \| sed -nr "'s@.*libssh2 ([^<]*).*released on.*@\1@p'")"
+  libssh2_tag=$(retry curl -s https://libssh2.org/download/ | grep -o 'libssh2-[0-9.]*\.tar\.\(gz\|xz\)' | sed -n 's/.*libssh2-\([0-9.]*\)\.tar\.\(gz\|xz\).*/\1/p' | sort -V | tail -n 1)
   libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
   if [ ! -f "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz.part" "${libssh2_latest_url}"
