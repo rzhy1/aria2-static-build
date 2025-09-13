@@ -71,7 +71,7 @@ retry() {
   echo "命令 '$command' 执行失败 (已达到最大重试次数)" >&2
   return 1
 }
-libssh2_tag=$(retry curl -s https://libssh2.org/ | sed -nr 's@.*libssh2 ([^<]*).*released on.*@\1@p')
+libssh2_tag=$(retry curl -s https://libssh2.org/download/ | grep -o 'libssh2-[0-9.]*\.tar\.\(gz\|xz\)' | sed -n 's/.*libssh2-\([0-9.]*\)\.tar\.\(gz\|xz\).*/\1/p' | sort -V | tail -n 1)
 echo "libssh2的版本是：$libssh2_tag"
 # 1. 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
