@@ -21,7 +21,16 @@ mkdir -p "$BUILD_DIR" "$DOWNLOAD_DIR" "$PREFIX"
 
 # 工具函数
 log() { echo "⭐⭐ $1 ⭐⭐"; }
-timer() { local start=$EPOCHREALTIME; "$@"; local end=$EPOCHREALTIME; log "$1 完成: $(printf "%.1fs" $(echo "$end - $start" | bc))"; }
+timer() { 
+    local task_name="$1"
+    shift
+    local start=$(date +%s.%N)
+    log "开始 $task_name"
+    "$@"
+    local end=$(date +%s.%N)
+    local duration=$(echo "$end - $start" | bc | xargs printf "%.1f")
+    log "$task_name 完成: ${duration}s"
+}
 retry() { for i in {1..5}; do "$@" && return 0; sleep 3; done; return 1; }
 
 # 初始化构建信息
@@ -60,7 +69,10 @@ build_lib() {
     
     # 特殊处理
     case $name in
-        gmp) sed -i '/Test compile: long long reliability test/,+37s/^/#/' configure ;;
+        gmp) 
+            sed -i '/Test compile: long long reliability test/,+37s/^/#/' configure 
+            BUILD_CC=gcc BUILD_CXX=g++ ./configure --disable-shared --enable-static --prefix=$PREFIX --host=$HOST --enable-cxx --disable-assembly
+            ;;
         zlib) 
             CC=$HOST-gcc AR=$HOST-ar ./configure --prefix=$PREFIX --static
             make -j$JOBS install
@@ -68,10 +80,12 @@ build_lib() {
             echo "| $name | $version | $url |" >> "$BUILD_INFO"
             return
             ;;
+        *) 
+            ./configure --disable-shared --enable-static --prefix=$PREFIX --host=$HOST $configure_args
+            ;;
     esac
     
-    # 通用配置和编译
-    eval "./configure --disable-shared --enable-static --prefix=$PREFIX --host=$HOST $configure_args"
+    # 通用编译和安装
     make -j$JOBS install
     
     echo "| $name | $version | $url |" >> "$BUILD_INFO"
@@ -83,48 +97,55 @@ main() {
     log "开始构建 aria2"
     
     # 工具链
-    timer "下载工具链" download_toolchain
+    timer "download_toolchain" download_toolchain
     
     # 并行下载所有依赖
     log "并行下载依赖"
-    (
+    
+    # GMP
     build_lib gmp \
         "curl -fs https://mirrors.kernel.org/gnu/gmp/ | grep -oE 'href=\"gmp-[0-9.]+\\.tar\\.(xz|gz)\"' | sed -r 's/href=\"gmp-([0-9.]+)\\.tar\\..+\"/\\1/' | sort -rV | head -1" \
         "echo \"https://ftp.gnu.org/gnu/gmp/gmp-\$version.tar.xz\"" \
         "--enable-cxx --disable-assembly" &
     
+    # Expat
     build_lib expat \
         "curl -fs https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name | sub(\"^R_\"; \"\") | gsub(\"_\"; \".\")'" \
-        "curl -fs \\\"https://api.github.com/repos/libexpat/libexpat/releases/latest\\\" | jq -r '.assets[] | select(.name | test(\"\\\\.tar\\\\.bz2\\$\")) | .browser_download_url' | head -1" \
+        "curl -fs \"https://api.github.com/repos/libexpat/libexpat/releases/latest\" | jq -r '.assets[] | select(.name | test(\"\\.tar\\.bz2$\")) | .browser_download_url' | head -1" \
         "--without-examples --without-tests" &
     
+    # SQLite
     build_lib sqlite \
-        "curl -fs https://sqlite.org/index.html | awk '/Version [0-9]+\\\\.[0-9]+\\\\.[0-9]+/ {match(\\$0, /Version ([0-9]+\\\\.[0-9]+\\\\.[0-9]+)/, a); print a[1]; exit}'" \
-        "echo \\\"https://www.sqlite.org/\\\$(curl -fsL https://www.sqlite.org/download.html | sed -n '/Download product data for scripts to read/,/-->/p' | grep 'autoconf.*\\\\.tar\\\\.gz' | cut -d ',' -f 3 | head -1)\\\"" \
+        "curl -fs https://sqlite.org/index.html | awk '/Version [0-9]+\\.[0-9]+\\.[0-9]+/ {match(\$0, /Version ([0-9]+\\.[0-9]+\\.[0-9]+)/, a); print a[1]; exit}'" \
+        "echo \"https://www.sqlite.org/\$(curl -fsL https://www.sqlite.org/download.html | sed -n '/Download product data for scripts to read/,/-->/p' | grep 'autoconf.*\\.tar\\.gz' | cut -d ',' -f 3 | head -1)\"" \
         "--enable-threadsafe --disable-debug --disable-editline --disable-fts3 --disable-fts4 --disable-fts5 --disable-rtree --disable-session --disable-load-extension" &
     
+    # zlib
     build_lib zlib \
         "curl -fs https://api.github.com/repos/madler/zlib/releases/latest | jq -r '.tag_name | sub(\"^v\"; \"\")'" \
         "echo \"https://github.com/madler/zlib/releases/download/v\$version/zlib-\$version.tar.gz\"" \
         "" &
     
+    # c-ares
     build_lib cares \
         "curl -fs https://api.github.com/repos/c-ares/c-ares/releases/latest | jq -r '.tag_name | sub(\"^v\"; \"\")'" \
         "echo \"https://github.com/c-ares/c-ares/releases/download/v\$version/c-ares-\$version.tar.gz\"" \
-        "--disable-tests --without-random LIBS=\\\"-lws2_32\\\"" &
+        "--disable-tests --without-random LIBS=\"-lws2_32\"" &
     
+    # libssh2
     build_lib libssh2 \
-        "curl -fs https://libssh2.org/download/ | grep -o 'libssh2-[0-9.]*\\\\.tar\\\\.\\\\(gz\\\\|xz\\\\)' | sed -n 's/.*libssh2-\\\\([0-9.]*\\\\)\\\\.tar\\\\.\\\\(gz\\\\|xz\\\\).*/\\1/p' | sort -V | tail -1" \
+        "curl -fs https://libssh2.org/download/ | grep -o 'libssh2-[0-9.]*\\.tar\\.\\(gz\\|xz\\)' | sed -n 's/.*libssh2-\\([0-9.]*\\).tar\\.\\(gz\\|xz\\).*/\\1/p' | sort -V | tail -1" \
         "echo \"https://libssh2.org/download/libssh2-\$version.tar.gz\"" \
-        "--disable-examples-build --disable-docker-tests --disable-sshd-tests --disable-debug LIBS=\\\"-lws2_32\\\"" &
+        "--disable-examples-build --disable-docker-tests --disable-sshd-tests --disable-debug LIBS=\"-lws2_32\"" &
     
     wait
-    )
     
     # 构建 aria2
     log "构建 aria2"
     cd "$BUILD_DIR"
-    [[ ! -d "aria2" ]] && git clone --depth 1 https://github.com/aria2/aria2.git
+    if [[ ! -d "aria2" ]]; then
+        git clone --depth 1 https://github.com/aria2/aria2.git
+    fi
     cd aria2
     
     # 优化配置
