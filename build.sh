@@ -1,314 +1,632 @@
 #!/bin/bash
 
-# Dockerfile to build aria2 Windows binary using ubuntu mingw-w64
-# cross compiler chain.
-#
-# $ sudo docker build -t aria2-mingw - < Dockerfile.mingw
-#
-# After successful build, windows binary is located at
-# /aria2/src/aria2c.exe.  You can copy the binary using following
-# commands:
-#
-# $ sudo docker run --rm -it -v /path/to/dest:/out aria2-mingw cp /aria2/src/aria2c.exe /out
-export LD=x86_64-w64-mingw32-ld.lld
 set -euo pipefail
-HOST=x86_64-w64-mingw32
-PREFIX=$PWD/$HOST
-SELF_DIR="$(dirname "$(realpath "${0}")")"
-BUILD_INFO="${SELF_DIR}/build_info.md"
-export PKG_CONFIG_PATH=${PKG_CONFIG_PATH:-/usr/lib/pkgconfig:/usr/local/lib/pkgconfig:$PREFIX/lib/pkgconfig}
-export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -flto=$(nproc) -pipe  -g0"
+
+# 配置常量
+readonly HOST=x86_64-w64-mingw32
+readonly PREFIX="$PWD/$HOST"
+readonly SELF_DIR="$(dirname "$(realpath "${0}")")"
+readonly BUILD_INFO="${SELF_DIR}/build_info.md"
+readonly JOBS=$(nproc)
+readonly BUILD_DIR="$PWD/build"
+readonly DOWNLOAD_DIR="$PWD/downloads"
+readonly TMPFS_DIR="/dev/shm/aria2-build"
+
+# 编译优化选项
+export CFLAGS="-march=native -O3 -ffunction-sections -fdata-sections -flto=$JOBS -pipe -g0 -fno-semantic-interposition"
 export CXXFLAGS="$CFLAGS"
-export LDFLAGS="-Wl,--gc-sections -flto=$(nproc)"
+export LDFLAGS="-Wl,--gc-sections -flto=$JOBS -static -Wl,--enable-stdcall-fixup -s"
+export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:/usr/lib/pkgconfig:/usr/local/lib/pkgconfig"
+export AR="$HOST-ar"
+export RANLIB="$HOST-ranlib"
 
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
-start_time=$(date +%s.%N)
-USE_GCC=0
-if [[ "$USE_GCC" -eq 1 ]]; then
-    echo "使用最新版的 mingw-w64-x86_64-toolchain (GCC 16)..."
-    curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
-    sudo tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C /usr/
-else
-    echo "使用相对成熟的 musl-cross (GCC 15)..."
-    curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz"  "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32-1.tar.xz"
-    mkdir -p /opt/mingw64
-    tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
-    export PATH="/opt/mingw64/bin:${PATH}"    
-fi
-end_time=$(date +%s.%N)
-duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-# ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-* /usr/bin/ 一次链接所有
-sudo ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
+# 版本缓存
+declare -A VERSIONS DOWNLOAD_URLS
 
-echo "x86_64-w64-mingw32-gcc版本是："
-x86_64-w64-mingw32-gcc --version
-#x86_64-w64-mingw32-gcc -print-search-dirs
+# 创建必要目录
+mkdir -p "$BUILD_DIR" "$DOWNLOAD_DIR" "$PREFIX"
 
-# 配置 apt 以保留下载的 .deb 包，并禁用 HTTPS 证书验证
-#rm -f /etc/apt/apt.conf.d/*
-#echo 'Binary::apt::APT::Keep-Downloaded-Packages "true";' >/etc/apt/apt.conf.d/01keep-debs
-#echo -e 'Acquire::https::Verify-Peer "false";\nAcquire::https::Verify-Host "false";' >/etc/apt/apt.conf.d/99-trust-https    
+# 统一的日志函数
+log() {
+    echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S') - $1 ⭐⭐⭐⭐⭐⭐"
+}
 
-echo "## aria2c.exe （zlib & libexpat） dependencies:" >>"${BUILD_INFO}"
-# 初始化表格
-echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
-echo "|------------|---------|--------|" >>"${BUILD_INFO}"
+# 计时函数
+timer() {
+    local start_time=$(date +%s.%N)
+    local job_name="$1"
+    shift
+    
+    log "开始 $job_name"
+    "$@"
+    local exit_code=$?
+    
+    local end_time=$(date +%s.%N)
+    local duration=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+    
+    log "$job_name 完成，用时 ${duration}s"
+    return $exit_code
+}
 
+# 重试函数
 retry() {
-  local max_retries=5
-  local sleep_seconds=3
-  local command="$@"
+    local max_retries=5
+    local sleep_seconds=3
+    local attempt=1
+    local command=("$@")
+    
+    while [ $attempt -le $max_retries ]; do
+        if [ $attempt -gt 1 ]; then
+            log "第 $attempt 次重试: ${command[*]}"
+        fi
+        
+        if "${command[@]}"; then
+            return 0
+        fi
+        
+        sleep $sleep_seconds
+        ((attempt++))
+    done
+    
+    log "命令 '${command[*]}' 失败，已达最大重试次数"
+    return 1
+}
 
-  for (( i=1; i<=max_retries; i++ )); do
-    echo "正在执行 (重试次数: $i): $command" >&2
-    if $command; then
-      return 0
-    else
-      echo "命令 '$command' 执行失败 (重试次数: $i)" >&2
-      sleep "$sleep_seconds"
+# 并行下载函数
+parallel_download() {
+    local urls=("$@")
+    local pid_list=()
+    local download_ok=true
+    
+    for url in "${urls[@]}"; do
+        local filename="$DOWNLOAD_DIR/$(basename "$url")"
+        if [[ ! -f "$filename" ]] || [[ ! -s "$filename" ]]; then
+            log "下载: $(basename "$filename")"
+            curl -fSL --connect-timeout 30 --retry 3 --retry-delay 2 -o "$filename" "$url" &
+            pid_list+=($!)
+        else
+            log "使用缓存: $(basename "$filename")"
+        fi
+    done
+    
+    # 等待所有下载完成
+    for pid in "${pid_list[@]}"; do
+        if ! wait "$pid"; then
+            log "下载进程 $pid 失败"
+            download_ok=false
+        fi
+    done
+    
+    $download_ok
+}
+
+# 设置内存盘加速
+setup_tmpfs() {
+    if [[ -w "/dev/shm" ]] && [[ ! -d "$TMPFS_DIR" ]]; then
+        mkdir -p "$TMPFS_DIR"
+        export TMPDIR="$TMPFS_DIR"
+        log "使用内存盘加速: $TMPFS_DIR"
     fi
-  done
-  echo "命令 '$command' 执行失败 (已达到最大重试次数)" >&2
-  return 1
 }
 
-# 1. 下载并编译 GMP
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
-start_time=$(date +%s.%N)
-gmp_tag="$(retry curl -s https://mirrors.kernel.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9.]+\.tar\.(xz|gz)"' | sed -r 's/href="gmp-([0-9.]+)\.tar\..+"/\1/' | sort -rV | head -n 1)"
-echo "gmp最新版本是${gmp_tag} ，下载地址是https://mirrors.kernel.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
-curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
-cd gmp-*
-#curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
-
-# patch configure（不检测long long）
-find_and_comment() {
-  local file="$1"
-  local search_str="Test compile: long long reliability test"
-  local current_line=1
-  while read -r start_line; do  
-    [[ -z "$start_line" ]] && { echo "在文件 $file 中未找到更多字符串 '$search_str'"; break; }
-    local end_line=$((start_line + 37))
-    sed -i "${start_line},${end_line}s/^/# /" "$file"
-    echo "注释了文件 $file 中从第 $start_line 行到第 $end_line 行"
-    current_line=$((end_line + 1))
-  done < <(awk -v s="$search_str" -v cl="$current_line" 'NR >= cl && !/^# / && $0 ~ s {print NR}' "$file")
+# 清理临时文件
+clean_intermediate_files() {
+    log "清理中间文件"
+    find "$BUILD_DIR" -name "*.o" -delete 2>/dev/null || true
+    find "$BUILD_DIR" -name "*.lo" -delete 2>/dev/null || true
+    find "$BUILD_DIR" -name ".deps" -type d -exec rm -rf {} + 2>/dev/null || true
+    find "$BUILD_DIR" -name ".libs" -type d -exec rm -rf {} + 2>/dev/null || true
 }
-find_and_comment "configure"  && echo "configure文件修改完成"
 
-BUILD_CC=gcc BUILD_CXX=g++ ./configure \
-    --disable-shared \
-    --enable-static \
-    --prefix=$PREFIX \
-    --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-make -j$(nproc) install
-echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
-cd ..
-end_time=$(date +%s.%N)
-duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+# 检查是否需要重新编译
+should_rebuild() {
+    local lib="$1"
+    local version="$2"
+    local stamp_file="$BUILD_DIR/${lib}.stamp"
+    
+    if [[ -f "$stamp_file" ]]; then
+        local cached_version=$(cat "$stamp_file")
+        if [[ "$cached_version" == "$version" ]]; then
+            log "$lib $version 已构建，跳过"
+            return 1
+        fi
+    fi
+    return 0
+}
 
-# 2.  Expat
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') -  Expat⭐⭐⭐⭐⭐⭐"
-start_time=$(date +%s.%N)
-expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
-expat_latest_url=$(retry curl -s "https://api.github.com/repos/libexpat/libexpat/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.bz2$")) | .browser_download_url' | head -n 1)
-echo "libexpat最新版本是${expat_tag} ，下载地址是${expat_latest_url}"
-curl -L ${expat_latest_url} | tar xj
-#curl -L https://github.com/libexpat/libexpat/releases/download/R_2_6_3/expat-2.6.3.tar.bz2 | tar xj
-cd expat-*
-./configure \
-    --disable-shared \
-    --enable-static \
-    --without-examples \
-    --without-tests \
-    --enable-silent-rules \
-    --prefix=$PREFIX \
-    --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-make -j$(nproc) install
-echo "| libexpat | ${expat_tag} | ${expat_latest_url} |" >>"${BUILD_INFO}"
-cd ..
-end_time=$(date +%s.%N)
-duration3=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+# 标记构建完成
+mark_built() {
+    local lib="$1"
+    local version="$2"
+    echo "$version" > "$BUILD_DIR/${lib}.stamp"
+}
 
-# 3.  SQLite
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') -  SQLite⭐⭐⭐⭐⭐⭐"
-start_time=$(date +%s.%N)
-sqlite_tag=$(curl -s https://sqlite.org/index.html | awk '/Version [0-9]+\.[0-9]+\.[0-9]+/ {match($0, /Version ([0-9]+\.[0-9]+\.[0-9]+)/, a); print a[1]; exit}')
-echo "sqlite最新版本是${sqlite_tag}"
-download_page=$(curl -sL "https://www.sqlite.org/download.html")
-csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
-tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1)
-sqlite_latest_url="https://www.sqlite.org/${tarball_url}"
-echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
-curl -L ${sqlite_latest_url} | tar xz
-#curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
-cd sqlite-*
-export LDFLAGS="$LDFLAGS -L/opt/mingw64/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lpthread"
-./configure \
-    --disable-shared \
-    --enable-threadsafe \
-    --enable-static \
-    --disable-debug \
-    --enable-silent-rules \
-    --disable-editline \
-    --disable-fts3 --disable-fts4 --disable-fts5 \
-    --disable-rtree \
-    --disable-session \
-    --disable-load-extension \
-    --prefix=$PREFIX \
-    --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-make -j$(nproc) install
-x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
-cp libsqlite3.a "$PREFIX/lib/" ||  exit 1
-echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
-cd ..
-end_time=$(date +%s.%N)
-duration4=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+# 智能配置函数
+configure_library() {
+    local name="$1"
+    shift
+    local extra_args=("$@")
+    
+    local common_args=(
+        "--disable-shared"
+        "--enable-static" 
+        "--prefix=$PREFIX"
+        "--host=$HOST"
+        "--build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)"
+        "--enable-silent-rules"
+    )
+    
+    log "配置 $name: ${common_args[*]} ${extra_args[*]}"
+    ./configure "${common_args[@]}" "${extra_args[@]}"
+}
 
-export LDFLAGS="-L$PREFIX/lib -flto=$(nproc)"
+# 获取最新版本信息
+cache_versions() {
+    log "获取最新版本信息"
+    
+    # GMP
+    VERSIONS[gmp]=$(retry curl -fs https://mirrors.kernel.org/gnu/gmp/ | \
+        grep -oE 'href="gmp-[0-9.]+\.tar\.(xz|gz)"' | \
+        sed -r 's/href="gmp-([0-9.]+)\.tar\..+"/\1/' | \
+        sort -rV | head -1)
+    DOWNLOAD_URLS[gmp]="https://ftp.gnu.org/gnu/gmp/gmp-${VERSIONS[gmp]}.tar.xz"
+    
+    # Expat
+    VERSIONS[expat]=$(retry curl -fs https://api.github.com/repos/libexpat/libexpat/releases/latest | \
+        jq -r '.tag_name | sub("^R_"; "") | gsub("_"; ".")')
+    DOWNLOAD_URLS[expat]=$(retry curl -fs "https://api.github.com/repos/libexpat/libexpat/releases/latest" | \
+        jq -r '.assets[] | select(.name | test("\\.tar\\.bz2$")) | .browser_download_url' | head -1)
+    
+    # SQLite
+    VERSIONS[sqlite]=$(retry curl -fs https://sqlite.org/index.html | \
+        awk '/Version [0-9]+\.[0-9]+\.[0-9]+/ {match($0, /Version ([0-9]+\.[0-9]+\.[0-9]+)/, a); print a[1]; exit}')
+    local download_page=$(retry curl -fsL "https://www.sqlite.org/download.html")
+    local csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
+    local tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1)
+    DOWNLOAD_URLS[sqlite]="https://www.sqlite.org/${tarball_url}"
+    
+    # zlib
+    VERSIONS[zlib]=$(retry curl -fs https://api.github.com/repos/madler/zlib/releases/latest | \
+        jq -r '.tag_name | sub("^v"; "")')
+    DOWNLOAD_URLS[zlib]="https://github.com/madler/zlib/releases/download/v${VERSIONS[zlib]}/zlib-${VERSIONS[zlib]}.tar.gz"
+    
+    # c-ares
+    VERSIONS[cares]=$(retry curl -fs https://api.github.com/repos/c-ares/c-ares/releases/latest | \
+        jq -r '.tag_name | sub("^v"; "")')
+    DOWNLOAD_URLS[cares]="https://github.com/c-ares/c-ares/releases/download/v${VERSIONS[cares]}/c-ares-${VERSIONS[cares]}.tar.gz"
+    
+    # libssh2
+    VERSIONS[libssh2]=$(retry curl -fs https://libssh2.org/download/ | \
+        grep -o 'libssh2-[0-9.]*\.tar\.\(gz\|xz\)' | \
+        sed -n 's/.*libssh2-\([0-9.]*\)\.tar\.\(gz\|xz\).*/\1/p' | \
+        sort -V | tail -n 1)
+    DOWNLOAD_URLS[libssh2]="https://libssh2.org/download/libssh2-${VERSIONS[libssh2]}.tar.gz"
+    
+    log "版本信息获取完成"
+}
 
-# 4. 下载并编译 zlib
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib⭐⭐⭐⭐⭐⭐"
-start_time=$(date +%s.%N)
-zlib_tag=$(retry curl -s https://api.github.com/repos/madler/zlib/releases/latest | jq -r '.name' | cut -d' ' -f2)
-zlib_latest_url=$(retry curl -s "https://api.github.com/repos/madler/zlib/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.gz$")) | .browser_download_url' | head -n 1)
-#zlib_tag="$(retry wget -qO- --compression=auto https://zlib.net/ \| grep -i "'<FONT.*FONT>'" \| sed -r "'s/.*zlib\s*([^<]+).*/\1/'" \| head -1)"
-#zlib_latest_url="https://zlib.net/zlib-${zlib_tag}.tar.gz"
-echo "zlib最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
-curl -L ${zlib_latest_url} | tar xz
-#curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
-cd zlib-*
-CC=$HOST-gcc \
-AR=$HOST-ar \
-LD=$HOST-ld \
-RANLIB=$HOST-ranlib \
-STRIP=$HOST-strip \
-./configure \
-    --prefix=$PREFIX \
-    --libdir=$PREFIX/lib \
-    --includedir=$PREFIX/include \
-    --static
-make -j$(nproc) install
-echo "| zlib | ${zlib_tag} | ${zlib_latest_url} |" >>"${BUILD_INFO}"
-cd ..
-end_time=$(date +%s.%N)
-duration5=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+# 初始化构建信息
+init_build_info() {
+    cat > "$BUILD_INFO" << EOF
+## aria2c.exe 构建信息
 
-# 5. 下载并编译 c-ares
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares⭐⭐⭐⭐⭐⭐"
-start_time=$(date +%s.%N)
-cares_tag=$(retry curl -s https://api.github.com/repos/c-ares/c-ares/releases/latest | jq -r '.tag_name | sub("^v"; "")')
-cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
-echo "cares最新版本是${cares_tag} ，下载地址是${cares_latest_url}"
-curl -L ${cares_latest_url} | tar xz
-#curl -L https://github.com/c-ares/c-ares/releases/download/v1.34.1/c-ares-1.34.1.tar.gz | tar xz
-cd c-ares-*
-./configure \
-    --disable-shared \
-    --enable-static \
-    --disable-tests \
-    --enable-silent-rules \
-    --without-random \
-    --prefix=$PREFIX \
-    --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    LIBS="-lws2_32"
-make -j$(nproc) install
-echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
-cd ..
-end_time=$(date +%s.%N)
-duration6=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+构建时间: $(date)
+构建主机: $HOST
+编译线程数: $JOBS
 
-# 6. 下载并编译 libssh2
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2⭐⭐⭐⭐⭐⭐"
-start_time=$(date +%s.%N)
-libssh2_tag=$(retry curl -s https://libssh2.org/download/ | grep -o 'libssh2-[0-9.]*\.tar\.\(gz\|xz\)' | sed -n 's/.*libssh2-\([0-9.]*\)\.tar\.\(gz\|xz\).*/\1/p' | sort -V | tail -n 1)
-libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
-echo "libssh2最新版本是${libssh2_tag} ，下载地址是${libssh2_latest_url}"
-curl -L ${libssh2_latest_url} | tar xz
-#curl -L https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
-cd libssh2-*
-./configure \
-    --disable-shared \
-    --enable-static \
-    --enable-silent-rules \
-    --disable-examples-build \
-    --disable-docker-tests \
-    --disable-sshd-tests \
-    --disable-debug \
-    --prefix=$PREFIX \
-    --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    LIBS="-lws2_32"
-make -j$(nproc) install
-echo "| libssh2 | ${libssh2_tag} | ${libssh2_latest_url} |" >>"${BUILD_INFO}"
-cd ..
-end_time=$(date +%s.%N)
-duration7=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
+### 依赖库版本
 
-# 7. 下载并编译 aria2
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
-start_time=$(date +%s.%N)
-ARIA2_VERSION=master
-ARIA2_REF=refs/heads/master
-curl -L -o version.json https://api.github.com/repos/aria2/aria2/git/$ARIA2_REF
-git clone -j$(nproc) --depth 1 https://github.com/aria2/aria2.git
-cd aria2
-sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
-sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
-#sed -i 's/void sock_state_cb(void\* arg, int fd, int read, int write)/void sock_state_cb(void\* arg, ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
-#sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
-#sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
-autoreconf -i
-./configure \
-    --host=$HOST \
-    --prefix=$PREFIX \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    --with-sysroot=$PREFIX \
-    --with-cppunit-prefix=$PREFIX \
-    --enable-silent-rules \
-    --with-libz \
-    --with-libgmp \
-    --with-libssh2 \
-    --with-libcares \
-    --with-sqlite3 \
-    --with-libexpat \
-    --with-libuv=no \
-    --with-tcmalloc=no \
-    --with-jemalloc=no \
-    --without-appletls \
-    --without-gnutls \
-    --without-openssl \
-    --without-libxml2 \
-    --without-libgcrypt \
-    --without-libnettle \
-    --without-included-gettext \
-    --disable-epoll \
-    --disable-nls \
-    --disable-dependency-tracking \
-    --disable-libtool-lock \
-    --disable-checking \
-    ARIA2_STATIC=yes \
-    SQLITE3_LIBS="-L$PREFIX/lib -lsqlite3" \
-    CPPFLAGS="-I$PREFIX/include" \
-    PKG_CONFIG="/usr/bin/pkg-config" \
-    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
-make -j$(nproc)
-$HOST-strip src/aria2c.exe
-mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
-ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
-aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
-echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
-end_time=$(date +%s.%N)
-duration8=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-echo "下载mingw-w64用时: ${duration1}s"
-echo "编译 GMP 用时: ${duration2}s"
-echo "编译 Expat 用时: ${duration3}s"
-echo "编译 SQLite 用时: ${duration4}s"
-echo "编译 zlib 用时: ${duration5}s"
-echo "编译 c-ares 用时: ${duration6}s"
-echo "编译 libssh2 用时: ${duration7}s"
-echo "编译 aria2 用时: ${duration8}s"
+| Dependency | Version | Source |
+|------------|---------|--------|
+EOF
+}
+
+# 下载工具链
+download_toolchain() {
+    local USE_GCC=0
+    
+    if [[ $USE_GCC -eq 1 ]]; then
+        log "使用 GCC 工具链"
+        retry curl -fSL -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" \
+            "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
+        sudo tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C /usr/
+    else
+        log "使用 musl-cross 工具链"
+        retry curl -fSL -o "/tmp/x86_64-w64-mingw32.tar.xz" \
+            "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32-1.tar.xz"
+        sudo mkdir -p /opt/mingw64
+        sudo tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C /opt/mingw64
+        export PATH="/opt/mingw64/bin:${PATH}"
+    fi
+    
+    # 创建符号链接
+    sudo ln -sf "$(which lld-link)" "/usr/bin/x86_64-w64-mingw32-ld.lld" 2>/dev/null || true
+    
+    # 验证工具链
+    log "工具链版本信息"
+    x86_64-w64-mingw32-gcc --version | head -1
+}
+
+# 构建 GMP
+build_gmp() {
+    local version="${VERSIONS[gmp]}"
+    local url="${DOWNLOAD_URLS[gmp]}"
+    
+    if ! should_rebuild "gmp" "$version"; then
+        return 0
+    fi
+    
+    local tarball="$DOWNLOAD_DIR/$(basename "$url")"
+    [[ -f "$tarball" ]] || { log "文件不存在: $tarball"; return 1; }
+    
+    # 清理旧构建
+    rm -rf "$BUILD_DIR/gmp-$version"
+    mkdir -p "$BUILD_DIR/gmp-$version"
+    
+    # 解压到构建目录
+    tar -xf "$tarball" -C "$BUILD_DIR/gmp-$version" --strip-components=1
+    cd "$BUILD_DIR/gmp-$version"
+    
+    # 应用补丁避免长long检测
+    sed -i '
+        /Test compile: long long reliability test/,+37 {
+            /^#/! s/^/#/
+        }
+    ' configure
+    
+    # 配置和编译
+    BUILD_CC=gcc BUILD_CXX=g++ configure_library "gmp" \
+        --enable-cxx \
+        --disable-assembly
+    
+    make -j$JOBS
+    make install
+    
+    # 记录构建信息
+    echo "| gmp | $version | $url |" >> "$BUILD_INFO"
+    
+    mark_built "gmp" "$version"
+    cd - >/dev/null
+}
+
+# 构建 Expat
+build_expat() {
+    local version="${VERSIONS[expat]}"
+    local url="${DOWNLOAD_URLS[expat]}"
+    
+    if ! should_rebuild "expat" "$version"; then
+        return 0
+    fi
+    
+    local tarball="$DOWNLOAD_DIR/$(basename "$url")"
+    [[ -f "$tarball" ]] || { log "文件不存在: $tarball"; return 1; }
+    
+    rm -rf "$BUILD_DIR/expat-$version"
+    mkdir -p "$BUILD_DIR/expat-$version"
+    tar -xf "$tarball" -C "$BUILD_DIR/expat-$version" --strip-components=1
+    cd "$BUILD_DIR/expat-$version"
+    
+    configure_library "expat" \
+        --without-examples \
+        --without-tests
+    
+    make -j$JOBS
+    make install
+    
+    echo "| libexpat | $version | $url |" >> "$BUILD_INFO"
+    mark_built "expat" "$version"
+    cd - >/dev/null
+}
+
+# 构建 SQLite
+build_sqlite() {
+    local version="${VERSIONS[sqlite]}"
+    local url="${DOWNLOAD_URLS[sqlite]}"
+    
+    if ! should_rebuild "sqlite" "$version"; then
+        return 0
+    fi
+    
+    local tarball="$DOWNLOAD_DIR/$(basename "$url")"
+    [[ -f "$tarball" ]] || { log "文件不存在: $tarball"; return 1; }
+    
+    rm -rf "$BUILD_DIR/sqlite-$version"
+    mkdir -p "$BUILD_DIR/sqlite-$version"
+    tar -xf "$tarball" -C "$BUILD_DIR/sqlite-$version" --strip-components=1
+    cd "$BUILD_DIR/sqlite-$version"
+    
+    # 临时修改LDFLAGS
+    local old_ldflags="$LDFLAGS"
+    export LDFLAGS="$old_ldflags -L/opt/mingw64/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lpthread"
+    
+    configure_library "sqlite" \
+        --enable-threadsafe \
+        --disable-debug \
+        --disable-editline \
+        --disable-fts3 --disable-fts4 --disable-fts5 \
+        --disable-rtree \
+        --disable-session \
+        --disable-load-extension
+    
+    make -j$JOBS
+    make install
+    
+    # 创建静态库
+    $HOST-ar cr libsqlite3.a sqlite3.o
+    cp libsqlite3.a "$PREFIX/lib/"
+    
+    export LDFLAGS="$old_ldflags"
+    echo "| sqlite | $version | $url |" >> "$BUILD_INFO"
+    mark_built "sqlite" "$version"
+    cd - >/dev/null
+}
+
+# 构建 zlib
+build_zlib() {
+    local version="${VERSIONS[zlib]}"
+    local url="${DOWNLOAD_URLS[zlib]}"
+    
+    if ! should_rebuild "zlib" "$version"; then
+        return 0
+    fi
+    
+    local tarball="$DOWNLOAD_DIR/$(basename "$url")"
+    [[ -f "$tarball" ]] || { log "文件不存在: $tarball"; return 1; }
+    
+    rm -rf "$BUILD_DIR/zlib-$version"
+    mkdir -p "$BUILD_DIR/zlib-$version"
+    tar -xf "$tarball" -C "$BUILD_DIR/zlib-$version" --strip-components=1
+    cd "$BUILD_DIR/zlib-$version"
+    
+    # zlib 使用自定义配置
+    CC=$HOST-gcc \
+    AR=$HOST-ar \
+    LD=$HOST-ld \
+    RANLIB=$HOST-ranlib \
+    STRIP=$HOST-strip \
+    ./configure \
+        --prefix=$PREFIX \
+        --libdir=$PREFIX/lib \
+        --includedir=$PREFIX/include \
+        --static
+    
+    make -j$JOBS
+    make install
+    
+    echo "| zlib | $version | $url |" >> "$BUILD_INFO"
+    mark_built "zlib" "$version"
+    cd - >/dev/null
+}
+
+# 构建 c-ares
+build_cares() {
+    local version="${VERSIONS[cares]}"
+    local url="${DOWNLOAD_URLS[cares]}"
+    
+    if ! should_rebuild "cares" "$version"; then
+        return 0
+    fi
+    
+    local tarball="$DOWNLOAD_DIR/$(basename "$url")"
+    [[ -f "$tarball" ]] || { log "文件不存在: $tarball"; return 1; }
+    
+    rm -rf "$BUILD_DIR/c-ares-$version"
+    mkdir -p "$BUILD_DIR/c-ares-$version"
+    tar -xf "$tarball" -C "$BUILD_DIR/c-ares-$version" --strip-components=1
+    cd "$BUILD_DIR/c-ares-$version"
+    
+    configure_library "c-ares" \
+        --disable-tests \
+        --without-random \
+        LIBS="-lws2_32"
+    
+    make -j$JOBS
+    make install
+    
+    echo "| c-ares | $version | $url |" >> "$BUILD_INFO"
+    mark_built "cares" "$version"
+    cd - >/dev/null
+}
+
+# 构建 libssh2
+build_libssh2() {
+    local version="${VERSIONS[libssh2]}"
+    local url="${DOWNLOAD_URLS[libssh2]}"
+    
+    if ! should_rebuild "libssh2" "$version"; then
+        return 0
+    fi
+    
+    local tarball="$DOWNLOAD_DIR/$(basename "$url")"
+    [[ -f "$tarball" ]] || { log "文件不存在: $tarball"; return 1; }
+    
+    rm -rf "$BUILD_DIR/libssh2-$version"
+    mkdir -p "$BUILD_DIR/libssh2-$version"
+    tar -xf "$tarball" -C "$BUILD_DIR/libssh2-$version" --strip-components=1
+    cd "$BUILD_DIR/libssh2-$version"
+    
+    configure_library "libssh2" \
+        --disable-examples-build \
+        --disable-docker-tests \
+        --disable-sshd-tests \
+        --disable-debug \
+        LIBS="-lws2_32"
+    
+    make -j$JOBS
+    make install
+    
+    echo "| libssh2 | $version | $url |" >> "$BUILD_INFO"
+    mark_built "libssh2" "$version"
+    cd - >/dev/null
+}
+
+# 构建 aria2
+build_aria2() {
+    cd "$BUILD_DIR"
+    
+    local aria2_dir="$BUILD_DIR/aria2"
+    if [[ ! -d "$aria2_dir" ]]; then
+        log "克隆 aria2 仓库"
+        git clone --depth 1 --branch master --single-branch \
+            https://github.com/aria2/aria2.git
+    else
+        log "更新 aria2 仓库"
+        cd aria2
+        git pull origin master
+        cd ..
+    fi
+    
+    cd aria2
+    
+    # 应用性能优化补丁
+    sed -i '
+        s/"1", 1, 16/"1", 1, 1024/
+        s/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g
+    ' src/OptionHandlerFactory.cc
+    
+    # 配置编译环境
+    export CPPFLAGS="-I$PREFIX/include -DNDEBUG -DHAVE_MMAP=0"
+    export LIBS="-lws2_32 -liphlpapi"
+    
+    autoreconf -i
+    
+    ./configure \
+        --host=$HOST \
+        --prefix=$PREFIX \
+        --with-sysroot=$PREFIX \
+        --enable-static \
+        --disable-shared \
+        --with-libz \
+        --with-libgmp \
+        --with-libssh2 \
+        --with-libcares \
+        --with-sqlite3 \
+        --with-libexpat \
+        --without-libxml2 \
+        --without-openssl \
+        --without-gnutls \
+        --disable-nls \
+        --disable-debug \
+        --disable-epoll \
+        ARIA2_STATIC=yes \
+        SQLITE3_LIBS="-L$PREFIX/lib -lsqlite3" \
+        PKG_CONFIG="/usr/bin/pkg-config" \
+        CXXFLAGS="$CXXFLAGS" \
+        LDFLAGS="$LDFLAGS"
+    
+    # 并行编译
+    make -j$JOBS
+    
+    # 优化和验证二进制
+    $HOST-strip -s src/aria2c.exe
+    
+    if file src/aria2c.exe | grep -q "PE32+"; then
+        cp src/aria2c.exe "$SELF_DIR/"
+        log "构建成功: $SELF_DIR/aria2c.exe"
+        
+        # 获取版本信息
+        local aria2_version=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS 2>/dev/null || echo "master")
+        echo "| aria2 | $aria2_version | https://github.com/aria2/aria2/archive/master.tar.gz |" >> "$BUILD_INFO"
+    else
+        log "构建失败：二进制格式错误"
+        return 1
+    fi
+    
+    cd - >/dev/null
+}
+
+# 依赖关系构建
+build_dependencies() {
+    log "开始构建依赖库"
+    
+    # 并行下载所有依赖
+    parallel_download "${DOWNLOAD_URLS[@]}"
+    
+    # 按依赖顺序构建
+    timer "构建 GMP" build_gmp
+    timer "构建 Expat" build_expat
+    timer "构建 SQLite" build_sqlite
+    timer "构建 zlib" build_zlib
+    timer "构建 c-ares" build_cares
+    timer "构建 libssh2" build_libssh2
+}
+
+# 资源监控（后台进程）
+start_resource_monitor() {
+    local monitor_pid_file="$BUILD_DIR/monitor.pid"
+    
+    {
+        echo "时间,CPU使用%,内存使用%,磁盘使用MB"
+        while [[ -f "$BUILD_DIR/build.started" ]]; do
+            local cpu=$(ps -o %cpu= -p $$ 2>/dev/null | tr -d ' ' || echo "0")
+            local mem=$(ps -o %mem= -p $$ 2>/dev/null | tr -d ' ' || echo "0")
+            local disk=$(du -sm "$BUILD_DIR" 2>/dev/null | cut -f1 || echo "0")
+            echo "$(date '+%H:%M:%S'),$cpu,$mem,$disk"
+            sleep 30
+        done
+    } > "$BUILD_DIR/resources.csv" &
+    
+    echo $! > "$monitor_pid_file"
+}
+
+stop_resource_monitor() {
+    local monitor_pid_file="$BUILD_DIR/monitor.pid"
+    if [[ -f "$monitor_pid_file" ]]; then
+        local pid=$(cat "$monitor_pid_file")
+        kill "$pid" 2>/dev/null || true
+        rm -f "$monitor_pid_file"
+    fi
+}
+
+# 主构建流程
+main() {
+    log "开始构建 aria2 Windows 版本"
+    
+    # 标记构建开始
+    touch "$BUILD_DIR/build.started"
+    
+    # 初始化
+    init_build_info
+    setup_tmpfs
+    
+    # 启动资源监控
+    start_resource_monitor
+    
+    # 下载和设置工具链
+    timer "下载工具链" download_toolchain
+    
+    # 获取版本信息
+    timer "获取版本信息" cache_versions
+    
+    # 构建依赖库
+    build_dependencies
+    
+    # 构建 aria2
+    timer "构建 aria2" build_aria2
+    
+    # 清理
+    clean_intermediate_files
+    stop_resource_monitor
+    rm -f "$BUILD_DIR/build.started"
+    
+    # 输出总结
+    log "构建完成总结"
+    echo "=========================================="
+    echo "最终二进制: $SELF_DIR/aria2c.exe"
+    echo "构建信息: $BUILD_INFO"
+    echo "二进制大小: $(du -h "$SELF_DIR/aria2c.exe" | cut -f1)"
+    echo "文件类型: $(file "$SELF_DIR/aria2c.exe")"
+    echo "=========================================="
+    
+    # 清理内存盘
+    if [[ -d "$TMPFS_DIR" ]]; then
+        rm -rf "$TMPFS_DIR"
+    fi
+}
+
+# 信号处理
+trap 'log "构建被中断"; stop_resource_monitor; exit 1' INT TERM
+trap 'clean_intermediate_files; stop_resource_monitor' EXIT
+
+# 运行主函数
+main "$@"
