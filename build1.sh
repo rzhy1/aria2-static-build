@@ -374,7 +374,7 @@ prepare_libssh2() {
 }
 
 prepare_openssl() {
-  openssl_tag=$(retry curl -s https://github.com/openssl/openssl/releases/latest | grep -o 'openssl-[0-9.]*\.tar\.gz' | head -1 | sed 's/openssl-\(.*\)\.tar\.gz/\1/')
+  openssl_tag=$(retry curl -s https://api.github.com/repos/OpenSSL/OpenSSL/releases | grep -o '"tag_name": *"[^"]*"' | grep openssl | head -1 | sed 's/"tag_name": *"openssl-\([0-9.]*\)"/\1/')
   if [ -z "$openssl_tag" ]; then
     openssl_tag="3.6.0"  # 备用版本号
   fi
