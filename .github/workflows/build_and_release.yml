@@ -20,66 +20,53 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
-      - name: Install tcping and find fastest mirror
+      - name: Find fastest apt mirror (simplified)
         run: |
-          echo "Installing tcping and testing mirrors..."
+          echo "Testing mirror speeds (simplified)..."
           
-          # 安装tcping
-          sudo apt-get update
-          sudo apt-get install -y tcptraceroute  # 包含tcping
-          
-          # 国外镜像列表（包含更多选项）
-          FOREIGN_MIRRORS=(
-            "archive.ubuntu.com"
-            "ports.ubuntu.com" 
-            "security.ubuntu.com"
-            "mirrors.mit.edu"
-            "mirror.csclub.uwaterloo.ca"
-            "ubuntu.mirror.ac.za"
-            "ubuntu.mirror.digitalpacific.com.au"
-            "mirror.lagoon.nc"
-            "ubuntu.mirror.rafal.ca"
-            "mirrors.coreix.net"
-            "mirror.koddos.net"          # 荷兰
-            "ftp.rrze.de"                # 德国
-            "mirrors.dotsrc.org"         # 丹麦
-            "ubuntu.mirror.nforce.com"   # 荷兰
-            "mirror.enzu.com"            # 美国
+          # 镜像列表和对应的测试URL
+          declare -A MIRROR_URLS=(
+          	["archive.ubuntu.com"]="http://archive.ubuntu.com/ubuntu/dists/noble/Release.gpg"
+          	["ports.ubuntu.com"]="http://ports.ubuntu.com/ubuntu-ports/dists/noble/Release.gpg"
+          	["security.ubuntu.com"]="http://security.ubuntu.com/ubuntu/dists/noble/Release.gpg"
+          	["mirrors.mit.edu"]="http://mirrors.mit.edu/ubuntu/dists/noble/Release.gpg"
+          	["mirror.csclub.uwaterloo.ca"]="http://mirror.csclub.uwaterloo.ca/ubuntu/dists/noble/Release.gpg"
+          	["ubuntu.mirror.ac.za"]="http://ubuntu.mirror.ac.za/ubuntu/dists/noble/Release.gpg"
+          	["ubuntu.mirror.digitalpacific.com.au"]="http://ubuntu.mirror.digitalpacific.com.au/ubuntu/dists/noble/Release.gpg"
+          	["mirror.lagoon.nc"]="http://mirror.lagoon.nc/ubuntu/dists/noble/Release.gpg"
+          	["ubuntu.mirror.rafal.ca"]="http://ubuntu.mirror.rafal.ca/ubuntu/dists/noble/Release.gpg"
+          	["mirrors.coreix.net"]="http://mirrors.coreix.net/ubuntu/dists/noble/Release.gpg"
+          	["mirror.koddos.net"]="http://mirror.koddos.net/ubuntu/dists/noble/Release.gpg"
+          	["ftp.rrze.de"]="http://ftp.rrze.de/ubuntu/dists/noble/Release.gpg"
+          	["mirrors.dotsrc.org"]="http://mirrors.dotsrc.org/ubuntu/dists/noble/Release.gpg"
+          	["ubuntu.mirror.nforce.com"]="http://ubuntu.mirror.nforce.com/ubuntu/dists/noble/Release.gpg"
+          	["mirror.enzu.com"]="http://mirror.enzu.com/ubuntu/dists/noble/Release.gpg"
+          	["mirrors.tencent.com"]="http://mirrors.tencent.com/ubuntu/dists/noble/Release.gpg"
+          	["mirrors.aliyun.com"]="http://mirrors.aliyun.com/ubuntu/dists/noble/Release.gpg"
+          	["mirrors.tuna.tsinghua.edu.cn"]="http://mirrors.tuna.tsinghua.edu.cn/ubuntu/dists/noble/Release.gpg"
+          	["mirrors.ustc.edu.cn"]="http://mirrors.ustc.edu.cn/ubuntu/dists/noble/Release.gpg"
+          	["mirrors.huaweicloud.com"]="http://mirrors.huaweicloud.com/ubuntu/dists/noble/Release.gpg"
+          	["mirrors.bfsu.edu.cn"]="http://mirrors.bfsu.edu.cn/ubuntu/dists/noble/Release.gpg"
+          	["mirrors.sjtug.sjtu.edu.cn"]="http://mirrors.sjtug.sjtu.edu.cn/ubuntu/dists/noble/Release.gpg"
           )
-          
-          # 国内镜像列表
-          DOMESTIC_MIRRORS=(
-            "mirrors.tencent.com"
-            "mirrors.aliyun.com" 
-            "mirrors.tuna.tsinghua.edu.cn"
-            "mirrors.ustc.edu.cn"
-            "mirrors.huaweicloud.com"
-            "mirrors.bfsu.edu.cn"
-            "mirrors.sjtug.sjtu.edu.cn"
-            "mirrors.nju.edu.cn"
-            "mirrors.zju.edu.cn"
-          )
-          
-          # 合并所有镜像
-          ALL_MIRRORS=("${FOREIGN_MIRRORS[@]}" "${DOMESTIC_MIRRORS[@]}")
           
           FASTEST_MIRROR=""
-          FASTEST_TIME=999
+          FASTEST_TIME=999999
           
-          echo "Testing ${#ALL_MIRRORS[@]} mirrors using tcping..."
-          
-          for mirror in "${ALL_MIRRORS[@]}"; do
+          for mirror in "${!MIRROR_URLS[@]}"; do
             echo -n "Testing $mirror ... "
+            URL="${MIRROR_URLS[$mirror]}"
             
-            # 使用tcping测试HTTP端口(80)的响应时间
-            if TCPING_RESULT=$(timeout 5s tcping -x 1 -t 2 "$mirror" 80 2>/dev/null | grep "avg" | awk '{print $4}'); then
-              # 提取时间数值（去除单位）
-              TCPING_TIME=$(echo "$TCPING_RESULT" | sed 's/ms//g' | cut -d. -f1)
-              echo "${TCPING_TIME}ms"
+            # 使用timeout确保不会卡住
+            START_TIME=$(date +%s%3N)
+            if timeout 10s curl --connect-timeout 5 --silent --output /dev/null "$URL"; then
+              END_TIME=$(date +%s%3N)
+              TIME_MS=$((END_TIME - START_TIME))
+              echo "${TIME_MS}ms"
               
-              if [ "$TCPING_TIME" -lt "$FASTEST_TIME" ] && [ "$TCPING_TIME" -gt 0 ]; then
-                FASTEST_TIME=$TCPING_TIME
-                FASTEST_MIRROR=$mirror
+              if [ "$TIME_MS" -lt "$FASTEST_TIME" ]; then
+                FASTEST_MIRROR="$mirror"
+                FASTEST_TIME="$TIME_MS"
               fi
             else
               echo "failed"
