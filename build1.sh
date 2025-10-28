@@ -461,8 +461,6 @@ build_aria2() {
   sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
   
   sed -i 's/EVP_rc4()/EVP_CIPHER_fetch(nullptr, "RC4", nullptr)/' src/LibsslARC4Encryptor.cc
-  # 在适当位置添加 EVP_CIPHER_free
-  sed -i '/EVP_EncryptInit_ex2(ctx_, nullptr, key, nullptr, nullptr) != 1)/a\\n#ifndef EVP_rc4\n  EVP_CIPHER_free(cipher);\n#endif' src/LibsslARC4Encryptor.cc
       
   if [ ! -f ./configure ]; then
     autoreconf -i
