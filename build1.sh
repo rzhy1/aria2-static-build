@@ -227,6 +227,7 @@ prepare_xz() {
 prepare_gmp() {
   gmp_tag="$(retry curl -s https://mirrors.kernel.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9.]+\.tar\.(xz|gz)"' | sed -r 's/href="gmp-([0-9.]+)\.tar\..+"/\1/' | sort -rV | head -n 1)"
   echo "gmp最新版本是${gmp_tag} ，下载地址是https://mirrors.kernel.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
+  gmp_latest_url="https://mirrors.kernel.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
   curl -L https://mirrors.kernel.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
   cd gmp-*
   
