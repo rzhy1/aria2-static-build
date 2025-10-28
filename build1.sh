@@ -459,15 +459,18 @@ build_aria2() {
   sed -i 's/void sock_state_cb(void\* arg, int fd, int read, int write)/void sock_state_cb(void\* arg, ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
   sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
   sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
+  
+  sed -i 's/EVP_rc4()/EVP_CIPHER_fetch(nullptr, "RC4", nullptr)/' src/LibsslARC4Encryptor.cc
+  # 在适当位置添加 EVP_CIPHER_free
+  sed -i '/EVP_EncryptInit_ex2(ctx_, nullptr, key, nullptr, nullptr) != 1)/a\\n#ifndef EVP_rc4\n  EVP_CIPHER_free(cipher);\n#endif' src/LibsslARC4Encryptor.cc
+      
   if [ ! -f ./configure ]; then
     autoreconf -i
   fi
-  if [ x"${TARGET_HOST}" = xwin ]; then
-    ARIA2_EXT_CONF='--without-openssl'
-  # else
-  #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
-  fi
-  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  
+  export OPENSSL_CFLAGS="-I${CROSS_PREFIX}/include"
+  export OPENSSL_LIBS="-L${CROSS_PREFIX}/lib -lssl -lcrypto -lws2_32 -lgdi32 -lcrypt32"
+  export LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
@@ -485,7 +488,8 @@ build_aria2() {
     --with-jemalloc=no \
     --without-appletls \
     --without-gnutls \
-    --without-openssl \
+    --without-wintls \
+    --with-openssl \
     --with-libgmp \
     --without-libexpat \
     --without-libgcrypt \
@@ -497,8 +501,7 @@ build_aria2() {
     --disable-libtool-lock \
     --disable-checking \
     --enable-checking=release \
-    ARIA2_STATIC=yes \
-    ${ARIA2_EXT_CONF}
+    ARIA2_STATIC=yes
   make -j$(nproc)
   make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
@@ -525,8 +528,8 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c_a
 prepare_c_ares
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2 ⭐⭐⭐⭐⭐⭐"
 prepare_libssh2
-#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 openssl ⭐⭐⭐⭐⭐⭐"
-#prepare_openssl
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 openssl ⭐⭐⭐⭐⭐⭐"
+prepare_openssl
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
