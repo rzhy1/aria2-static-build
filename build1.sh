@@ -463,6 +463,16 @@ build_aria2() {
     autoreconf -i
   fi
   
+  # 检查 OpenSSL 是否可用
+  echo "检查 OpenSSL 安装:"
+  pkg-config --exists openssl && echo "OpenSSL 通过 pkg-config 找到" || echo "OpenSSL 未通过 pkg-config 找到"
+  pkg-config --cflags openssl
+  pkg-config --libs openssl
+  
+  # 设置 OpenSSL 环境变量（根据 configure 帮助信息）
+  export OPENSSL_CFLAGS="-I${CROSS_PREFIX}/include"
+  export OPENSSL_LIBS="-L${CROSS_PREFIX}/lib -lssl -lcrypto"
+  
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   ./configure \
     --host="${CROSS_HOST}" \
