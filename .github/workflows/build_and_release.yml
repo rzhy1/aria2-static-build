@@ -20,6 +20,63 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v5
+      - name: Find fastest apt mirror
+        run: |
+          echo "Testing mirror speeds..."
+          
+          # 镜像列表
+          MIRRORS=(
+            "archive.ubuntu.com"
+            "ports.ubuntu.com"
+            "mirrors.tencent.com"
+            "mirrors.aliyun.com"
+            "mirrors.tuna.tsinghua.edu.cn"
+            "mirrors.ustc.edu.cn"
+          )
+          
+          FASTEST_MIRROR=""
+          FASTEST_TIME=999
+          
+          for mirror in "${MIRRORS[@]}"; do
+            echo -n "Testing $mirror ... "
+            
+            # 测试下载速度（下载一个小文件并计算时间）
+            START_TIME=$(date +%s.%N)
+            if curl --connect-timeout 5 --max-time 10 --silent --fail \
+                   "http://$mirror/ubuntu/dists/noble/Release.gpg" > /dev/null 2>&1; then
+              END_TIME=$(date +%s.%N)
+              TIME_DIFF=$(echo "$END_TIME - $START_TIME" | bc -l)
+              TIME_MS=$(echo "$TIME_DIFF * 1000" | bc -l | cut -d. -f1)
+              
+              echo "${TIME_MS}ms"
+              
+              # 检查是否是最快的
+              if [ $TIME_MS -lt $FASTEST_TIME ]; then
+                FASTEST_TIME=$TIME_MS
+                FASTEST_MIRROR=$mirror
+              fi
+            else
+              echo "failed"
+            fi
+          done
+          
+          if [ -n "$FASTEST_MIRROR" ]; then
+            echo "Fastest mirror: $FASTEST_MIRROR (${FASTEST_TIME}ms)"
+            echo "FASTEST_MIRROR=$FASTEST_MIRROR" >> $GITHUB_ENV
+          else
+            echo "No working mirror found, using default"
+            echo "FASTEST_MIRROR=archive.ubuntu.com" >> $GITHUB_ENV
+          fi
+
+      - name: Configure apt sources
+        run: |
+          echo "Configuring apt to use fastest mirror: $FASTEST_MIRROR"
+          sudo sed -i "s|http://[a-z]*\.ubuntu\.com/ubuntu|http://$FASTEST_MIRROR/ubuntu|g" /etc/apt/sources.list
+          sudo sed -i "s|http://security\.ubuntu\.com/ubuntu|http://$FASTEST_MIRROR/ubuntu|g" /etc/apt/sources.list
+          
+          # 显示配置结果
+          echo "Updated apt sources:"
+          grep "^deb " /etc/apt/sources.list
       - name: Install prerequisites
         run: |
           sudo apt-get update
