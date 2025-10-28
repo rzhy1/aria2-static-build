@@ -471,7 +471,7 @@ build_aria2() {
   
   # 设置 OpenSSL 环境变量（根据 configure 帮助信息）
   export OPENSSL_CFLAGS="-I${CROSS_PREFIX}/include"
-  export OPENSSL_LIBS="-L${CROSS_PREFIX}/lib -lssl -lcrypto"
+  export OPENSSL_LIBS="-L${CROSS_PREFIX}/lib -lssl -lcrypto -lws2_32 -lgdi32 -lcrypt32"
   
   local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
   ./configure \
@@ -531,7 +531,7 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c_a
 prepare_c_ares
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2 ⭐⭐⭐⭐⭐⭐"
 prepare_libssh2
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 penssl ⭐⭐⭐⭐⭐⭐"
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 openssl ⭐⭐⭐⭐⭐⭐"
 prepare_openssl
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
