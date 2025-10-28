@@ -373,6 +373,56 @@ prepare_libssh2() {
   echo "| libssh2 | ${libssh2_ver} | ${libssh2_latest_url:-cached libssh2} |" >>"${BUILD_INFO}"
 }
 
+prepare_openssl() {
+  openssl_tag=$(retry curl -s https://github.com/openssl/openssl/releases/latest | grep -o 'openssl-[0-9.]*\.tar\.gz' | head -1 | sed 's/openssl-\(.*\)\.tar\.gz/\1/')
+  if [ -z "$openssl_tag" ]; then
+    openssl_tag="3.6.0"  # 备用版本号
+  fi
+  openssl_latest_url="https://github.com/openssl/openssl/releases/download/openssl-${openssl_tag}/openssl-${openssl_tag}.tar.gz"
+  
+  if [ ! -f "${DOWNLOADS_DIR}/openssl-${openssl_tag}.tar.gz" ]; then
+    retry wget -cT10 -O "${DOWNLOADS_DIR}/openssl-${openssl_tag}.tar.gz.part" "${openssl_latest_url}"
+    mv -fv "${DOWNLOADS_DIR}/openssl-${openssl_tag}.tar.gz.part" "${DOWNLOADS_DIR}/openssl-${openssl_tag}.tar.gz"
+  fi
+  
+  mkdir -p "/usr/src/openssl-${openssl_tag}"
+  tar -zxf "${DOWNLOADS_DIR}/openssl-${openssl_tag}.tar.gz" --strip-components=1 -C "/usr/src/openssl-${openssl_tag}"
+  cd "/usr/src/openssl-${openssl_tag}"
+  
+  # 优化后的禁用列表
+  DISABLED_FEATURES=(
+    no-err no-dso no-engine no-async no-autoalginit
+    no-dtls no-sctp no-ssl3 no-tls1 no-tls1_1
+    no-comp no-ts no-ocsp no-ct no-cms no-psk no-srp no-srtp no-rfc3779
+    no-fips no-acvp-tests no-docs no-stdio no-ui-console
+    no-afalgeng no-ssl-trace no-filenames
+    no-aria no-bf no-blake2 no-camellia no-cast no-cmac
+    no-dh no-dsa no-ec2m no-gost no-idea no-rc2 no-rc4 no-rc5 no-rmd160
+    no-scrypt no-seed no-siphash no-siv no-sm2 no-sm3 no-sm4 no-whirlpool
+    no-tests no-apps
+  )
+
+  CFLAGS="-march=tigerlake -mtune=tigerlake -Os -ffunction-sections -fdata-sections -pipe -g0 -fvisibility=hidden $LTO_FLAGS" \
+  LDFLAGS="-Wl,--gc-sections -Wl,--icf=all -static -static-libgcc $LTO_FLAGS" \
+  ./Configure -static \
+    --prefix="${CROSS_PREFIX}" \
+    --libdir=lib \
+    --cross-compile-prefix="${CROSS_HOST}-" \
+    mingw64 no-shared \
+    --with-zlib-include="${CROSS_PREFIX}/include" \
+    --with-zlib-lib="${CROSS_PREFIX}/lib/libz.a" \
+    "${DISABLED_FEATURES[@]}"
+  
+  make -j$(nproc)
+  make install_sw
+  
+  ${CROSS_HOST}-strip --strip-unneeded "${CROSS_PREFIX}/lib/libcrypto.a" || true
+  ${CROSS_HOST}-strip --strip-unneeded "${CROSS_PREFIX}/lib/libssl.a" || true
+  
+  openssl_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/openssl.pc" 2>/dev/null | awk '{print $2}' || echo ${openssl_tag})"
+  echo "| openssl | ${openssl_ver} | ${openssl_latest_url:-cached openssl} |" >>"${BUILD_INFO}"
+}
+
 build_aria2() {
   if [ -n "${ARIA2_VER}" ]; then
     aria2_tag="${ARIA2_VER}"
@@ -435,7 +485,7 @@ build_aria2() {
     --with-jemalloc=no \
     --without-appletls \
     --without-gnutls \
-    --without-openssl \
+    --with-openssl \
     --with-libgmp \
     --without-libexpat \
     --without-libgcrypt \
@@ -471,6 +521,7 @@ prepare_libxml2
 prepare_sqlite
 prepare_c_ares
 prepare_libssh2
+prepare_openssl
 #wait
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
