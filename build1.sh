@@ -224,6 +224,37 @@ prepare_xz() {
   echo "| xz | ${xz_ver} | ${xz_latest_url:-cached xz} |" >>"${BUILD_INFO}" 
 }
 
+prepare_gmp() {
+  gmp_tag="$(retry curl -s https://mirrors.kernel.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9.]+\.tar\.(xz|gz)"' | sed -r 's/href="gmp-([0-9.]+)\.tar\..+"/\1/' | sort -rV | head -n 1)"
+  echo "gmp最新版本是${gmp_tag} ，下载地址是https://mirrors.kernel.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
+  curl -L https://mirrors.kernel.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
+  cd gmp-*
+  
+  # patch configure（不检测long long）
+  find_and_comment() {
+    local file="$1"
+    local search_str="Test compile: long long reliability test"
+    local current_line=1
+    while read -r start_line; do  
+      [[ -z "$start_line" ]] && { echo "在文件 $file 中未找到更多字符串 '$search_str'"; break; }
+      local end_line=$((start_line + 37))
+      sed -i "${start_line},${end_line}s/^/# /" "$file"
+      echo "注释了文件 $file 中从第 $start_line 行到第 $end_line 行"
+      current_line=$((end_line + 1))
+    done < <(awk -v s="$search_str" -v cl="$current_line" 'NR >= cl && !/^# / && $0 ~ s {print NR}' "$file")
+  }
+  find_and_comment "configure"  && echo "configure文件修改完成"
+  
+  BUILD_CC=gcc BUILD_CXX=g++ ./configure \
+      --disable-shared \
+      --enable-static \
+      --prefix="${CROSS_PREFIX}" \
+      --host="${CROSS_HOST}" \
+      --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
+  make -j$(nproc) install
+  echo "| gmp | ${gmp_tag} | ${gmp_latest_url:-cached gmp} |" >>"${BUILD_INFO}"
+}
+
 prepare_libxml2() {
   libxml2_tag=$(retry wget -qO- https://gitlab.gnome.org/api/v4/projects/GNOME%2Flibxml2/releases \
       | jq -r '.[].tag_name' \
@@ -404,7 +435,7 @@ build_aria2() {
     --without-appletls \
     --without-gnutls \
     --without-openssl \
-    --without-libgmp \
+    --with-libgmp \
     --without-libexpat \
     --without-libgcrypt \
     --without-libnettle \
@@ -427,6 +458,8 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 cma
 prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 gmp⭐⭐⭐⭐⭐⭐"
+prepare_gmp
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libiconv⭐⭐⭐⭐⭐⭐"
 #prepare_libiconv
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib、xz、libxml2、sqlite、c_ares、libssh2⭐⭐⭐⭐⭐⭐"
