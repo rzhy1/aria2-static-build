@@ -22,51 +22,62 @@ jobs:
         uses: actions/checkout@v5
       - name: Find fastest apt mirror
         run: |
-          echo "Testing mirror speeds..."
+          echo "Testing mirror speeds with timeout control..."
+          
+          # 安装必要的工具
+          sudo apt-get update -y
+          sudo apt-get install -y curl bc
           
           # 镜像列表
           MIRRORS=(
             "archive.ubuntu.com"
-            "ports.ubuntu.com"
+            "ports.ubuntu.com" 
             "mirrors.tencent.com"
             "mirrors.aliyun.com"
             "mirrors.tuna.tsinghua.edu.cn"
             "mirrors.ustc.edu.cn"
           )
           
-          FASTEST_MIRROR=""
-          FASTEST_TIME=999
-          
-          for mirror in "${MIRRORS[@]}"; do
+          # 创建测试函数
+          test_mirror_speed() {
+            local mirror=$1
             echo -n "Testing $mirror ... "
             
-            # 测试下载速度（下载一个小文件并计算时间）
-            START_TIME=$(date +%s.%N)
-            if curl --connect-timeout 5 --max-time 10 --silent --fail \
+            # 使用 timeout 命令防止卡住
+            START_TIME=$(date +%s%3N)
+            if timeout 10s curl --connect-timeout 5 --max-time 10 --silent --fail \
                    "http://$mirror/ubuntu/dists/noble/Release.gpg" > /dev/null 2>&1; then
-              END_TIME=$(date +%s.%N)
-              TIME_DIFF=$(echo "$END_TIME - $START_TIME" | bc -l)
-              TIME_MS=$(echo "$TIME_DIFF * 1000" | bc -l | cut -d. -f1)
-              
+              END_TIME=$(date +%s%3N)
+              TIME_MS=$((END_TIME - START_TIME))
               echo "${TIME_MS}ms"
-              
-              # 检查是否是最快的
-              if [ $TIME_MS -lt $FASTEST_TIME ]; then
-                FASTEST_TIME=$TIME_MS
-                FASTEST_MIRROR=$mirror
-              fi
+              echo "$mirror $TIME_MS"
             else
-              echo "failed"
+              echo "failed or timeout"
+              echo "$mirror 99999"  # 给失败的大数值
             fi
-          done
+          }
           
-          if [ -n "$FASTEST_MIRROR" ]; then
-            echo "Fastest mirror: $FASTEST_MIRROR (${FASTEST_TIME}ms)"
+          # 导出函数以便在子shell中使用
+          export -f test_mirror_speed
+          
+          # 并行测试所有镜像
+          RESULTS=$(for mirror in "${MIRRORS[@]}"; do
+            echo "$mirror"
+          done | xargs -I {} -P 4 bash -c 'test_mirror_speed "$@"' _ {})
+          
+          # 找出最快的镜像
+          FASTEST_MIRROR=$(echo "$RESULTS" | grep -v "99999" | sort -k2 -n | head -1 | awk '{print $1}')
+          
+          if [ -n "$FASTEST_MIRROR" ] && [ "$FASTEST_MIRROR" != "99999" ]; then
+            echo "Fastest mirror: $FASTEST_MIRROR"
             echo "FASTEST_MIRROR=$FASTEST_MIRROR" >> $GITHUB_ENV
           else
             echo "No working mirror found, using default"
             echo "FASTEST_MIRROR=archive.ubuntu.com" >> $GITHUB_ENV
           fi
+          
+          echo "All results:"
+          echo "$RESULTS"
 
       - name: Configure apt sources
         run: |
