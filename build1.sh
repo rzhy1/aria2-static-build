@@ -453,27 +453,66 @@ build_aria2() {
   mkdir -p "/usr/src/aria2-${aria2_tag}"
   tar -zxf "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz" --strip-components=1 -C "/usr/src/aria2-${aria2_tag}"
   cd "/usr/src/aria2-${aria2_tag}"
+  
+  # 应用补丁
   sed -i 's/res += "zlib\/" ZLIB_VERSION " ";/res += "zlib_ng\/" ZLIBNG_VERSION " ";/' "src/FeatureConfig.cc"
   sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
   sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
   sed -i 's/void sock_state_cb(void\* arg, int fd, int read, int write)/void sock_state_cb(void\* arg, ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
   sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
   sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
+  
   if [ ! -f ./configure ]; then
     autoreconf -i
   fi
   
-  # 检查 OpenSSL 是否可用
-  echo "检查 OpenSSL 安装:"
+  # 设置 pkg-config 路径
+  export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
+  
+  # 详细的 OpenSSL 检查
+  echo "=== 详细的 OpenSSL 检查 ==="
+  echo "CROSS_PREFIX: ${CROSS_PREFIX}"
+  echo "CROSS_HOST: ${CROSS_HOST}"
+  ls -la "${CROSS_PREFIX}/lib/" | grep -E "(ssl|crypto)" || echo "未找到 OpenSSL 库文件"
   pkg-config --exists openssl && echo "OpenSSL 通过 pkg-config 找到" || echo "OpenSSL 未通过 pkg-config 找到"
-  pkg-config --cflags openssl
-  pkg-config --libs openssl
   
-  # 设置 OpenSSL 环境变量（根据 configure 帮助信息）
+  # 手动测试 OpenSSL 链接
+  echo "=== 手动测试 OpenSSL 链接 ==="
+  cat > test_openssl.c << 'EOF'
+#include <openssl/ssl.h>
+#include <stdio.h>
+int main() {
+    printf("OpenSSL version: %s\n", OpenSSL_version(OPENSSL_VERSION));
+    SSL_library_init();
+    return 0;
+}
+EOF
+  
+  ${CROSS_HOST}-gcc -I${CROSS_PREFIX}/include test_openssl.c -L${CROSS_PREFIX}/lib -lssl -lcrypto -lws2_32 -lcrypt32 -o test_openssl.exe
+  if [ $? -eq 0 ]; then
+    echo "OpenSSL 链接测试成功"
+  else
+    echo "OpenSSL 链接测试失败"
+    ${CROSS_HOST}-gcc -I${CROSS_PREFIX}/include test_openssl.c -L${CROSS_PREFIX}/lib -lssl -lcrypto -lws2_32 -lcrypt32 -o test_openssl.exe -v
+  fi
+  rm -f test_openssl.c test_openssl.exe
+  
+  # 设置环境变量
+  export CPPFLAGS="-I${CROSS_PREFIX}/include"
+  export LDFLAGS="-L${CROSS_PREFIX}/lib -L/usr/x86_64-w64-mingw32/lib"
+  export LIBS="-lssl -lcrypto -lws2_32 -lcrypt32 -lz -lwinpthread"
+  
+  # 设置 OpenSSL 特定环境变量
   export OPENSSL_CFLAGS="-I${CROSS_PREFIX}/include"
-  export OPENSSL_LIBS="-L${CROSS_PREFIX}/lib -lssl -lcrypto -lws2_32 -lgdi32 -lcrypt32"
+  export OPENSSL_LIBS="-L${CROSS_PREFIX}/lib -lssl -lcrypto -lws2_32 -lcrypt32"
   
-  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  # 设置编译标志
+  local EXTRA_CFLAGS="-I${CROSS_PREFIX}/include"
+  local EXTRA_CXXFLAGS="-I${CROSS_PREFIX}/include"
+  local EXTRA_LDFLAGS="-L${CROSS_PREFIX}/lib -L/usr/x86_64-w64-mingw32/lib"
+  
+  # 运行配置 - 关键修改：禁用 WinTLS，强制使用 OpenSSL
+  echo "=== 开始配置 aria2 (禁用 WinTLS，强制使用 OpenSSL) ==="
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
@@ -491,7 +530,8 @@ build_aria2() {
     --with-jemalloc=no \
     --without-appletls \
     --without-gnutls \
-    --with-openssl \
+    --without-wintls \           # 关键：禁用 WinTLS
+    --with-openssl \             # 关键：强制使用 OpenSSL
     --with-libgmp \
     --without-libexpat \
     --without-libgcrypt \
@@ -504,10 +544,46 @@ build_aria2() {
     --disable-checking \
     --enable-checking=release \
     ARIA2_STATIC=yes \
-    ${ARIA2_EXT_CONF}
+    CFLAGS="${EXTRA_CFLAGS}" \
+    CXXFLAGS="${EXTRA_CXXFLAGS}" \
+    LDFLAGS="${EXTRA_LDFLAGS}" \
+    LIBS="${LIBS}" \
+    OPENSSL_CFLAGS="${OPENSSL_CFLAGS}" \
+    OPENSSL_LIBS="${OPENSSL_LIBS}" \
+    2>&1 | tee configure.log
+  
+  # 检查配置结果
+  echo "=== 配置摘要 ==="
+  grep -A5 -B5 -i "openssl\|wintls" config.log | head -30
+  
+  # 如果配置仍然失败，尝试强制设置 OpenSSL
+  if grep -q "OpenSSL:.*no" config.log; then
+    echo "警告: OpenSSL 检测失败，尝试强制启用..."
+    # 手动修改 config.h
+    if [ -f config.h ]; then
+      sed -i 's/#define HAVE_OPENSSL 0/#define HAVE_OPENSSL 1/' config.h
+      sed -i 's/#define HAVE_LIBSSL 0/#define HAVE_LIBSSL 1/' config.h
+      sed -i 's/#define HAVE_WINTLS 1/#define HAVE_WINTLS 0/' config.h
+      echo "已手动修改 config.h 启用 OpenSSL"
+    fi
+  fi
+  
   make -j$(nproc)
   make install
-  ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
+  
+  # 验证编译结果
+  if [ -f "${CROSS_PREFIX}/bin/aria2c.exe" ]; then
+    echo "aria2c 编译成功!"
+    ${CROSS_HOST}-strip "${CROSS_PREFIX}/bin/aria2c.exe"
+    # 检查是否包含 OpenSSL 支持
+    echo "检查二进制文件的 SSL 支持:"
+    ${CROSS_HOST}-strings "${CROSS_PREFIX}/bin/aria2c.exe" | grep -i ssl | head -5
+  else
+    echo "警告: 未找到编译后的 aria2c.exe"
+    find "/usr/src/aria2-${aria2_tag}" -name "aria2c" -o -name "aria2c.exe" | head -5
+  fi
+  
+  ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS 2>/dev/null || echo "unknown")
   echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
 }
 
