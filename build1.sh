@@ -491,7 +491,7 @@ build_aria2() {
     --without-appletls \
     --without-gnutls \
     --without-openssl \
-    --with-libgmp \
+    --without-libgmp \
     --without-libexpat \
     --without-libgcrypt \
     --without-libnettle \
