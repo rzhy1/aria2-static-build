@@ -65,3 +65,4 @@ Optional environment variables:
 - `USE_CHINA_MIRROR`: set to `1` will use China mirrors, if you were located in China, please set to `1`. Default: `0`.
 - `USE_ZLIB_NG`: use [zlib-ng](https://github.com/zlib-ng/zlib-ng) instead of [zlib](https://zlib.net/). Default: `1`
 - `USE_LIBRESSL`: use [LibreSSL](https://www.libressl.org/) instead of [OpenSSL](https://www.openssl.org/). Default: `0`. **_NOTE_**, if `CROSS_HOST=x86_64-w64-mingw32` will not use openssl or libressl because aria2 and all dependencies will use WinTLS instead.
+- https://aur.archlinux.org/cgit/aur.git/plain/aria2-fast.patch?h=aria2-fast
