@@ -134,12 +134,12 @@ jobs:
           fi
           
       - name: Archive aria2c.exe
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: aria2c.exe
           path: "${{ github.workspace }}/aria2c.exe"
       - name: Upload build info
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: build-info
           path: "${{ github.workspace }}/build_info.md"
@@ -165,17 +165,17 @@ jobs:
           "${GITHUB_WORKSPACE}/build1.sh"
       - name: Upload sqlite config.log on failure
         if: failure() # 关键！同样只在失败时运行
-        uses: actions/upload-artifact@v5 # 使用官方的上传工具
+        uses: actions/upload-artifact@v6 # 使用官方的上传工具
         with:
           name: sqlite-config-log # 上传后压缩包的名字
           path: /usr/src/sqlite-*/config.log # 要上传的文件的路径
       - name: Archive aria2c1.exe
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: aria2c1.exe
           path: "${{ github.workspace }}/aria2c1.exe"
       - name: Upload build info
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: build-info1
           path: "${{ github.workspace }}/build_info1.md"
@@ -187,7 +187,7 @@ jobs:
     if: always()
     steps:
       - name: Download Artifacts
-        uses: actions/download-artifact@v6
+        uses: actions/download-artifact@v7
         with:
            path: release-folder
            merge-multiple: true
