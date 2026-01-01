@@ -306,7 +306,8 @@ prepare_sqlite() {
     --disable-editline \
     --disable-math \
     --disable-load-extension
-  sed -i '/^LDFLAGS =/{ /-municode/! s/$/ -municode/; /-mconsole/! s/$/ -mconsole/; }' Makefile
+  #sed -i '/^LDFLAGS =/{ /-municode/! s/$/ -municode/; /-mconsole/! s/$/ -mconsole/; }' Makefile
+  sed -i '/^CFLAGS =/{ /-municode/! s/$/ -municode/; /-mconsole/! s/$/ -mconsole/; }'  Makefile
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
