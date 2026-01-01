@@ -284,27 +284,19 @@ prepare_libxml2() {
 prepare_sqlite() {
   sqlite_tag="$(retry wget -qO- --compression=auto https://raw.githubusercontent.com/sqlite/sqlite/refs/heads/master/VERSION)"
   sqlite_latest_url="https://github.com/sqlite/sqlite/archive/refs/heads/master.tar.gz"
-  
   if [ ! -f "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${sqlite_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz.part" "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz"
   fi
-  
   mkdir -p "/usr/src/sqlite-${sqlite_tag}"
   tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
   cd "/usr/src/sqlite-${sqlite_tag}"
-  
   if [ x"${TARGET_HOST}" = x"Windows" ]; then
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  
-  # 1. 运行 configure (保持原样，只传基础参数)
-  local BASE_LDFLAGS="${LDFLAGS} -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lwinpthread -lmsvcrt"
-  
-  CFLAGS="$CFLAGS -DHAVE_PTHREAD" \
-  LDFLAGS="${BASE_LDFLAGS}" \
-  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared "${SQLITE_EXT_CONF}" \
+  local LDFLAGS="${LDFLAGS} -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lwinpthread -lmsvcrt"
+  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
@@ -314,29 +306,10 @@ prepare_sqlite() {
     --disable-editline \
     --disable-math \
     --disable-load-extension
-
-  # 2. 【核心修复】修改 Makefile (不是 main.mk)
-  # 强制在 Makefile 的 LDFLAGS 和 CFLAGS 定义行末尾追加参数
-  if [ x"${TARGET_HOST}" = x"Windows" ]; then
-      echo "Force patching Makefile for Windows wmain support..."
-      # 修改 LDFLAGS = ... 行
-      sed -i 's|^LDFLAGS =.*|& -municode -mconsole|' Makefile
-      # 修改 CFLAGS = ... 行 (防止 compile-link 一步完成时遗漏)
-      sed -i 's|^CFLAGS =.*|& -municode -mconsole|' Makefile
-  fi
-
-  # 3. 运行 make
-  # 额外传入 SHELL_OPT，双重保险
-  if [ x"${TARGET_HOST}" = x"Windows" ]; then
-    make -j$(nproc) SHELL_OPT="-municode -mconsole"
-  else
-    make -j$(nproc)
-  fi
-  
+  make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   make install
-  
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
 }
