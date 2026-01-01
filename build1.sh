@@ -299,8 +299,7 @@ prepare_sqlite() {
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
   
-  # 1. 正常运行 configure (不带 -municode，避免检测失败)
-  # 注意：这里只传基础的 LDFLAGS
+  # 1. 运行 configure (保持原样，只传基础参数)
   local BASE_LDFLAGS="${LDFLAGS} -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lwinpthread -lmsvcrt"
   
   CFLAGS="$CFLAGS -DHAVE_PTHREAD" \
@@ -316,16 +315,23 @@ prepare_sqlite() {
     --disable-math \
     --disable-load-extension
 
-  # 2. 【关键步骤】直接修改生成的 main.mk 文件
-  # 强制在 CFLAGS 变量末尾追加 -municode -mconsole
-  # 这样无论是编译 shell.c 还是链接 sqlite3.exe，都会带上这两个参数
+  # 2. 【核心修复】修改 Makefile (不是 main.mk)
+  # 强制在 Makefile 的 LDFLAGS 和 CFLAGS 定义行末尾追加参数
   if [ x"${TARGET_HOST}" = x"Windows" ]; then
-      echo "Patching main.mk to add -municode -mconsole..."
-      sed -i '/^CFLAGS *=/ s/$/ -municode -mconsole/' main.mk
+      echo "Force patching Makefile for Windows wmain support..."
+      # 修改 LDFLAGS = ... 行
+      sed -i 's|^LDFLAGS =.*|& -municode -mconsole|' Makefile
+      # 修改 CFLAGS = ... 行 (防止 compile-link 一步完成时遗漏)
+      sed -i 's|^CFLAGS =.*|& -municode -mconsole|' Makefile
   fi
 
   # 3. 运行 make
-  make -j$(nproc)
+  # 额外传入 SHELL_OPT，双重保险
+  if [ x"${TARGET_HOST}" = x"Windows" ]; then
+    make -j$(nproc) SHELL_OPT="-municode -mconsole"
+  else
+    make -j$(nproc)
+  fi
   
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
