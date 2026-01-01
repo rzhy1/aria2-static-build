@@ -295,7 +295,7 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  local LDFLAGS="${LDFLAGS} -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lwinpthread -lmsvcrt"
+  local LDFLAGS="${LDFLAGS} -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lwinpthread -lmsvcrt -municode -mconsole"
   CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
@@ -306,7 +306,6 @@ prepare_sqlite() {
     --disable-editline \
     --disable-math \
     --disable-load-extension
-  local  LDFLAGS="$LDFLAGS -mconsole"
   make -j$(nproc)
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
