@@ -8,7 +8,7 @@ export CFLAGS="-I${CROSS_PREFIX}/include -march=tigerlake -mtune=tigerlake -O2 -
 export CXXFLAGS="$CFLAGS"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
 export WINPTHREAD_LIB="${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib"
-export LDFLAGS="-L${WINPTHREAD_LIB} -L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc) -Wl,-subsystem,console"
+export LDFLAGS="-L${WINPTHREAD_LIB} -L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc)"
 export LD=x86_64-w64-mingw32-ld.lld
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
@@ -291,12 +291,19 @@ prepare_sqlite() {
   mkdir -p "/usr/src/sqlite-${sqlite_tag}"
   tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
   cd "/usr/src/sqlite-${sqlite_tag}"
+  
   if [ x"${TARGET_HOST}" = x"Windows" ]; then
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  local LDFLAGS="${LDFLAGS} -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lwinpthread -lmsvcrt"
-  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
+
+  # 1. 定义基础 LDFLAGS (用于 configure 检查)
+  local BASE_LDFLAGS="${LDFLAGS} -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lwinpthread -lmsvcrt"
+
+  # 2. 运行 configure (不要传 -municode，防止检测失败)
+  CFLAGS="$CFLAGS -DHAVE_PTHREAD" \
+  LDFLAGS="${BASE_LDFLAGS}" \
+  ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
@@ -306,7 +313,16 @@ prepare_sqlite() {
     --disable-editline \
     --disable-math \
     --disable-load-extension
-  make -j$(nproc)
+  
+  # 3. 准备 Make 时的 LDFLAGS (这里加入 -municode 修复报错)
+  local MAKE_LDFLAGS="${BASE_LDFLAGS}"
+  if [ x"${TARGET_HOST}" = x"Windows" ]; then
+      MAKE_LDFLAGS="${MAKE_LDFLAGS} -municode -mconsole"
+  fi
+
+  # 4. 编译 (将参数传给 make，覆盖 Makefile 中的设置)
+  make -j$(nproc) LDFLAGS="${MAKE_LDFLAGS}"
+
   x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   make install
