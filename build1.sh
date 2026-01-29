@@ -252,9 +252,8 @@ prepare_gmp() {
 }
 
 prepare_libxml2() {
-  libxml2_tag=$(retry wget -qO- https://gitlab.gnome.org/api/v4/projects/GNOME%2Flibxml2/releases \
-      | jq -r '.[].tag_name' \
-      | sed 's/^v//' \
+  libxml2_tag=$(retry wget -qO- https://download.gnome.org/sources/libxml2/ \
+      | grep -oP 'href="libxml2-\K[0-9]+\.[0-9]+\.[0-9]+' \
       | sort -Vr \
       | head -n1)
   libxml2_latest_url="https://download.gnome.org/sources/libxml2/${libxml2_tag%.*}/libxml2-${libxml2_tag}.tar.xz"
@@ -506,7 +505,7 @@ build_aria2() {
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
   echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
 }
-
+prepare_libxml2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 cmake⭐⭐⭐⭐⭐⭐"
 prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
