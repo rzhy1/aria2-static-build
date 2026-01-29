@@ -252,10 +252,12 @@ prepare_gmp() {
 }
 
 prepare_libxml2() {
-  libxml2_tag=$(retry wget -qO- https://download.gnome.org/sources/libxml2/ \
-      | grep -oP 'href="libxml2-\K[0-9]+\.[0-9]+\.[0-9]+' \
-      | sort -Vr \
-      | head -n1)
+  libxml2_tag=$(retry wget -qO- https://api.github.com/repos/GNOME/libxml2/tags \
+    | jq -r '.[].name' \
+    | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
+    | sed 's/^v//' \
+    | sort -Vr \
+    | head -n1)
   echo "版本号是${libxml2_tag}"
   libxml2_latest_url="https://download.gnome.org/sources/libxml2/${libxml2_tag%.*}/libxml2-${libxml2_tag}.tar.xz"
   libxml2_filename="libxml2-${libxml2_tag}.tar.xz"
