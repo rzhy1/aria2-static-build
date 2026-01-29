@@ -256,6 +256,7 @@ prepare_libxml2() {
       | grep -oP 'href="libxml2-\K[0-9]+\.[0-9]+\.[0-9]+' \
       | sort -Vr \
       | head -n1)
+  echo "版本号是${libxml2_tag}"
   libxml2_latest_url="https://download.gnome.org/sources/libxml2/${libxml2_tag%.*}/libxml2-${libxml2_tag}.tar.xz"
   libxml2_filename="libxml2-${libxml2_tag}.tar.xz"
   if [ ! -f "${DOWNLOADS_DIR}/${libxml2_filename}" ]; then
