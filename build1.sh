@@ -167,12 +167,12 @@ prepare_libiconv() {
 }
 
 prepare_zlib_ng() {
-    zlib_ng_latest_tag="$(retry wget -qO- https://raw.githubusercontent.com/zlib-ng/zlib-ng/master/Makefile.in | grep '^VER=' | cut -d= -f2 | tr -d '"')"
-    zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz"
+    zlib_ng_latest_tag="$(retry wget -qO- https://api.github.com/repos/zlib-ng/zlib-ng/releases/latest | jq -r '.tag_name')"
+    zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${zlib_ng_latest_tag}.tar.gz"
     mkdir -p "/usr/src/zlib-ng"
     cd "/usr/src/zlib-ng"
-    wget -q -O- https://github.com/zlib-ng/zlib-ng/archive/master.tar.gz | tar xz
-    cd zlib-ng-develop
+    wget -q -O- ${zlib_ng_latest_url} | tar xz
+    cd zlib-ng-*
     echo "当前完整路径是: $PWD" 
     rm -fr build
     cmake -B build \
