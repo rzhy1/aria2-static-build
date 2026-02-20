@@ -6,9 +6,8 @@ export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 export CFLAGS="-I${CROSS_PREFIX}/include -march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -pipe -flto=$(nproc) -g0"
 export CXXFLAGS="$CFLAGS"
-export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig:${PKG_CONFIG_PATH}"
-export WINPTHREAD_LIB="${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib"
-export LDFLAGS="-L${WINPTHREAD_LIB} -L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -s -Wl,--gc-sections -flto=$(nproc)"
+export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig"
+export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -static-libgcc -static-libstdc++ -s -Wl,--gc-sections -flto=$(nproc)"
 export LD=x86_64-w64-mingw32-ld.lld
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
@@ -297,7 +296,7 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  local LDFLAGS="${LDFLAGS} -L${CROSS_ROOT}/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lwinpthread -lmsvcrt"
+  local LDFLAGS="${LDFLAGS} -lwinpthread"
   CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --disable-debug \
@@ -471,7 +470,7 @@ build_aria2() {
   #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
   
-  local LDFLAGS="$LDFLAGS -L/usr/x86_64-w64-mingw32/lib -lwinpthread"
+  local LDFLAGS="$LDFLAGS -lwinpthread -lws2_32 -liphlpapi"
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
