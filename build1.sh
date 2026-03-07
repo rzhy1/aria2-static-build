@@ -474,6 +474,7 @@ build_aria2() {
   fi
   
   local LDFLAGS="$LDFLAGS -lwinpthread -lws2_32 -liphlpapi"
+  local CXXFLAGS="$CXXFLAGS -fno-rtti -fno-exceptions"
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
@@ -486,6 +487,7 @@ build_aria2() {
     --with-libxml2 \
     --with-libcares \
     --with-sqlite3 \
+    --with-wintls \
     --with-libuv=no \
     --with-tcmalloc=no \
     --with-jemalloc=no \
@@ -507,7 +509,6 @@ build_aria2() {
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF}
   make -j$(nproc)
-  make install
   ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
   echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
 }
