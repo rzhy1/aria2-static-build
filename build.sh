@@ -146,6 +146,7 @@ curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 #export LDFLAGS="$LDFLAGS -L/opt/mingw64/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lpthread"
+LDFLAGS="-Wl,--subsystem,console $LDFLAGS" \
 ./configure \
     --disable-shared \
     --enable-threadsafe \
