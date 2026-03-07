@@ -474,7 +474,7 @@ build_aria2() {
   fi
   
   local LDFLAGS="$LDFLAGS -lwinpthread -lws2_32 -liphlpapi"
-  local CXXFLAGS="$CXXFLAGS -fno-rtti -fno-exceptions"
+  local CXXFLAGS="$CXXFLAGS -fno-rtti"
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
