@@ -312,8 +312,7 @@ prepare_sqlite() {
     --disable-math \
     --disable-load-extension
   sed -i '/^CFLAGS =/{ /-municode/! s/$/ -municode/; /-mconsole/! s/$/ -mconsole/; }'  Makefile
-  make -j$(nproc) sqlite3.o
-  ${CROSS_HOST}-ar rcs libsqlite3.a sqlite3.o
+  make -j$(nproc) libsqlite3.a
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   cp sqlite3.h sqlite3ext.h "${CROSS_PREFIX}/include/" ||  exit 1
   make install
@@ -368,8 +367,7 @@ prepare_libssh2() {
     --disable-examples-build \
     --disable-docker-tests \
     --disable-sshd-tests \
-    --disable-debug \
-    --disable-tests
+    --disable-debug 
   make -j$(nproc)
   make install
   libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
