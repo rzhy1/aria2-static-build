@@ -146,7 +146,6 @@ curl -L ${sqlite_latest_url} | tar xz
 #curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
 cd sqlite-*
 #export LDFLAGS="$LDFLAGS -L/opt/mingw64/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lpthread"
-LDFLAGS="-Wl,--subsystem,console $LDFLAGS" \
 ./configure \
     --disable-shared \
     --enable-threadsafe \
@@ -162,7 +161,8 @@ LDFLAGS="-Wl,--subsystem,console $LDFLAGS" \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     LIBS="-lpthread"
-make -j$(nproc) install
+make libsqlite3.a
+make install
 #x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
 #cp libsqlite3.a "$PREFIX/lib/" ||  exit 1
 echo "| sqlite | ${sqlite_tag} | ${sqlite_latest_url} |" >>"${BUILD_INFO}"
