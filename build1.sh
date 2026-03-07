@@ -271,11 +271,15 @@ prepare_libxml2() {
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
     --enable-silent-rules \
+    --enable-static \
+    --disable-shared \
     --without-python \
     --without-iconv \
     --without-icu \
-    --enable-static \
-    --disable-shared
+    --without-lzma \
+    --without-iconv \
+    --without-zlib \
+    --disable-doc
   make -j$(nproc)
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
@@ -307,11 +311,11 @@ prepare_sqlite() {
     --disable-editline \
     --disable-math \
     --disable-load-extension
-  #sed -i '/^LDFLAGS =/{ /-municode/! s/$/ -municode/; /-mconsole/! s/$/ -mconsole/; }' Makefile
   sed -i '/^CFLAGS =/{ /-municode/! s/$/ -municode/; /-mconsole/! s/$/ -mconsole/; }'  Makefile
-  make -j$(nproc)
-  x86_64-w64-mingw32-ar cr libsqlite3.a sqlite3.o
+  make -j$(nproc) sqlite3.o
+  ${CROSS_HOST}-ar rcs libsqlite3.a sqlite3.o
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
+  cp sqlite3.h sqlite3ext.h "${CROSS_PREFIX}/include/" ||  exit 1
   make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
@@ -364,7 +368,8 @@ prepare_libssh2() {
     --disable-examples-build \
     --disable-docker-tests \
     --disable-sshd-tests \
-    --disable-debug
+    --disable-debug \
+    --disable-tests
   make -j$(nproc)
   make install
   libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
@@ -500,6 +505,7 @@ build_aria2() {
     --disable-libtool-lock \
     --disable-checking \
     --enable-checking=release \
+    --disable-tests \
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF}
   make -j$(nproc)
@@ -534,5 +540,5 @@ build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
 
 # get release
-${CROSS_HOST}-strip "${CROSS_PREFIX}/bin/aria2c.exe"
+${CROSS_HOST}-strip --strip-all "${CROSS_PREFIX}/bin/aria2c.exe"
 mv -fv "${CROSS_PREFIX}/bin/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
