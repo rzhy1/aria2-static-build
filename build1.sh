@@ -539,5 +539,5 @@ build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
 
 # get release
-${CROSS_HOST}-strip --strip-all "${CROSS_PREFIX}/bin/aria2c.exe"
-mv -fv "${CROSS_PREFIX}/bin/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
+${CROSS_HOST}-strip --strip-all "/usr/src/aria2-master/src/aria2c.exe"
+mv -fv "/usr/src/aria2-master/src/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
