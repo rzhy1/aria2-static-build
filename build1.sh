@@ -316,7 +316,8 @@ prepare_sqlite() {
   make -j$(nproc) libsqlite3.a ||  exit 1
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   cp sqlite3.h sqlite3ext.h "${CROSS_PREFIX}/include/" ||  exit 1
-  sqlite_ver="$(grep '#define SQLITE_VERSION ' sqlite3.h | awk '{print $3}' | tr -d '"')"
+  cp sqlite3.pc "${CROSS_PREFIX}/lib/pkgconfig/" || echo "Warning: sqlite3.pc not found"
+  sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite3.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
 }
 
