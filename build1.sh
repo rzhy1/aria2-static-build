@@ -303,6 +303,8 @@ prepare_sqlite() {
   local LDFLAGS="${LDFLAGS} -lwinpthread"
   CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
+    --enable-static \
+    --enable-silent-rules \
     --disable-debug \
     --disable-fts3 --disable-fts4 --disable-fts5 \
     --disable-rtree \
@@ -311,11 +313,10 @@ prepare_sqlite() {
     --disable-editline \
     --disable-math \
     --disable-load-extension
-  sed -i '/^CFLAGS =/{ /-municode/! s/$/ -municode/; /-mconsole/! s/$/ -mconsole/; }'  Makefile
-  make -j$(nproc) libsqlite3.a
+  #sed -i '/^CFLAGS =/{ /-municode/! s/$/ -municode/; /-mconsole/! s/$/ -mconsole/; }'  Makefile
+  make -j$(nproc) libsqlite3.a ||  exit 1
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   cp sqlite3.h sqlite3ext.h "${CROSS_PREFIX}/include/" ||  exit 1
-  make install
   sqlite_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"sqlite*.pc | awk '{print $2}')"
   echo "| sqlite | ${sqlite_ver} | ${sqlite_latest_url:-cached sqlite} |" >>"${BUILD_INFO}"
 }
