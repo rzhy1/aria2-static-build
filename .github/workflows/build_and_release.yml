@@ -146,7 +146,7 @@ jobs:
   build-aria2c1:
     runs-on: ubuntu-24.04
     container:
-      image: ubuntu:rolling
+      image: ubuntu:devel
     steps:
       - name: Checkout
         uses: actions/checkout@v6
