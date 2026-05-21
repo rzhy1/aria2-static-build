@@ -90,7 +90,8 @@ find_and_comment() {
     current_line=$((end_line + 1))
   done < <(awk -v s="$search_str" -v cl="$current_line" 'NR >= cl && !/^# / && $0 ~ s {print NR}' "$file")
 }
-find_and_comment "configure"  && echo "configure文件修改完成"
+#find_and_comment "configure"  && echo "configure文件修改完成"
+awk '/Test compile: long long reliability test/ { in_block = 1 } in_block { print "# " $0; if ($0 ~ /^[ \t]*fi[ \t]*$/) in_block = 0; next } { print }' configure > configure.tmp && mv configure.tmp configure
 
 BUILD_CC=gcc BUILD_CXX=g++ ./configure \
     --disable-shared \
