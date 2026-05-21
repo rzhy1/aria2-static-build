@@ -76,9 +76,7 @@ echo "gmp最新版本是${gmp_tag} ，下载地址是${gmp_url}"
 retry curl -SLf -o "/tmp/gmp-${gmp_tag}.tar.xz" "$gmp_url"
 tar -xf "/tmp/gmp-${gmp_tag}.tar.xz"
 cd gmp-*
-
-# 注入 Cache 变量跳过 "long long" 运行期测试，彻底移除不稳定的 sed 修改源码逻辑
-export gmp_cv_c_long_long=yes
+sed -i 's/gmp_cv_c_long_long=no/gmp_cv_c_long_long=yes/g' configure
 
 BUILD_CC=gcc BUILD_CXX=g++ ./configure \
     --disable-shared \
