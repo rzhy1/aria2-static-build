@@ -76,7 +76,21 @@ echo "gmp最新版本是${gmp_tag} ，下载地址是${gmp_url}"
 retry curl -SLf -o "/tmp/gmp-${gmp_tag}.tar.xz" "$gmp_url"
 tar -xf "/tmp/gmp-${gmp_tag}.tar.xz"
 cd gmp-*
-sed -i 's/gmp_cv_c_long_long=no/gmp_cv_c_long_long=yes/g' configure
+
+# patch configure（不检测long long）
+find_and_comment() {
+  local file="$1"
+  local search_str="Test compile: long long reliability test"
+  local current_line=1
+  while read -r start_line; do  
+    [[ -z "$start_line" ]] && { echo "在文件 $file 中未找到更多字符串 '$search_str'"; break; }
+    local end_line=$((start_line + 37))
+    sed -i "${start_line},${end_line}s/^/# /" "$file"
+    echo "注释了文件 $file 中从第 $start_line 行到第 $end_line 行"
+    current_line=$((end_line + 1))
+  done < <(awk -v s="$search_str" -v cl="$current_line" 'NR >= cl && !/^# / && $0 ~ s {print NR}' "$file")
+}
+find_and_comment "configure"  && echo "configure文件修改完成"
 
 BUILD_CC=gcc BUILD_CXX=g++ ./configure \
     --disable-shared \
