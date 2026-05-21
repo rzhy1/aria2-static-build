@@ -92,7 +92,7 @@ find_and_comment() {
 }
 #find_and_comment "configure"  && echo "configure文件修改完成"
 awk '/Test compile: long long reliability test/ { in_block = 1 } in_block { print "# " $0; if ($0 ~ /^[ \t]*fi[ \t]*$/) in_block = 0; next } { print }' configure > configure.tmp && mv configure.tmp configure
-
+chmod +x configure
 BUILD_CC=gcc BUILD_CXX=g++ ./configure \
     --disable-shared \
     --enable-static \
@@ -178,9 +178,15 @@ echo "zlib最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
 retry curl -SLf -o "/tmp/zlib.tar.gz" "${zlib_latest_url}"
 tar -xf "/tmp/zlib.tar.gz"
 cd zlib-*
-# 针对 MinGW 环境，使用其原生维护的 win32/Makefile.gcc 编译最为稳妥
-make -f win32/Makefile.gcc PREFIX="$HOST-" -j$(nproc)
-make -f win32/Makefile.gcc PREFIX="$HOST-" DESTDIR="$PREFIX/" BINARY_PATH=bin INCLUDE_PATH=include LIBRARY_PATH=lib install
+CC="$HOST-gcc" \
+AR="$HOST-ar" \
+RANLIB="$HOST-ranlib" \
+./configure \
+    --prefix=$PREFIX \
+    --libdir=$PREFIX/lib \
+    --includedir=$PREFIX/include \
+    --static
+make -j$(nproc) install
 echo "| zlib | ${zlib_tag} | ${zlib_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 rm -rf zlib-*
