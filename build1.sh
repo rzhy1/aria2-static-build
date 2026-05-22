@@ -4,30 +4,30 @@ export CROSS_HOST="x86_64-w64-mingw32"
 export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
-export CFLAGS="-I${CROSS_PREFIX}/include -march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -pipe -flto=$(nproc) -g0"
+
+export CFLAGS="-I${CROSS_PREFIX}/include -march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -pipe -flto=auto -g0"
 export CXXFLAGS="$CFLAGS"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig"
-export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -static-libgcc -static-libstdc++ -s -Wl,--gc-sections -flto=$(nproc)"
-export LD=x86_64-w64-mingw32-ld.lld
+export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -static-libgcc -static-libstdc++ -s -Wl,--gc-sections -flto=auto"
+
 set -o pipefail
 export USE_ZLIB_NG="${USE_ZLIB_NG:-1}"
-
 
 retry() {
   # max retry 5 times
   try=5
-  # sleep 3s every retry
+  # sleep 30s every retry
   sleep_time=30
   for i in $(seq ${try}); do
-    echo "executing with retry: $@" >&2
-    if eval "$@"; then
+    echo "executing with retry: $*" >&2
+    if "$@"; then
       return 0
     else
-      echo "execute '$@' failed, tries: ${i}" >&2
+      echo "execute '$*' failed, tries: ${i}" >&2
       sleep ${sleep_time}
     fi
   done
-  echo "execute '$@' failed" >&2
+  echo "execute '$*' failed" >&2
   return 1
 }
 source /etc/os-release
@@ -52,12 +52,9 @@ else
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
 fi
 
-ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
+ln -sf "$(which ld.lld)" /usr/bin/x86_64-w64-mingw32-ld.lld
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
-#find / -name "*pthread.a"
-#find / -name "*pthread.h"
-#find / -name "*pthread*.pc"
 echo "查询结束"
 BUILD_ARCH="$(x86_64-w64-mingw32-gcc -dumpmachine)"
 TARGET_ARCH="${CROSS_HOST%%-*}"
@@ -74,17 +71,6 @@ case "${TARGET_HOST}" in
 *"mingw"*)
   TARGET_HOST=Windows
   hash -r
-  # if [ ! -f "/usr/share/keyrings/winehq-archive.key" ]; then
-  #   rm -f /usr/share/keyrings/winehq-archive.key.part
-  #   retry wget -cT30 -O /usr/share/keyrings/winehq-archive.key.part https://dl.winehq.org/wine-builds/winehq.key
-  #   mv -fv /usr/share/keyrings/winehq-archive.key.part /usr/share/keyrings/winehq-archive.key
-  # fi
-  # if [ x"${USE_CHINA_MIRROR}" = x1 ]; then
-  #   WINEHQ_URL="http://mirrors.tuna.tsinghua.edu.cn/wine-builds/ubuntu/"
-  # else
-  #   WINEHQ_URL="http://dl.winehq.org/wine-builds/ubuntu/"
-  # fi
-  # echo "deb [signed-by=/usr/share/keyrings/winehq-archive.key] ${WINEHQ_URL} ${UBUNTU_CODENAME} main" >/etc/apt/sources.list.d/winehq.list
   export WINEPREFIX=/tmp/
   RUNNER_CHECKER="wine"
   ;;
@@ -117,9 +103,11 @@ echo "## aria2c1.exe （zlib_ng & libxml2 & WinTLS ） dependencies:" >>"${BUILD
 # 初始化表格
 echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
 echo "|------------|---------|--------|" >>"${BUILD_INFO}"
+
+# 【优化 6 配合】：因去除了 retry 内部的 eval，将管道提取到 retry 外部
 prepare_cmake() {
   if ! which cmake &>/dev/null; then
-    cmake_latest_ver="$(retry wget -qO- --compression=auto https://cmake.org/download/ \| grep "'Latest Release'" \| sed -r "'s/.*Latest Release\s*\((.+)\).*/\1/'" \| head -1)"
+    cmake_latest_ver="$(retry wget -qO- --compression=auto https://cmake.org/download/ | grep 'Latest Release' | sed -r 's/.*Latest Release\s*\((.+)\).*/\1/' | head -1)"
     cmake_binary_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz"
     cmake_sha256_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-SHA-256.txt"
 
@@ -137,9 +125,10 @@ prepare_cmake() {
   fi
   cmake --version
 }
+
 prepare_ninja() {
   if ! which ninja &>/dev/null; then
-    ninja_ver="$(retry wget -qO- --compression=auto https://ninja-build.org/ \| grep "'The last Ninja release is'" \| sed -r "'s@.*<b>(.+)</b>.*@\1@'" \| head -1)"
+    ninja_ver="$(retry wget -qO- --compression=auto https://ninja-build.org/ | grep 'The last Ninja release is' | sed -r 's@.*<b>(.+)</b>.*@\1@' | head -1)"
     ninja_binary_url="https://github.com/ninja-build/ninja/releases/download/${ninja_ver}/ninja-linux.zip"
     if [ ! -f "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip" ]; then
       rm -f "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip.part"
@@ -185,7 +174,10 @@ prepare_zlib_ng() {
       -DCMAKE_SYSTEM_PROCESSOR="${TARGET_ARCH}" \
       -DWITH_GTEST=OFF
     cmake --build build
-    cmake --install build
+    cp -f build/libz.a "${CROSS_PREFIX}/lib/" 2>/dev/null || cp -f build/libzlib.a "${CROSS_PREFIX}/lib/" || { echo "Error: libz.a not found"; exit 1; }
+    cp -f zlib.h "${CROSS_PREFIX}/include/" || exit 1
+    cp -f build/zlib.pc "${CROSS_PREFIX}/lib/pkgconfig/" || exit 1
+	
     zlib_ng_ver="${zlib_ng_latest_tag}"
     echo "| zlib-ng | ${zlib_ng_ver} | ${zlib_ng_latest_url:-cached zlib-ng} |" >>"${BUILD_INFO}" || exit
     # Fix mingw build sharedlibdir lost issue
@@ -237,12 +229,7 @@ prepare_gmp() {
 }
 
 prepare_libxml2() {
-  libxml2_tag=$(retry wget -qO- https://api.github.com/repos/GNOME/libxml2/tags \
-    | jq -r '.[].name' \
-    | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' \
-    | sed 's/^v//' \
-    | sort -Vr \
-    | head -n1)
+  libxml2_tag=$(retry wget -qO- https://api.github.com/repos/GNOME/libxml2/tags | jq -r '.[].name' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/^v//' | sort -Vr | head -n1)
   echo "版本号是${libxml2_tag}"
   libxml2_latest_url="https://download.gnome.org/sources/libxml2/${libxml2_tag%.*}/libxml2-${libxml2_tag}.tar.xz"
   libxml2_filename="libxml2-${libxml2_tag}.tar.xz"
@@ -299,6 +286,7 @@ prepare_sqlite() {
     --disable-editline \
     --disable-math \
     --disable-load-extension
+  # 保留用户原先的手动极简拷贝逻辑
   make -j$(nproc) libsqlite3.a ||  exit 1
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   cp sqlite3.h sqlite3ext.h "${CROSS_PREFIX}/include/" ||  exit 1
@@ -335,7 +323,10 @@ prepare_c_ares() {
     --disable-tests \
     --without-random
   make -j$(nproc)
-  make install
+  cp -f src/lib/.libs/libcares.a "${CROSS_PREFIX}/lib/" || exit 1
+  cp -f include/ares.h include/ares_rules.h include/ares_version.h include/ares_dns.h "${CROSS_PREFIX}/include/" || exit 1
+  cp -f libcares.pc "${CROSS_PREFIX}/lib/pkgconfig/" || exit 1
+  
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
   echo "| c-ares | ${cares_ver} | ${cares_latest_url:-cached c-ares} |" >>"${BUILD_INFO}"
 }
@@ -359,56 +350,6 @@ prepare_libssh2() {
   make install
   libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
   echo "| libssh2 | ${libssh2_ver} | ${libssh2_latest_url:-cached libssh2} |" >>"${BUILD_INFO}"
-}
-
-prepare_openssl() {
-  openssl_tag=$(retry curl -s https://api.github.com/repos/OpenSSL/OpenSSL/releases | grep -o '"tag_name": *"[^"]*"' | grep openssl | head -1 | sed 's/"tag_name": *"openssl-\([0-9.]*\)"/\1/')
-  if [ -z "$openssl_tag" ]; then
-    openssl_tag="3.6.0"  # 备用版本号
-  fi
-  openssl_latest_url="https://github.com/openssl/openssl/releases/download/openssl-${openssl_tag}/openssl-${openssl_tag}.tar.gz"
-  
-  if [ ! -f "${DOWNLOADS_DIR}/openssl-${openssl_tag}.tar.gz" ]; then
-    retry wget -cT10 -O "${DOWNLOADS_DIR}/openssl-${openssl_tag}.tar.gz.part" "${openssl_latest_url}"
-    mv -fv "${DOWNLOADS_DIR}/openssl-${openssl_tag}.tar.gz.part" "${DOWNLOADS_DIR}/openssl-${openssl_tag}.tar.gz"
-  fi
-  
-  mkdir -p "/usr/src/openssl-${openssl_tag}"
-  tar -zxf "${DOWNLOADS_DIR}/openssl-${openssl_tag}.tar.gz" --strip-components=1 -C "/usr/src/openssl-${openssl_tag}"
-  cd "/usr/src/openssl-${openssl_tag}"
-  
-  # 优化后的禁用列表
-  DISABLED_FEATURES=(
-    no-err no-dso no-engine no-async no-autoalginit
-    no-dtls no-sctp no-ssl3 no-tls1 no-tls1_1
-    no-comp no-ts no-ocsp no-ct no-cms no-psk no-srp no-srtp no-rfc3779
-    no-fips no-acvp-tests no-docs no-stdio no-ui-console
-    no-afalgeng no-ssl-trace no-filenames
-    no-aria no-bf no-blake2 no-camellia no-cast no-cmac
-    no-dh no-dsa no-ec2m no-gost no-idea no-rc2 no-rc4 no-rc5 no-rmd160
-    no-scrypt no-seed no-siphash no-siv no-sm2 no-sm3 no-sm4 no-whirlpool
-    no-tests no-apps
-  )
-
-  CFLAGS="-march=tigerlake -mtune=tigerlake -Os -ffunction-sections -fdata-sections -pipe -g0 -fvisibility=hidden $LTO_FLAGS" \
-  LDFLAGS="-Wl,--gc-sections -Wl,--icf=all -static -static-libgcc $LTO_FLAGS" \
-  ./Configure -static \
-    --prefix="${CROSS_PREFIX}" \
-    --libdir=lib \
-    --cross-compile-prefix="${CROSS_HOST}-" \
-    mingw64 no-shared \
-    --with-zlib-include="${CROSS_PREFIX}/include" \
-    --with-zlib-lib="${CROSS_PREFIX}/lib/libz.a" \
-    "${DISABLED_FEATURES[@]}"
-  
-  make -j$(nproc)
-  make install_sw
-  
-  ${CROSS_HOST}-strip --strip-unneeded "${CROSS_PREFIX}/lib/libcrypto.a" || true
-  ${CROSS_HOST}-strip --strip-unneeded "${CROSS_PREFIX}/lib/libssl.a" || true
-  
-  openssl_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/openssl.pc" 2>/dev/null | awk '{print $2}' || echo ${openssl_tag})"
-  echo "| openssl | ${openssl_ver} | ${openssl_latest_url:-cached openssl} |" >>"${BUILD_INFO}"
 }
 
 build_aria2() {
@@ -448,26 +389,25 @@ build_aria2() {
   sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
   sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
   
-  #sed -i 's/EVP_rc4()/EVP_CIPHER_fetch(nullptr, "RC4", nullptr)/' src/LibsslARC4Encryptor.cc
-      
   if [ ! -f ./configure ]; then
     autoreconf -i
   fi
 
   if [ x"${TARGET_HOST}" = xwin ]; then
     ARIA2_EXT_CONF='--without-openssl'
-  # else
-  #   ARIA2_EXT_CONF='--with-ca-bundle=/etc/ssl/certs/ca-certificates.crt'
   fi
   
+  # 保留局部 LDFLAGS/CXXFLAGS 声明：在 Bash 中因为全局已 export，这些 local 变量在 ./configure 子进程中依然有效
   local LDFLAGS="$LDFLAGS -lwinpthread -lws2_32 -liphlpapi"
   local CXXFLAGS="$CXXFLAGS -fno-rtti"
+
+  # 【优化 2】：修正了 --with-cppunit-prefix 的错误变量名（$PREFIX -> ${CROSS_PREFIX}）
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
     --enable-static \
     --disable-shared \
-    --with-cppunit-prefix=$PREFIX \
+    --with-cppunit-prefix="${CROSS_PREFIX}" \
     --enable-silent-rules \
     --with-libz \
     --with-libssh2 \
@@ -503,11 +443,7 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 cma
 prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 gmp⭐⭐⭐⭐⭐⭐"
-#prepare_gmp
-#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libiconv⭐⭐⭐⭐⭐⭐"
-#prepare_libiconv
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib_ng ⭐⭐⭐⭐⭐⭐"
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib_ng ⭐⭐⭐⭐⭐加"
 prepare_zlib_ng
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 xz ⭐⭐⭐⭐⭐⭐"
 prepare_xz
@@ -519,8 +455,6 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c_a
 prepare_c_ares
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2 ⭐⭐⭐⭐⭐⭐"
 prepare_libssh2
-#echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 openssl ⭐⭐⭐⭐⭐⭐"
-#prepare_openssl
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
 build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
