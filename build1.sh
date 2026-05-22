@@ -321,7 +321,7 @@ prepare_c_ares() {
     --without-random
   make -j$(nproc)
   cp -f src/lib/.libs/libcares.a "${CROSS_PREFIX}/lib/" || exit 1
-  cp -f include/ares.h include/ares_rules.h include/ares_version.h include/ares_dns.h "${CROSS_PREFIX}/include/" || exit 1
+  cp -f include/*.h "${CROSS_PREFIX}/include/" || exit 1
   cp -f libcares.pc "${CROSS_PREFIX}/lib/pkgconfig/" || exit 1
   
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
