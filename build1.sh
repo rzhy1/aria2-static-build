@@ -46,7 +46,7 @@ if [ "$USE_GCC" -eq 1 ]; then
     curl -SLf -o "/tmp/mingw-w64-x86_64-toolchain.tar.zst" "https://github.com/rzhy1/build-mingw-w64/releases/download/mingw-w64/mingw-w64-x86_64-toolchain.tar.zst"
     tar --zstd -xf "/tmp/mingw-w64-x86_64-toolchain.tar.zst" -C "/usr/"
 else
-    echo "使用相对成熟的 musl-cros (GCC 15)..."
+    echo "使用相对成熟的 musl-cros..."
     curl -SLf -o "/tmp/x86_64-w64-mingw32.tar.xz" "https://github.com/rzhy1/musl-cross/releases/download/mingw-w64/x86_64-w64-mingw32-1.tar.xz"
     mkdir -p ${CROSS_ROOT}
     tar -xf "/tmp/x86_64-w64-mingw32.tar.xz" --strip-components=1 -C ${CROSS_ROOT}
@@ -104,7 +104,6 @@ echo "## aria2c1.exe （zlib_ng & libxml2 & WinTLS ） dependencies:" >>"${BUILD
 echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
 echo "|------------|---------|--------|" >>"${BUILD_INFO}"
 
-# 【优化 6 配合】：因去除了 retry 内部的 eval，将管道提取到 retry 外部
 prepare_cmake() {
   if ! which cmake &>/dev/null; then
     cmake_latest_ver="$(retry wget -qO- --compression=auto https://cmake.org/download/ | grep 'Latest Release' | sed -r 's/.*Latest Release\s*\((.+)\).*/\1/' | head -1)"
@@ -174,9 +173,7 @@ prepare_zlib_ng() {
       -DCMAKE_SYSTEM_PROCESSOR="${TARGET_ARCH}" \
       -DWITH_GTEST=OFF
     cmake --build build
-    cp -f build/libz.a "${CROSS_PREFIX}/lib/" 2>/dev/null || cp -f build/libzlib.a "${CROSS_PREFIX}/lib/" || { echo "Error: libz.a not found"; exit 1; }
-    cp -f zlib.h "${CROSS_PREFIX}/include/" || exit 1
-    cp -f build/zlib.pc "${CROSS_PREFIX}/lib/pkgconfig/" || exit 1
+    cmake --install build
 	
     zlib_ng_ver="${zlib_ng_latest_tag}"
     echo "| zlib-ng | ${zlib_ng_ver} | ${zlib_ng_latest_url:-cached zlib-ng} |" >>"${BUILD_INFO}" || exit
