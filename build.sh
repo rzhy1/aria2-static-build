@@ -264,22 +264,22 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void sock_state_cb(void\* arg, int fd, int read, int write)/void sock_state_cb(void\* arg, ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
-# ==================== WinTLS 修复部分 ====================
+# ==================== WinTLS 终极修复补丁 ====================
 
-# 1) 将老旧的 UNISP_NAME 替换为现代的 SCHANNEL_NAME
+# 1) 将过时的安全通道提供者替换为标准的 SCHANNEL_NAME
 sed -i 's/UNISP_NAME/SCHANNEL_NAME/g' src/WinTLSContext.cc
 
-# 2) 开启 TLS 1.2 和 TLS 1.3 支持（修改 WinTLSContext.cc）
-sed -i '/#include "WinTLSContext.h"/a #ifndef SP_PROT_TLS1_3_CLIENT\n#define SP_PROT_TLS1_3_CLIENT 0x00002000\n#endif' src/WinTLSContext.cc
-sed -i '/schCred.dwFlags =/a\  schCred.grbitEnabledProtocols = SP_PROT_TLS1_2_CLIENT | SP_PROT_TLS1_3_CLIENT;' src/WinTLSContext.cc
-
-# 3) 移除限制连接的 ISC_REQ_USE_SUPPLIED_CREDS 标志位
+# 2) 移除可能引发冲突的限制标志位
+sed -i 's/SCH_CRED_NO_DEFAULT_CREDS | //g' src/WinTLSContext.cc
 sed -i 's/| ISC_REQ_USE_SUPPLIED_CREDS//g' src/WinTLSSession.cc
 
-# 4) 补齐 TLS 1.3 的 switch-case 分支避免崩溃
-sed -i '/case 0x303:/i\    case 0x304:\n      version = TLS_PROTO_TLS13;\n      break;' src/WinTLSSession.cc
+# 3) 仅显式启用最稳定的 TLS 1.2（避免在不支持 1.3 的老系统上报错，同时减少重协商时的干扰）
+sed -i '/schCred.dwFlags =/a\  schCred.grbitEnabledProtocols = SP_PROT_TLS1_2_CLIENT;' src/WinTLSContext.cc
 
-# ========================================================
+# 4) 【核心修复】修复 Schannel 重协商 Bug
+sed -i 's/::InitializeSecurityContext(cred_, nullptr, host/::InitializeSecurityContext(cred_, (handle_.dwLower || handle_.dwUpper) ? \&handle_ : nullptr, host/g' src/WinTLSSession.cc
+
+# ============================================================
 autoreconf -i
 ./configure \
     --host=$HOST \
