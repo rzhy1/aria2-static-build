@@ -270,8 +270,8 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 sed -i 's/UNISP_NAME/SCHANNEL_NAME/g' src/WinTLSContext.cc
 
 # 2) 【关键修复：解锁 Win11 TLS 1.3】
-# 移除 SCH_CRED_MANUAL_CRED_VALIDATION，使 Schannel 使用系统根证书库进行自动验证
-sed -i 's/SCH_CRED_NO_DEFAULT_CREDS | SCH_CRED_MANUAL_CRED_VALIDATION/SCH_CRED_NO_DEFAULT_CREDS/g' src/WinTLSContext.cc
+# 直接将手动验证标志替换为 0，使 Schannel 使用系统根证书库进行自动验证
+sed -i 's/SCH_CRED_MANUAL_CRED_VALIDATION/0/g' src/WinTLSContext.cc
 
 # 3) 移除限制连接的旧标志位（保持与 curl 一致）
 sed -i 's/| ISC_REQ_USE_SUPPLIED_CREDS//g' src/WinTLSSession.cc
@@ -287,8 +287,8 @@ sed -i '/case 0x303:/i\    case 0x304:\n      version = TLS_PROTO_TLS13;\n      
 
 # ==================== 编译前自动验证 ====================
 echo "==================== [验证] 检查补丁是否成功应用 ===================="
-echo "1. 检查凭证标志位修改（应只保留 SCH_CRED_NO_DEFAULT_CREDS，关闭手动证书验证以解锁 Win11 TLS 1.3）："
-grep -n "schCred.dwFlags =" src/WinTLSContext.cc || echo "未找到匹配行！"
+echo "1. 检查凭证标志位修改（应显示 | 0，即成功关闭手动证书验证）："
+grep -n "dwFlags" src/WinTLSContext.cc || echo "未找到匹配行！"
 
 echo "2. 检查重协商修复（应显示 handle_.dwLower 判定）："
 grep -n "InitializeSecurityContext(cred_," src/WinTLSSession.cc || echo "未找到匹配行！"
