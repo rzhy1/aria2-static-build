@@ -264,34 +264,39 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void sock_state_cb(void\* arg, int fd, int read, int write)/void sock_state_cb(void\* arg, ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
-# ==================== WinTLS 极其精简且可靠的补丁 ====================
+# ==================== WinTLS 终极整改补丁 ====================
 
 # 1) 将过时的安全通道提供者替换为标准的 SCHANNEL_NAME
 sed -i 's/UNISP_NAME/SCHANNEL_NAME/g' src/WinTLSContext.cc
 
-# 2) 移除可能引发冲突的限制标志位
+# 2) 【关键修复：解锁 Win11 TLS 1.3】
+# 移除 SCH_CRED_MANUAL_CRED_VALIDATION，使 Schannel 使用系统根证书库进行自动验证
+sed -i 's/SCH_CRED_NO_DEFAULT_CREDS | SCH_CRED_MANUAL_CRED_VALIDATION/SCH_CRED_NO_DEFAULT_CREDS/g' src/WinTLSContext.cc
+
+# 3) 移除限制连接的旧标志位（保持与 curl 一致）
 sed -i 's/| ISC_REQ_USE_SUPPLIED_CREDS//g' src/WinTLSSession.cc
 
-# 3) 【精简修复一：修复重协商句柄】
-# 匹配 ::InitializeSecurityContext(cred_, nullptr, host 并替换
+# 4) 【核心修复一】修复重协商时的第 2 个参数 (phContext)
 sed -i 's/::InitializeSecurityContext(cred_, nullptr, host/::InitializeSecurityContext(cred_, (handle_.dwLower || handle_.dwUpper) ? \&handle_ : nullptr, host/g' src/WinTLSSession.cc
 
-# 4) 【精简修复二：修复后续握手句柄更新】
-# 仅匹配独占一行的 "0, nullptr, &outdesc" 并替换（规避跨行匹配失败）
+# 5) 【核心修复二】修复后续握手读阶段的第 9 个参数 (phNewContext)，将 nullptr 替换为 &handle_
 sed -i 's/0, nullptr, \&outdesc/0, \&handle_, \&outdesc/g' src/WinTLSSession.cc
 
-# 5) 【精简修复三：补齐 TLS 1.3 的 switch-case 分支】
+# 6) 【核心修复三】补齐 TLS 1.3 的 switch-case 分支
 sed -i '/case 0x303:/i\    case 0x304:\n      version = TLS_PROTO_TLS13;\n      break;' src/WinTLSSession.cc
 
-# ==================== 编译前自动验证（核心步骤） ====================
+# ==================== 编译前自动验证 ====================
 echo "==================== [验证] 检查补丁是否成功应用 ===================="
-echo "1. 检查重协商修复（应显示 handle_.dwLower 判定）："
+echo "1. 检查凭证标志位修改（应只保留 SCH_CRED_NO_DEFAULT_CREDS，关闭手动证书验证以解锁 Win11 TLS 1.3）："
+grep -n "schCred.dwFlags =" src/WinTLSContext.cc || echo "未找到匹配行！"
+
+echo "2. 检查重协商修复（应显示 handle_.dwLower 判定）："
 grep -n "InitializeSecurityContext(cred_," src/WinTLSSession.cc || echo "未找到匹配行！"
 
-echo "2. 检查后续握手句柄更新修复（应显示 &handle_, &outdesc）："
+echo "3. 检查后续握手句柄更新修复（应显示 &handle_, &outdesc）："
 grep -n "0, \&handle_, \&outdesc" src/WinTLSSession.cc || echo "未找到匹配行！"
 
-echo "3. 检查 TLS 1.3 协议支持（应显示 case 0x304 分支）："
+echo "4. 检查 TLS 1.3 协议支持（应显示 case 0x304 分支）："
 grep -n -C 3 "case 0x304" src/WinTLSSession.cc || echo "未找到匹配行！"
 echo "===================================================================="
 autoreconf -i
