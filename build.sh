@@ -264,24 +264,36 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void sock_state_cb(void\* arg, int fd, int read, int write)/void sock_state_cb(void\* arg, ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
-# ==================== WinTLS 终极整改补丁 ====================
+# ==================== WinTLS 极其精简且可靠的补丁 ====================
 
 # 1) 将过时的安全通道提供者替换为标准的 SCHANNEL_NAME
 sed -i 's/UNISP_NAME/SCHANNEL_NAME/g' src/WinTLSContext.cc
 
-# 2) 移除限制连接的旧标志位（保持与 curl 一致）
+# 2) 移除可能引发冲突的限制标志位
 sed -i 's/| ISC_REQ_USE_SUPPLIED_CREDS//g' src/WinTLSSession.cc
 
-# 3) 【核心修复一】修复重协商时的第 2 个参数 (phContext)
+# 3) 【精简修复一：修复重协商句柄】
+# 匹配 ::InitializeSecurityContext(cred_, nullptr, host 并替换
 sed -i 's/::InitializeSecurityContext(cred_, nullptr, host/::InitializeSecurityContext(cred_, (handle_.dwLower || handle_.dwUpper) ? \&handle_ : nullptr, host/g' src/WinTLSSession.cc
 
-# 4) 【核心修复二】修复后续握手读阶段的第 9 个参数 (phNewContext)，将 nullptr 替换为 &handle_
-sed -i 's/\&indesc, 0, nullptr, \&outdesc/\&indesc, 0, \&handle_, \&outdesc/g' src/WinTLSSession.cc
+# 4) 【精简修复二：修复后续握手句柄更新】
+# 仅匹配独占一行的 "0, nullptr, &outdesc" 并替换（规避跨行匹配失败）
+sed -i 's/0, nullptr, \&outdesc/0, \&handle_, \&outdesc/g' src/WinTLSSession.cc
 
-# 5) 【核心修复三】补齐 TLS 1.3 的 switch-case 分支，防止系统默认采用 TLS 1.3 时崩溃
+# 5) 【精简修复三：补齐 TLS 1.3 的 switch-case 分支】
 sed -i '/case 0x303:/i\    case 0x304:\n      version = TLS_PROTO_TLS13;\n      break;' src/WinTLSSession.cc
 
-# ============================================================
+# ==================== 编译前自动验证（核心步骤） ====================
+echo "==================== [验证] 检查补丁是否成功应用 ===================="
+echo "1. 检查重协商修复（应显示 handle_.dwLower 判定）："
+grep -n "InitializeSecurityContext(cred_," src/WinTLSSession.cc || echo "未找到匹配行！"
+
+echo "2. 检查后续握手句柄更新修复（应显示 &handle_, &outdesc）："
+grep -n "0, \&handle_, \&outdesc" src/WinTLSSession.cc || echo "未找到匹配行！"
+
+echo "3. 检查 TLS 1.3 协议支持（应显示 case 0x304 分支）："
+grep -n -C 3 "case 0x304" src/WinTLSSession.cc || echo "未找到匹配行！"
+echo "===================================================================="
 autoreconf -i
 ./configure \
     --host=$HOST \
