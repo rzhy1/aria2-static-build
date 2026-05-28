@@ -264,8 +264,23 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void sock_state_cb(void\* arg, int fd, int read, int write)/void sock_state_cb(void\* arg, ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
-# 在 WinTLSContext.cc 中查找 SCHANNEL_CRED 相关初始化，并添加协议版本设置
-sed -i '/SCHANNEL_CRED schCred;/a\    schCred.grbitEnabledProtocols = SP_PROT_TLS1_2_CLIENT | SP_PROT_TLS1_3_CLIENT;' src/WinTLSContext.cc
+# ==================== WinTLS 修复部分 ====================
+
+# 修复一：开启 TLS 1.2 和 TLS 1.3 支持（修改 WinTLSContext.cc）
+# 1) 兼容旧版 MinGW 头文件，防止缺少 TLS 1.3 宏定义
+sed -i '/#include "WinTLSContext.h"/a #ifndef SP_PROT_TLS1_3_CLIENT\n#define SP_PROT_TLS1_3_CLIENT 0x00002000\n#endif' src/WinTLSContext.cc
+# 2) 在 dwFlags 赋值之后插入协议设置，避免被 memset 清零
+sed -i '/schCred.dwFlags =/a\  schCred.grbitEnabledProtocols = SP_PROT_TLS1_2_CLIENT | SP_PROT_TLS1_3_CLIENT;' src/WinTLSContext.cc
+
+# 修复二：解决握手阶段的 SEC_E_UNSUPPORTED_FUNCTION 错误（修改 WinTLSSession.cc）
+# 移除 ISC_REQ_USE_SUPPLIED_CREDS 标志位
+sed -i 's/| ISC_REQ_USE_SUPPLIED_CREDS//g' src/WinTLSSession.cc
+
+# 修复三：防止成功协商 TLS 1.3 时程序 abort 崩溃（修改 WinTLSSession.cc）
+# 在 getProtocolVersion 的 switch-case 中注入 0x304 (TLS 1.3) 分支
+sed -i '/case 0x303:/i\    case 0x304:\n      version = TLS_PROTO_TLS13;\n      break;' src/WinTLSSession.cc
+
+# ========================================================
 autoreconf -i
 ./configure \
     --host=$HOST \
