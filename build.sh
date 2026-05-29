@@ -261,40 +261,6 @@ git clone -j$(nproc) --depth 1 https://github.com/aria2/aria2.git
 cd aria2
 sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
 sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
-# ==================== WinTLS 终极整改补丁 ====================
-
-# 1) 将过时的安全通道提供者替换为标准的 SCHANNEL_NAME
-sed -i 's/UNISP_NAME/SCHANNEL_NAME/g' src/WinTLSContext.cc
-
-# 2) 【核心修复：锁定 TLS 1.2，避开 Win11 TLS 1.3 + 代理隧道的系统 Bug】
-sed -i '/credentials_.dwFlags = SCH_CRED_NO_DEFAULT_CREDS;/a\  credentials_.grbitEnabledProtocols = SP_PROT_TLS1_2_CLIENT;' src/WinTLSContext.cc
-
-# 3) 移除限制连接的旧标志位（保持与 curl 一致）
-sed -i 's/| ISC_REQ_USE_SUPPLIED_CREDS//g' src/WinTLSSession.cc
-
-# 4) 【重协商句柄修复】修复重协商时的第 2 个参数 (phContext)
-sed -i 's/::InitializeSecurityContext(cred_, nullptr, host/::InitializeSecurityContext(cred_, (handle_.dwLower || handle_.dwUpper) ? \&handle_ : nullptr, host/g' src/WinTLSSession.cc
-
-# 5) 【握手句柄更新修复】修复后续握手读阶段的第 9 个参数 (phNewContext)，将 nullptr 替换为 &handle_
-sed -i 's/0, nullptr, \&outdesc/0, \&handle_, \&outdesc/g' src/WinTLSSession.cc
-
-# 6) 【TLS 1.3 状态机兼容】补齐 TLS 1.3 的 switch-case 分支
-sed -i '/case 0x303:/i\    case 0x304:\n      version = TLS_PROTO_TLS13;\n      break;' src/WinTLSSession.cc
-
-# ==================== 编译前自动验证 ====================
-echo "==================== [验证] 检查补丁是否成功应用 ===================="
-echo "1. 检查 TLS 1.2 锁定（应显示 grbitEnabledProtocols = SP_PROT_TLS1_2_CLIENT）："
-grep -n -A 2 "dwFlags" src/WinTLSContext.cc || echo "未找到匹配行！"
-
-echo "2. 检查重协商修复（应显示 handle_.dwLower 判定）："
-grep -n "InitializeSecurityContext(cred_," src/WinTLSSession.cc || echo "未找到匹配行！"
-
-echo "3. 检查后续握手句柄更新修复（应显示 &handle_, &outdesc）："
-grep -n "0, \&handle_, \&outdesc" src/WinTLSSession.cc || echo "未找到匹配行！"
-
-echo "4. 检查 TLS 1.3 协议支持（应显示 case 0x304 分支）："
-grep -n -C 3 "case 0x304" src/WinTLSSession.cc || echo "未找到匹配行！"
-echo "===================================================================="
 autoreconf -i
 ./configure \
     --host=$HOST \
