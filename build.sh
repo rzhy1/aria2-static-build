@@ -265,30 +265,30 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
 # ==================== WinTLS 终极整改补丁 ====================
-
+make clean
 # 1) 将过时的安全通道提供者替换为标准的 SCHANNEL_NAME
 sed -i 's/UNISP_NAME/SCHANNEL_NAME/g' src/WinTLSContext.cc
 
 # 2) 【关键修复：解锁 Win11 TLS 1.3】
-# 直接将手动验证标志替换为 0，使 Schannel 使用系统根证书库进行自动验证
-sed -i 's/SCH_CRED_MANUAL_CRED_VALIDATION/0/g' src/WinTLSContext.cc
+# 替换冲突标志位为 0（允许 Schannel 进行自动服务器域名校验，解决 TLS 1.3 底层握手冲突）
+sed -i 's/SCH_CRED_NO_SERVER_NAME_CHECK/0/g' src/WinTLSContext.cc
 
 # 3) 移除限制连接的旧标志位（保持与 curl 一致）
 sed -i 's/| ISC_REQ_USE_SUPPLIED_CREDS//g' src/WinTLSSession.cc
 
-# 4) 【核心修复一】修复重协商时的第 2 个参数 (phContext)
+# 4) 【重协商句柄修复】修复重协商时的第 2 个参数 (phContext)
 sed -i 's/::InitializeSecurityContext(cred_, nullptr, host/::InitializeSecurityContext(cred_, (handle_.dwLower || handle_.dwUpper) ? \&handle_ : nullptr, host/g' src/WinTLSSession.cc
 
-# 5) 【核心修复二】修复后续握手读阶段的第 9 个参数 (phNewContext)，将 nullptr 替换为 &handle_
+# 5) 【握手句柄更新修复】修复后续握手读阶段的第 9 个参数 (phNewContext)，将 nullptr 替换为 &handle_
 sed -i 's/0, nullptr, \&outdesc/0, \&handle_, \&outdesc/g' src/WinTLSSession.cc
 
-# 6) 【核心修复三】补齐 TLS 1.3 的 switch-case 分支
+# 6) 【TLS 1.3 状态机兼容】补齐 TLS 1.3 的 switch-case 分支
 sed -i '/case 0x303:/i\    case 0x304:\n      version = TLS_PROTO_TLS13;\n      break;' src/WinTLSSession.cc
 
 # ==================== 编译前自动验证 ====================
 echo "==================== [验证] 检查补丁是否成功应用 ===================="
-echo "1. 检查凭证标志位修改（应显示 | 0，即成功关闭手动证书验证）："
-grep -n "dwFlags" src/WinTLSContext.cc || echo "未找到匹配行！"
+echo "1. 检查凭证标志位修改（应显示 | 0，即成功关闭域名检测屏蔽以解锁 Win11 TLS 1.3）："
+grep -n "SCH_CRED_REVOCATION_CHECK_CHAIN" src/WinTLSContext.cc || echo "未找到匹配行！"
 
 echo "2. 检查重协商修复（应显示 handle_.dwLower 判定）："
 grep -n "InitializeSecurityContext(cred_," src/WinTLSSession.cc || echo "未找到匹配行！"
