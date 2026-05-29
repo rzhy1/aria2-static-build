@@ -265,7 +265,6 @@ sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENG
 #sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
 #sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
 # ==================== WinTLS 终极整改补丁 ====================
-make clean
 # 1) 将过时的安全通道提供者替换为标准的 SCHANNEL_NAME
 sed -i 's/UNISP_NAME/SCHANNEL_NAME/g' src/WinTLSContext.cc
 
