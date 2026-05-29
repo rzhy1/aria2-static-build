@@ -261,33 +261,36 @@ git clone -j$(nproc) --depth 1 https://github.com/aria2/aria2.git
 cd aria2
 sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
 sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
-#sed -i 's/void sock_state_cb(void\* arg, int fd, int read, int write)/void sock_state_cb(void\* arg, ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
-#sed -i 's/void AsyncNameResolver::handle_sock_state(int fd, int read, int write)/void AsyncNameResolver::handle_sock_state(ares_socket_t fd, int read, int write)/g' src/AsyncNameResolver.cc
-#sed -i 's/void handle_sock_state(int sock, int read, int write)/void handle_sock_state(ares_socket_t sock, int read, int write)/g' src/AsyncNameResolver.h
-# ==================== WinTLS 终极整改补丁 ====================
-# 1) 将过时的安全通道提供者替换为标准的 SCHANNEL_NAME
+# ==================== WinTLS 终极融合补丁 ====================
+
+# 1) 兼容性宏定义：在 WinTLSContext.cc 头部防止旧版 MinGW 编译时缺少 TLS 1.3 宏
+sed -i '/#include "WinTLSContext.h"/a #ifndef SP_PROT_TLS1_2_CLIENT\n#define SP_PROT_TLS1_2_CLIENT 0x00000800\n#endif\n#ifndef SP_PROT_TLS1_3_CLIENT\n#define SP_PROT_TLS1_3_CLIENT 0x00002000\n#endif' src/WinTLSContext.cc
+
+# 2) 将过时的安全通道提供者替换为标准的 SCHANNEL_NAME
 sed -i 's/UNISP_NAME/SCHANNEL_NAME/g' src/WinTLSContext.cc
 
-# 2) 【关键修复：解锁 Win11 TLS 1.3】
-# 替换冲突标志位为 0（允许 Schannel 进行自动服务器域名校验，解决 TLS 1.3 底层握手冲突）
+# 3) 【凭证修复】显式启用 TLS 1.2 和 TLS 1.3 协议标志（强效启用）
+sed -i '/credentials_.dwFlags = SCH_CRED_NO_DEFAULT_CREDS;/a\  credentials_.grbitEnabledProtocols = SP_PROT_TLS1_2_CLIENT | SP_PROT_TLS1_3_CLIENT;' src/WinTLSContext.cc
+
+# 4) 【标志修复】移除在 Windows 11 TLS 1.3 下会导致握手直接崩溃的 SCH_CRED_NO_SERVER_NAME_CHECK 标志
 sed -i 's/SCH_CRED_NO_SERVER_NAME_CHECK/0/g' src/WinTLSContext.cc
 
-# 3) 移除限制连接的旧标志位（保持与 curl 一致）
+# 5) 移除限制连接的旧标志位（保持与 curl 一致）
 sed -i 's/| ISC_REQ_USE_SUPPLIED_CREDS//g' src/WinTLSSession.cc
 
-# 4) 【重协商句柄修复】修复重协商时的第 2 个参数 (phContext)
+# 6) 【核心修复：重协商自适应 phContext】修复重协商时的第 2 个参数 (phContext)
 sed -i 's/::InitializeSecurityContext(cred_, nullptr, host/::InitializeSecurityContext(cred_, (handle_.dwLower || handle_.dwUpper) ? \&handle_ : nullptr, host/g' src/WinTLSSession.cc
 
-# 5) 【握手句柄更新修复】修复后续握手读阶段的第 9 个参数 (phNewContext)，将 nullptr 替换为 &handle_
+# 7) 【核心修复：握手句柄更新】修复后续握手读阶段的第 9 个参数 (phNewContext)，将 nullptr 替换为 &handle_
 sed -i 's/0, nullptr, \&outdesc/0, \&handle_, \&outdesc/g' src/WinTLSSession.cc
 
-# 6) 【TLS 1.3 状态机兼容】补齐 TLS 1.3 的 switch-case 分支
+# 8) 【状态机修复】补齐 TLS 1.3 的 switch-case 分支
 sed -i '/case 0x303:/i\    case 0x304:\n      version = TLS_PROTO_TLS13;\n      break;' src/WinTLSSession.cc
 
 # ==================== 编译前自动验证 ====================
-echo "==================== [验证] 检查补丁是否成功应用 ===================="
-echo "1. 检查凭证标志位修改（应显示 | 0，即成功关闭域名检测屏蔽以解锁 Win11 TLS 1.3）："
-grep -n "SCH_CRED_REVOCATION_CHECK_CHAIN" src/WinTLSContext.cc || echo "未找到匹配行！"
+echo "==================== [验证] 检查融合补丁是否成功应用 ===================="
+echo "1. 检查凭证标志位与协议启用（应显式设置 grbitEnabledProtocols 包含 TLS 1.3）："
+grep -n -A 3 "dwFlags =" src/WinTLSContext.cc || echo "未找到匹配行！"
 
 echo "2. 检查重协商修复（应显示 handle_.dwLower 判定）："
 grep -n "InitializeSecurityContext(cred_," src/WinTLSSession.cc || echo "未找到匹配行！"
