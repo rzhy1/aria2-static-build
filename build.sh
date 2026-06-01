@@ -261,15 +261,6 @@ git clone -j$(nproc) --depth 1 https://github.com/aria2/aria2.git
 cd aria2
 sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
 sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
-
-# 下载并覆盖（带错误处理）
-tmp_dir=$(mktemp -d)
-for file in WinTLSContext.cc WinTLSContext.h WinTLSSession.cc WinTLSSession.h; do
-    curl -L -o "$tmp_dir/$file" "https://github.com/rzhy1/aria2-zero/raw/refs/heads/master/src/tls/wintls/$file" || exit 1
-    cp "$tmp_dir/$file" "src/$file"
-done
-rm -rf "$tmp_dir"
-
 autoreconf -i
 ./configure \
     --host=$HOST \
