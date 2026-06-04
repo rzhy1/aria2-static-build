@@ -182,8 +182,7 @@ prepare_zlib_ng() {
 }
 
 prepare_xz() {
-  # 从 GitHub API 获取最新版本号
-  xz_tag="$(retry wget -qO- https://api.github.com/repos/tukaani-project/xz/releases/latest | grep '"tag_name"' | sed -E 's/.*"v?([^"]+)".*/\1/')"
+  xz_tag="$(retry wget -qO- https://api.github.com/repos/tukaani-project/xz/releases/latest | jq -r '.tag_name' | sed 's/^v//')"
   xz_latest_url="https://github.com/tukaani-project/xz/releases/download/v${xz_tag}/xz-${xz_tag}.tar.xz"  
   if [ ! -f "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz.part" "${xz_latest_url}"
@@ -270,7 +269,7 @@ prepare_sqlite() {
     ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
-  local LDFLAGS="${LDFLAGS} -lwinpthread"
+  LDFLAGS="${LDFLAGS} -lwinpthread" \
   CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
     --enable-threadsafe \
     --enable-static \
@@ -390,15 +389,12 @@ build_aria2() {
     autoreconf -i
   fi
 
-  if [ x"${TARGET_HOST}" = xwin ]; then
+  if [ x"${TARGET_HOST}" = "Windows" ]; then
     ARIA2_EXT_CONF='--without-openssl'
   fi
-  
-  # 保留局部 LDFLAGS/CXXFLAGS 声明：在 Bash 中因为全局已 export，这些 local 变量在 ./configure 子进程中依然有效
-  local LDFLAGS="$LDFLAGS -lwinpthread -lws2_32 -liphlpapi"
-  local CXXFLAGS="$CXXFLAGS -fno-rtti"
 
-  # 【优化 2】：修正了 --with-cppunit-prefix 的错误变量名（$PREFIX -> ${CROSS_PREFIX}）
+  LDFLAGS="$LDFLAGS -lwinpthread -lws2_32 -liphlpapi" \
+  CXXFLAGS="$CXXFLAGS -fno-rtti" \
   ./configure \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
@@ -440,7 +436,7 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 cma
 prepare_cmake
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ninja⭐⭐⭐⭐⭐⭐"
 prepare_ninja
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib_ng ⭐⭐⭐⭐⭐加"
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib_ng ⭐⭐⭐⭐⭐"
 prepare_zlib_ng
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 xz ⭐⭐⭐⭐⭐⭐"
 prepare_xz
