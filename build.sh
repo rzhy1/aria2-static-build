@@ -17,7 +17,7 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PREFIX/share/pkgconfig"
-export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -flto=$(nproc) -pipe  -g0"
+export CFLAGS="-march=x86-64-v3 -O2 -ffunction-sections -fdata-sections -flto=$(nproc) -pipe  -g0"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="-Wl,--gc-sections -flto=$(nproc)"
 
@@ -37,8 +37,7 @@ else
 fi
 end_time=$(date +%s.%N)
 duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-# ln -sf /opt/mingw64/bin/x86_64-w64-mingw32-* /usr/bin/ 一次链接所有
-sudo ln -s $(which lld-link) /usr/bin/x86_64-w64-mingw32-ld.lld
+sudo ln -s $(which ld.lld) /usr/bin/x86_64-w64-mingw32-ld.lld
 
 echo "x86_64-w64-mingw32-gcc版本是："
 x86_64-w64-mingw32-gcc --version
@@ -57,18 +56,16 @@ echo "|------------|---------|--------|" >>"${BUILD_INFO}"
 retry() {
   local max_retries=5
   local sleep_seconds=3
-  local command="$@"
-
   for (( i=1; i<=max_retries; i++ )); do
-    echo "正在执行 (重试次数: $i): $command" >&2
-    if $command; then
+    echo "正在执行 (重试次数: $i): $@" >&2
+    if "$@"; then
       return 0
     else
-      echo "命令 '$command' 执行失败 (重试次数: $i)" >&2
+      echo "命令 '$*' 执行失败 (重试次数: $i)" >&2
       sleep "$sleep_seconds"
     fi
   done
-  echo "命令 '$command' 执行失败 (已达到最大重试次数)" >&2
+  echo "命令 '$*' 执行失败 (已达到最大重试次数)" >&2
   return 1
 }
 
@@ -76,8 +73,8 @@ retry() {
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
 gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9.]+\.tar\.(xz|gz)"' | sed -r 's/href="gmp-([0-9.]+)\.tar\..+"/\1/' | sort -rV | head -n 1)"
-echo "gmp最新版本是${gmp_tag} ，下载地址是hhttps://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
-curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
+echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
+retry  curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
 #curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
 
@@ -143,8 +140,7 @@ csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to
 tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1)
 sqlite_latest_url="https://www.sqlite.org/${tarball_url}"
 echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
-curl -L ${sqlite_latest_url} | tar xz
-#curl -L https://www.sqlite.org/2024/sqlite-autoconf-3470200.tar.gz | tar xz
+retry  curl -L ${sqlite_latest_url} | tar xz
 cd sqlite-*
 #export LDFLAGS="$LDFLAGS -L/opt/mingw64/x86_64-w64-mingw32/sysroot/usr/x86_64-w64-mingw32/lib -lpthread"
 ./configure \
@@ -180,8 +176,7 @@ zlib_latest_url=$(retry curl -s "https://api.github.com/repos/madler/zlib/releas
 #zlib_tag="$(retry wget -qO- --compression=auto https://zlib.net/ \| grep -i "'<FONT.*FONT>'" \| sed -r "'s/.*zlib\s*([^<]+).*/\1/'" \| head -1)"
 #zlib_latest_url="https://zlib.net/zlib-${zlib_tag}.tar.gz"
 echo "zlib最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
-curl -L ${zlib_latest_url} | tar xz
-#curl -L https://github.com/madler/zlib/releases/download/v1.3.1/zlib-1.3.1.tar.gz | tar xz
+retry  curl -L ${zlib_latest_url} | tar xz
 cd zlib-*
 CC=$HOST-gcc \
 AR=$HOST-ar \
@@ -205,8 +200,7 @@ start_time=$(date +%s.%N)
 cares_tag=$(retry curl -s https://api.github.com/repos/c-ares/c-ares/releases/latest | jq -r '.tag_name | sub("^v"; "")')
 cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
 echo "cares最新版本是${cares_tag} ，下载地址是${cares_latest_url}"
-curl -L ${cares_latest_url} | tar xz
-#curl -L https://github.com/c-ares/c-ares/releases/download/v1.34.1/c-ares-1.34.1.tar.gz | tar xz
+retry  curl -L ${cares_latest_url} | tar xz
 cd c-ares-*
 ./configure \
     --disable-shared \
@@ -230,8 +224,7 @@ start_time=$(date +%s.%N)
 libssh2_tag=$(retry curl -s https://libssh2.org/download/ | grep -o 'libssh2-[0-9.]*\.tar\.\(gz\|xz\)' | sed -n 's/.*libssh2-\([0-9.]*\)\.tar\.\(gz\|xz\).*/\1/p' | sort -V | tail -n 1)
 libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
 echo "libssh2最新版本是${libssh2_tag} ，下载地址是${libssh2_latest_url}"
-curl -L ${libssh2_latest_url} | tar xz
-#curl -L https://libssh2.org/download/libssh2-1.11.0.tar.gz | tar xz
+retry  curl -L ${libssh2_latest_url} | tar xz
 cd libssh2-*
 ./configure \
     --disable-shared \
@@ -256,7 +249,7 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ari
 start_time=$(date +%s.%N)
 ARIA2_VERSION=master
 ARIA2_REF=refs/heads/master
-curl -L -o version.json https://api.github.com/repos/aria2/aria2/git/$ARIA2_REF
+retry curl -L -o version.json https://api.github.com/repos/aria2/aria2/git/$ARIA2_REF
 git clone -j$(nproc) --depth 1 https://github.com/aria2/aria2.git
 cd aria2
 sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
