@@ -17,9 +17,9 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PREFIX/share/pkgconfig"
-export CFLAGS="-march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -flto=$(nproc) -pipe  -g0"
+export CFLAGS="-march=tigerlake -mtune=tigerlake -O3 -ffunction-sections -fdata-sections -flto=-flto -pipe  -g0"
 export CXXFLAGS="$CFLAGS"
-export LDFLAGS="-Wl,--gc-sections -flto=$(nproc)"
+export LDFLAGS="-Wl,--gc-sections -flto=auto"
 
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载最新版mingw-w64⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
@@ -72,7 +72,11 @@ retry() {
 # 1. 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-gmp_tag="$(retry curl -s https://ftp.gnu.org/gnu/gmp/ | grep -oE 'href="gmp-[0-9.]+\.tar\.(xz|gz)"' | sed -r 's/href="gmp-([0-9.]+)\.tar\..+"/\1/' | sort -rV | head -n 1)"
+gmp_tag="$(
+    retry curl -s 'https://ftp.gnu.org/gnu/gmp/?C=M;O=D' |
+    grep -oP 'gmp-\K[0-9.]+(?=\.tar\.xz)' |
+    head -n1
+)"
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 retry  curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
@@ -109,8 +113,18 @@ duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 # 2.  Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') -  Expat⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-expat_tag=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest | jq -r '.tag_name' | sed 's/R_//' | tr _ .)
-expat_latest_url=$(retry curl -s "https://api.github.com/repos/libexpat/libexpat/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.bz2$")) | .browser_download_url' | head -n 1)
+expat_json=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest)
+expat_tag=$(
+    jq -r '.tag_name' <<<"$expat_json" |
+    sed 's/R_//' |
+    tr '_' '.'
+)
+expat_latest_url=$(
+    jq -r '.assets[] |
+    select(.name|test("\\.tar\\.bz2$")) |
+    .browser_download_url' <<<"$expat_json" |
+    head -n1
+)
 echo "libexpat最新版本是${expat_tag} ，下载地址是${expat_latest_url}"
 curl -L ${expat_latest_url} | tar xj
 #curl -L https://github.com/libexpat/libexpat/releases/download/R_2_6_3/expat-2.6.3.tar.bz2 | tar xj
@@ -133,12 +147,21 @@ duration3=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 # 3.  SQLite
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') -  SQLite⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-sqlite_tag=$(curl -s https://sqlite.org/index.html | awk '/Version [0-9]+\.[0-9]+\.[0-9]+/ {match($0, /Version ([0-9]+\.[0-9]+\.[0-9]+)/, a); print a[1]; exit}')
-echo "sqlite最新版本是${sqlite_tag}"
-download_page=$(curl -sL "https://www.sqlite.org/download.html")
-csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
-tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1)
-sqlite_latest_url="https://www.sqlite.org/${tarball_url}"
+download_page=$(retry curl -sL https://www.sqlite.org/download.html)
+tarball_url=$(
+    grep -oP 'sqlite-autoconf-[0-9]+\.tar\.gz' <<<"$download_page" |
+    head -n1
+)
+sqlite_latest_url="https://www.sqlite.org/$(date +%Y)/${tarball_url}"
+sqlite_num=$(
+    grep -oP 'sqlite-autoconf-\K[0-9]+' <<<"$tarball_url"
+)
+sqlite_tag="$(
+    printf "%d.%d.%d" \
+    $((sqlite_num/1000000)) \
+    $(((sqlite_num/1000)%1000)) \
+    $((sqlite_num%1000))
+)"
 echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 retry  curl -L ${sqlite_latest_url} | tar xz
 cd sqlite-*
@@ -171,10 +194,17 @@ export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 # 4. 下载并编译 zlib
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-zlib_tag=$(retry curl -s https://api.github.com/repos/madler/zlib/releases/latest | jq -r '.name' | cut -d' ' -f2)
-zlib_latest_url=$(retry curl -s "https://api.github.com/repos/madler/zlib/releases/latest" | jq -r '.assets[] | select(.name | test("\\.tar\\.gz$")) | .browser_download_url' | head -n 1)
-#zlib_tag="$(retry wget -qO- --compression=auto https://zlib.net/ \| grep -i "'<FONT.*FONT>'" \| sed -r "'s/.*zlib\s*([^<]+).*/\1/'" \| head -1)"
-#zlib_latest_url="https://zlib.net/zlib-${zlib_tag}.tar.gz"
+zlib_json=$(retry curl -s https://api.github.com/repos/madler/zlib/releases/latest)
+zlib_tag=$(
+    jq -r '.name' <<<"$zlib_json" |
+    cut -d' ' -f2
+)
+zlib_latest_url=$(
+    jq -r '.assets[] |
+    select(.name|test("\\.tar\\.gz$")) |
+    .browser_download_url' <<<"$zlib_json" |
+    head -n1
+)
 echo "zlib最新版本是${zlib_tag} ，下载地址是${zlib_latest_url}"
 retry  curl -L ${zlib_latest_url} | tar xz
 cd zlib-*
@@ -221,7 +251,11 @@ duration6=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 # 6. 下载并编译 libssh2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libssh2⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-libssh2_tag=$(retry curl -s https://libssh2.org/download/ | grep -o 'libssh2-[0-9.]*\.tar\.\(gz\|xz\)' | sed -n 's/.*libssh2-\([0-9.]*\)\.tar\.\(gz\|xz\).*/\1/p' | sort -V | tail -n 1)
+libssh2_tag=$(
+    retry curl -s https://libssh2.org/download/ |
+    grep -oP 'libssh2-\K[0-9.]+(?=\.tar\.gz)' |
+    tail -n1
+)
 libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
 echo "libssh2最新版本是${libssh2_tag} ，下载地址是${libssh2_latest_url}"
 retry  curl -L ${libssh2_latest_url} | tar xz
@@ -290,7 +324,11 @@ autoreconf -i
     PKG_CONFIG="/usr/bin/pkg-config" \
     PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
 make -j$(nproc)
-$HOST-strip src/aria2c.exe
+$HOST-strip \
+    --strip-all \
+    --remove-section=.comment \
+    --remove-section=.note \
+    src/aria2c.exe
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
 ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
 aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
