@@ -17,7 +17,7 @@ PREFIX=$PWD/$HOST
 SELF_DIR="$(dirname "$(realpath "${0}")")"
 BUILD_INFO="${SELF_DIR}/build_info.md"
 export PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig:$PREFIX/share/pkgconfig"
-export CFLAGS="-march=tigerlake -mtune=tigerlake -O3 -ffunction-sections -fdata-sections -flto=-flto -pipe  -g0"
+export CFLAGS="-march=tigerlake -mtune=tigerlake -O3 -ffunction-sections -fdata-sections -flto=auto -pipe  -g0"
 export CXXFLAGS="$CFLAGS"
 export LDFLAGS="-Wl,--gc-sections -flto=auto"
 
