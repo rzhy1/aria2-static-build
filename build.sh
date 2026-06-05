@@ -146,13 +146,11 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') -  SQLite⭐⭐⭐⭐
 start_time=$(date +%s.%N)
 download_page=$(retry curl -sL https://www.sqlite.org/download.html)
 tarball_url=$(
-    grep -oP 'sqlite-autoconf-[0-9]+\.tar\.gz' <<<"$download_page" |
+    grep -oP '20[0-9]{2}/sqlite-autoconf-[0-9]+\.tar\.gz' <<<"$download_page" |
     head -n1
 )
-sqlite_latest_url="https://www.sqlite.org/$(date +%Y)/${tarball_url}"
-sqlite_num=$(
-    grep -oP 'sqlite-autoconf-\K[0-9]+' <<<"$tarball_url"
-)
+sqlite_latest_url="https://www.sqlite.org/${tarball_url}"
+sqlite_num=$(grep -oP 'sqlite-autoconf-\K[0-9]+' <<<"$tarball_url")
 sqlite_tag="$(
     printf "%d.%d.%d" \
     $((sqlite_num/1000000)) \
