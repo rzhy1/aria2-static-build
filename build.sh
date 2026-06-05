@@ -73,16 +73,14 @@ retry() {
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
 gmp_tag="$(
-    retry curl -s 'https://ftp.gnu.org/gnu/gmp/?C=M;O=D' |
-    grep -oP 'gmp-\K[0-9.]+(?=\.tar\.xz)' |
-    head -n1
+    retry curl -s https://ftp.gnu.org/gnu/gmp/ |
+    grep -oP 'gmp-\K[0-9.]+(?=\.tar\.(xz|gz))' |
+    sort -V |
+    tail -n1
 )"
 echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
 retry  curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
 cd gmp-*
-#curl -o configure https://raw.githubusercontent.com/rzhy1/aria2-static-build/refs/heads/main/configure || exit 1
-
-# patch configure（不检测long long）
 find_and_comment() {
   local file="$1"
   local search_str="Test compile: long long reliability test"
@@ -95,7 +93,6 @@ find_and_comment() {
     current_line=$((end_line + 1))
   done < <(awk -v s="$search_str" -v cl="$current_line" 'NR >= cl && !/^# / && $0 ~ s {print NR}' "$file")
 }
-#find_and_comment "configure"  && echo "configure文件修改完成"
 sed -i '/Test compile: long long reliability test/i echo "int main() { return 0; }" > conftest.c' configure
 chmod +x configure
 BUILD_CC=gcc BUILD_CXX=g++ ./configure \
@@ -253,7 +250,8 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 lib
 start_time=$(date +%s.%N)
 libssh2_tag=$(
     retry curl -s https://libssh2.org/download/ |
-    grep -oP 'libssh2-\K[0-9.]+(?=\.tar\.gz)' |
+    grep -oP 'libssh2-\K[0-9.]+(?=\.tar\.(gz|xz))' |
+    sort -V |
     tail -n1
 )
 libssh2_latest_url="https://libssh2.org/download/libssh2-${libssh2_tag}.tar.gz"
