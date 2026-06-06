@@ -144,13 +144,12 @@ duration3=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 # 3.  SQLite
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') -  SQLite⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
+sqlite_tag=$(curl -s https://sqlite.org/index.html | awk '/Version [0-9]+\.[0-9]+\.[0-9]+/ {match($0, /Version ([0-9]+\.[0-9]+\.[0-9]+)/, a); print a[1]; exit}')
+echo "sqlite最新版本是${sqlite_tag}"
 download_page=$(curl -sL "https://www.sqlite.org/download.html")
 csv_data=$(echo "$download_page" | sed -n '/Download product data for scripts to read/,/-->/p')
-autoconf_line=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | head -n1)
-sqlite_num=$(echo "$autoconf_line" | cut -d ',' -f 2)
-tarball_url=$(echo "$autoconf_line" | cut -d ',' -f 3)
+tarball_url=$(echo "$csv_data" | grep "autoconf.*\.tar\.gz" | cut -d ',' -f 3 | head -n 1)
 sqlite_latest_url="https://www.sqlite.org/${tarball_url}"
-sqlite_tag="$((sqlite_num/1000000)).$(((sqlite_num/1000)%1000)).$((sqlite_num%1000))"
 echo "sqlite最新版本是${sqlite_tag}，下载地址是${sqlite_latest_url}"
 retry  curl -L ${sqlite_latest_url} | tar xz
 cd sqlite-*
