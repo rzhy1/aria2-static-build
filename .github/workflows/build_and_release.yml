@@ -46,13 +46,6 @@ jobs:
             ["mirror.koddos.net"]="http://mirror.koddos.net/ubuntu/dists/$CODENAME/Release.gpg"
             ["ftp.rrze.de"]="http://ftp.rrze.de/ubuntu/dists/$CODENAME/Release.gpg"
             ["mirrors.dotsrc.org"]="http://mirrors.dotsrc.org/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirrors.tencent.com"]="http://mirrors.tencent.com/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirrors.aliyun.com"]="http://mirrors.aliyun.com/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirrors.tuna.tsinghua.edu.cn"]="http://mirrors.tuna.tsinghua.edu.cn/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirrors.ustc.edu.cn"]="http://mirrors.ustc.edu.cn/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirrors.huaweicloud.com"]="http://mirrors.huaweicloud.com/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirrors.bfsu.edu.cn"]="http://mirrors.bfsu.edu.cn/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirrors.sjtug.sjtu.edu.cn"]="http://mirrors.sjtug.sjtu.edu.cn/ubuntu/dists/$CODENAME/Release.gpg"
           )
           
           FASTEST_MIRROR=""
