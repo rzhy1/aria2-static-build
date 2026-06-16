@@ -39,7 +39,6 @@ jobs:
             ["security.ubuntu.com"]="http://security.ubuntu.com/ubuntu/dists/$CODENAME-security/Release.gpg"
             ["mirrors.mit.edu"]="http://mirrors.mit.edu/ubuntu/dists/$CODENAME/Release.gpg"
             ["mirror.csclub.uwaterloo.ca"]="http://mirror.csclub.uwaterloo.ca/ubuntu/dists/$CODENAME/Release.gpg"
-            ["ubuntu.mirror.ac.za"]="http://ubuntu.mirror.ac.za/ubuntu/dists/$CODENAME/Release.gpg"
             ["ubuntu.mirror.digitalpacific.com.au"]="http://ubuntu.mirror.digitalpacific.com.au/ubuntu/dists/$CODENAME/Release.gpg"
             ["mirror.lagoon.nc"]="http://mirror.lagoon.nc/ubuntu/dists/$CODENAME/Release.gpg"
             ["ubuntu.mirror.rafal.ca"]="http://ubuntu.mirror.rafal.ca/ubuntu/dists/$CODENAME/Release.gpg"
