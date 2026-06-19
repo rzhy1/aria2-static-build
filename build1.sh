@@ -5,7 +5,7 @@ export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
 
-export CFLAGS="-I${CROSS_PREFIX}/include -march=tigerlake -mtune=tigerlake -O2 -ffunction-sections -fdata-sections -pipe -flto=auto -g0"
+export CFLAGS="-I${CROSS_PREFIX}/include -march=x86-64-v3 -O2 -ffunction-sections -fdata-sections -pipe -flto=auto -g0"
 export CXXFLAGS="$CFLAGS"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig"
 export LDFLAGS="-L${CROSS_PREFIX}/lib64 -L${CROSS_PREFIX}/lib -static -static-libgcc -static-libstdc++ -s -Wl,--gc-sections -flto=auto"
