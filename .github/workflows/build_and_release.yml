@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-26.04
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Get Ubuntu codename
         run: |
           # 获取 Ubuntu 版本代号
@@ -141,7 +141,7 @@ jobs:
       image: ubuntu:devel
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Install prerequisites
         run: |
           apt-get update
