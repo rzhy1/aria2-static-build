@@ -31,35 +31,36 @@ jobs:
         run: |
           echo "Testing mirror speeds for Ubuntu $CODENAME..."
           
-          # 动态生成镜像URL
           declare -A MIRROR_URLS=(
-            ["archive.ubuntu.com"]="http://archive.ubuntu.com/ubuntu/dists/$CODENAME/Release.gpg"
-            ["azure.archive.ubuntu.com"]="http://azure.archive.ubuntu.com/ubuntu/dists/$CODENAME/Release.gpg"
-            ["ports.ubuntu.com"]="http://ports.ubuntu.com/ubuntu-ports/dists/$CODENAME/Release.gpg"
-            ["security.ubuntu.com"]="http://security.ubuntu.com/ubuntu/dists/$CODENAME-security/Release.gpg"
-            ["mirrors.mit.edu"]="http://mirrors.mit.edu/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirror.csclub.uwaterloo.ca"]="http://mirror.csclub.uwaterloo.ca/ubuntu/dists/$CODENAME/Release.gpg"
-            ["ubuntu.mirror.digitalpacific.com.au"]="http://ubuntu.mirror.digitalpacific.com.au/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirror.lagoon.nc"]="http://mirror.lagoon.nc/ubuntu/dists/$CODENAME/Release.gpg"
-            ["ubuntu.mirror.rafal.ca"]="http://ubuntu.mirror.rafal.ca/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirrors.coreix.net"]="http://mirrors.coreix.net/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirror.koddos.net"]="http://mirror.koddos.net/ubuntu/dists/$CODENAME/Release.gpg"
-            ["ftp.rrze.de"]="http://ftp.rrze.de/ubuntu/dists/$CODENAME/Release.gpg"
-            ["mirrors.dotsrc.org"]="http://mirrors.dotsrc.org/ubuntu/dists/$CODENAME/Release.gpg"
+                  ["archive.ubuntu.com"]="http://archive.ubuntu.com/ubuntu/dists/$CODENAME/Release.gpg"
+                  ["azure.archive.ubuntu.com"]="http://azure.archive.ubuntu.com/ubuntu/dists/$CODENAME/Release.gpg"
+                  ["ports.ubuntu.com"]="http://ports.ubuntu.com/ubuntu-ports/dists/$CODENAME/Release.gpg"
+                  ["security.ubuntu.com"]="http://security.ubuntu.com/ubuntu/dists/$CODENAME-security/Release.gpg"
+                  ["mirrors.mit.edu"]="http://mirrors.mit.edu/ubuntu/dists/$CODENAME/Release.gpg"
+                  ["mirror.csclub.uwaterloo.ca"]="http://mirror.csclub.uwaterloo.ca/ubuntu/dists/$CODENAME/Release.gpg"
+                  ["ubuntu.mirror.digitalpacific.com.au"]="http://ubuntu.mirror.digitalpacific.com.au/ubuntu/dists/$CODENAME/Release.gpg"
+                  ["mirror.lagoon.nc"]="http://mirror.lagoon.nc/ubuntu/dists/$CODENAME/Release.gpg"
+                  ["ubuntu.mirror.rafal.ca"]="http://ubuntu.mirror.rafal.ca/ubuntu/dists/$CODENAME/Release.gpg"
+                  ["mirrors.coreix.net"]="http://mirrors.coreix.net/ubuntu/dists/$CODENAME/Release.gpg"
+                  ["mirror.koddos.net"]="http://mirror.koddos.net/ubuntu/dists/$CODENAME/Release.gpg"
+                  ["ftp.rrze.de"]="http://ftp.rrze.de/ubuntu/dists/$CODENAME/Release.gpg"
+                  ["mirrors.dotsrc.org"]="http://mirrors.dotsrc.org/ubuntu/dists/$CODENAME/Release.gpg"
           )
           
           FASTEST_MIRROR=""
-          FASTEST_TIME=999999
+          FASTEST_TIME=999999999
           
           for mirror in "${!MIRROR_URLS[@]}"; do
             echo -n "Testing $mirror ... "
             URL="${MIRROR_URLS[$mirror]}"
             
-            # 使用timeout确保不会卡住
-            START_TIME=$(date +%s%3N)
-            if timeout 10s curl --connect-timeout 5 --silent --output /dev/null "$URL"; then
-              END_TIME=$(date +%s%3N)
-              TIME_MS=$((END_TIME - START_TIME))
+            # 使用 curl 的 time_total 变量，单位是秒
+            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 -m 10 "$URL" 2>/dev/null)
+            TIME_TOTAL=$(curl -s -o /dev/null -w "%{time_total}" --connect-timeout 5 -m 10 "$URL" 2>/dev/null)
+            
+            if [ "$HTTP_CODE" = "200" ]; then
+              # 转换为毫秒
+              TIME_MS=$(echo "$TIME_TOTAL * 1000" | bc | cut -d'.' -f1)
               echo "${TIME_MS}ms"
               
               if [ "$TIME_MS" -lt "$FASTEST_TIME" ]; then
