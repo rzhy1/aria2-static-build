@@ -36,7 +36,6 @@ jobs:
                   ["azure.archive.ubuntu.com"]="http://azure.archive.ubuntu.com/ubuntu/dists/$CODENAME/Release.gpg"
                   ["ports.ubuntu.com"]="http://ports.ubuntu.com/ubuntu-ports/dists/$CODENAME/Release.gpg"
                   ["security.ubuntu.com"]="http://security.ubuntu.com/ubuntu/dists/$CODENAME-security/Release.gpg"
-                  ["mirrors.mit.edu"]="http://mirrors.mit.edu/ubuntu/dists/$CODENAME/Release.gpg"
                   ["mirror.csclub.uwaterloo.ca"]="http://mirror.csclub.uwaterloo.ca/ubuntu/dists/$CODENAME/Release.gpg"
                   ["ubuntu.mirror.digitalpacific.com.au"]="http://ubuntu.mirror.digitalpacific.com.au/ubuntu/dists/$CODENAME/Release.gpg"
                   ["mirror.lagoon.nc"]="http://mirror.lagoon.nc/ubuntu/dists/$CODENAME/Release.gpg"
