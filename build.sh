@@ -110,7 +110,7 @@ duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 # 2.  Expat
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') -  Expat⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-expat_json=$(retry curl -s https://api.github.com/repos/libexpat/libexpat/releases/latest)
+expat_json=$(retry curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/libexpat/libexpat/releases/latest)
 expat_tag=$(
     jq -r '.tag_name' <<<"$expat_json" |
     sed 's/R_//' |
@@ -182,7 +182,7 @@ export LDFLAGS="$LDFLAGS -L$PREFIX/lib"
 # 4. 下载并编译 zlib
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-zlib_json=$(retry curl -s https://api.github.com/repos/madler/zlib/releases/latest)
+zlib_json=$(retry curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/madler/zlib/releases/latest)
 zlib_tag=$(
     jq -r '.name' <<<"$zlib_json" |
     cut -d' ' -f2
@@ -215,7 +215,7 @@ duration5=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 # 5. 下载并编译 c-ares
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 c-ares⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-cares_tag=$(retry curl -s https://api.github.com/repos/c-ares/c-ares/releases/latest | jq -r '.tag_name | sub("^v"; "")')
+cares_tag=$(retry curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/c-ares/c-ares/releases/latest | jq -r '.tag_name | sub("^v"; "")')
 cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
 echo "cares最新版本是${cares_tag} ，下载地址是${cares_latest_url}"
 retry  curl -L ${cares_latest_url} | tar xz
@@ -272,7 +272,7 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 ari
 start_time=$(date +%s.%N)
 ARIA2_VERSION=master
 ARIA2_REF=refs/heads/master
-retry curl -L -o version.json https://api.github.com/repos/aria2/aria2/git/$ARIA2_REF
+retry curl -s -H "Authorization: token $GITHUB_TOKEN"  -L -o version.json https://api.github.com/repos/aria2/aria2/git/$ARIA2_REF
 git clone -j$(nproc) --depth 1 https://github.com/aria2/aria2.git
 cd aria2
 sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
