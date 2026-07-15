@@ -111,6 +111,7 @@ jobs:
       - name: Compile
         env:
           CROSS_HOST: "x86_64-w64-mingw32"
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
           chmod +x "${GITHUB_WORKSPACE}/build.sh"
           "${GITHUB_WORKSPACE}/build.sh"
@@ -154,8 +155,6 @@ jobs:
           CROSS_HOST: "x86_64-w64-mingw32"
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_TOKEN }}
         run: |
-          echo "GITHUB_TOKEN is set: ${GITHUB_TOKEN:+yes}"
-          echo "GITHUB_TOKEN length: ${#GITHUB_TOKEN}"
           chmod +x "${GITHUB_WORKSPACE}/build1.sh"
           "${GITHUB_WORKSPACE}/build1.sh"
       - name: Upload sqlite config.log on failure
