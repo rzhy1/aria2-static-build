@@ -154,7 +154,7 @@ prepare_libiconv() {
 }
 
 prepare_zlib_ng() {
-    zlib_ng_latest_tag="$(retry wget -qO- https://api.github.com/repos/zlib-ng/zlib-ng/releases/latest | jq -r '.tag_name')"
+	zlib_ng_latest_tag="$(retry curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/zlib-ng/zlib-ng/releases/latest | jq -r '.tag_name')"
     zlib_ng_latest_url="https://github.com/zlib-ng/zlib-ng/archive/refs/tags/${zlib_ng_latest_tag}.tar.gz"
     mkdir -p "/usr/src/zlib-ng"
     cd "/usr/src/zlib-ng"
@@ -182,7 +182,7 @@ prepare_zlib_ng() {
 }
 
 prepare_xz() {
-  xz_tag="$(retry wget -qO- https://api.github.com/repos/tukaani-project/xz/releases/latest | jq -r '.tag_name' | sed 's/^v//')"
+  xz_tag="$(retry curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/tukaani-project/xz/releases/latest | jq -r '.tag_name' | sed 's/^v//')"
   xz_latest_url="https://github.com/tukaani-project/xz/releases/download/v${xz_tag}/xz-${xz_tag}.tar.xz"  
   if [ ! -f "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz" ]; then
     retry wget -cT10 -O "${DOWNLOADS_DIR}/xz-${xz_tag}.tar.xz.part" "${xz_latest_url}"
@@ -225,7 +225,7 @@ prepare_gmp() {
 }
 
 prepare_libxml2() {
-  libxml2_tag=$(retry wget -qO- https://api.github.com/repos/GNOME/libxml2/tags | jq -r '.[].name' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/^v//' | sort -Vr | head -n1)
+  libxml2_tag=$(retry curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/GNOME/libxml2/tags | jq -r '.[].name' | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | sed 's/^v//' | sort -Vr | head -n1)
   echo "版本号是${libxml2_tag}"
   libxml2_latest_url="https://download.gnome.org/sources/libxml2/${libxml2_tag%.*}/libxml2-${libxml2_tag}.tar.xz"
   libxml2_filename="libxml2-${libxml2_tag}.tar.xz"
@@ -292,7 +292,7 @@ prepare_sqlite() {
 }
 
 prepare_c_ares() {
-  cares_tag="$(retry wget -qO- --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
+  cares_tag="$(retry curl -s -H "Authorization: token $GITHUB_TOKEN"  --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
   cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
   #cares_latest_url="https://github.com/c-ares/c-ares/archive/master.tar.gz"
   if [[ ! $cares_latest_url =~ master\.tar\.gz ]]; then
