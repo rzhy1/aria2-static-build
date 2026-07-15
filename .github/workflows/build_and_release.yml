@@ -34,10 +34,8 @@ jobs:
           declare -A MIRROR_URLS=(
                   ["archive.ubuntu.com"]="http://archive.ubuntu.com/ubuntu/dists/$CODENAME/Release.gpg"
                   ["azure.archive.ubuntu.com"]="http://azure.archive.ubuntu.com/ubuntu/dists/$CODENAME/Release.gpg"
-                  ["ports.ubuntu.com"]="http://ports.ubuntu.com/ubuntu-ports/dists/$CODENAME/Release.gpg"
                   ["security.ubuntu.com"]="http://security.ubuntu.com/ubuntu/dists/$CODENAME-security/Release.gpg"
                   ["mirror.csclub.uwaterloo.ca"]="http://mirror.csclub.uwaterloo.ca/ubuntu/dists/$CODENAME/Release.gpg"
-                  ["ubuntu.mirror.digitalpacific.com.au"]="http://ubuntu.mirror.digitalpacific.com.au/ubuntu/dists/$CODENAME/Release.gpg"
                   ["mirror.lagoon.nc"]="http://mirror.lagoon.nc/ubuntu/dists/$CODENAME/Release.gpg"
                   ["ubuntu.mirror.rafal.ca"]="http://ubuntu.mirror.rafal.ca/ubuntu/dists/$CODENAME/Release.gpg"
                   ["mirrors.coreix.net"]="http://mirrors.coreix.net/ubuntu/dists/$CODENAME/Release.gpg"
