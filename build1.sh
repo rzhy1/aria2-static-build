@@ -1,9 +1,5 @@
 #!/bin/bash -e
-if [ -z "$GITHUB_TOKEN" ]; then
-  echo "错误：GITHUB_TOKEN 环境变量未设置！"
-else
-  echo "GITHUB_TOKEN 环境变量已设置（长度: ${#GITHUB_TOKEN}）"
-fi
+
 export CROSS_HOST="x86_64-w64-mingw32"
 export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
