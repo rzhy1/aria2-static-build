@@ -292,7 +292,7 @@ prepare_sqlite() {
 }
 
 prepare_c_ares() {
-  cares_tag="$(retry curl -s -H "Authorization: token $GITHUB_TOKEN"  --compression=auto https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
+  cares_tag="$(retry curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/c-ares/c-ares/releases | jq -r '.[0].tag_name | sub("^v"; "")')"
   cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_tag}/c-ares-${cares_tag}.tar.gz"
   #cares_latest_url="https://github.com/c-ares/c-ares/archive/master.tar.gz"
   if [[ ! $cares_latest_url =~ master\.tar\.gz ]]; then
