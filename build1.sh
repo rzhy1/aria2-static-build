@@ -282,7 +282,6 @@ prepare_sqlite() {
     --disable-editline \
     --disable-math \
     --disable-load-extension
-  # 保留用户原先的手动极简拷贝逻辑
   make -j$(nproc) libsqlite3.a ||  exit 1
   cp libsqlite3.a "${CROSS_PREFIX}/lib/" ||  exit 1
   cp sqlite3.h sqlite3ext.h "${CROSS_PREFIX}/include/" ||  exit 1
@@ -317,7 +316,8 @@ prepare_c_ares() {
     --disable-shared \
     --enable-silent-rules \
     --disable-tests \
-    --without-random
+    --without-random \
+	--build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
   make -j$(nproc)
   cp -f src/lib/.libs/libcares.a "${CROSS_PREFIX}/lib/" || exit 1
   cp -f include/*.h "${CROSS_PREFIX}/include/" || exit 1
@@ -341,7 +341,8 @@ prepare_libssh2() {
     --disable-examples-build \
     --disable-docker-tests \
     --disable-sshd-tests \
-    --disable-debug 
+    --disable-debug \
+	--build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
   make -j$(nproc)
   make install
   libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
@@ -425,6 +426,7 @@ build_aria2() {
     --disable-libtool-lock \
     --disable-checking \
     --enable-checking=release \
+	--build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     --disable-tests \
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF}
