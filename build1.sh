@@ -174,7 +174,7 @@ prepare_zlib_ng() {
       -DCMAKE_C_COMPILER="${CROSS_HOST}-gcc" \
       -DCMAKE_CXX_COMPILER="${CROSS_HOST}-g++" \
       -DCMAKE_SYSTEM_PROCESSOR="${TARGET_ARCH}" \
-	  -DWITH_VISIBILITY=OFF \
+	  -DCMAKE_C_FLAGS="${CFLAGS} -UHAVE_VISIBILITY_HIDDEN -UHAVE_VISIBILITY_INTERNAL" \
       -DWITH_GTEST=OFF
     cmake --build build
     cmake --install build
