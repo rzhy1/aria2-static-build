@@ -4,7 +4,10 @@ export CROSS_HOST="x86_64-w64-mingw32"
 export CROSS_ROOT="/cross_root"
 export PATH="${CROSS_ROOT}/bin:${PATH}"
 export CROSS_PREFIX="${CROSS_ROOT}/${CROSS_HOST}"
-
+export CC="${CROSS_HOST}-gcc"
+export CXX="${CROSS_HOST}-g++"
+export AR="${CROSS_HOST}-ar"
+export RANLIB="${CROSS_HOST}-ranlib"
 export CFLAGS="-I${CROSS_PREFIX}/include -march=x86-64-v3 -O2 -ffunction-sections -fdata-sections -pipe -flto=auto -g0"
 export CXXFLAGS="$CFLAGS"
 export PKG_CONFIG_PATH="${CROSS_PREFIX}/lib64/pkgconfig:${CROSS_PREFIX}/lib/pkgconfig"
@@ -171,6 +174,7 @@ prepare_zlib_ng() {
       -DCMAKE_C_COMPILER="${CROSS_HOST}-gcc" \
       -DCMAKE_CXX_COMPILER="${CROSS_HOST}-g++" \
       -DCMAKE_SYSTEM_PROCESSOR="${TARGET_ARCH}" \
+	  -DWITH_VISIBILITY=OFF \
       -DWITH_GTEST=OFF
     cmake --build build
     cmake --install build
@@ -245,10 +249,7 @@ prepare_libxml2() {
     --without-python \
     --without-iconv \
     --without-icu \
-    --without-lzma \
-    --without-iconv \
-    --without-zlib \
-    --disable-doc
+    --without-zlib
   make -j$(nproc)
   make install
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
@@ -266,7 +267,6 @@ prepare_sqlite() {
   tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
   cd "/usr/src/sqlite-${sqlite_tag}"
   if [ x"${TARGET_HOST}" = x"Windows" ]; then
-    ln -sf mksourceid.exe mksourceid
     SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
   fi
   LDFLAGS="${LDFLAGS} -lwinpthread" \
@@ -453,5 +453,5 @@ build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
 
 # get release
-${CROSS_HOST}-strip --strip-all "/usr/src/aria2-master/src/aria2c.exe"
-mv -fv "/usr/src/aria2-master/src/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
+${CROSS_HOST}-strip --strip-all "/usr/src/aria2-${aria2_tag}/src/aria2c.exe"
+mv -fv "/usr/src/aria2-${aria2_tag}/src/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
