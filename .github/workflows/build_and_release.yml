@@ -32,16 +32,16 @@ jobs:
           echo "Testing mirror speeds for Ubuntu $CODENAME..."
           
           declare -A MIRROR_URLS=(
-                  ["archive.ubuntu.com"]="http://archive.ubuntu.com/ubuntu/dists/$CODENAME/Release.gpg"
-                  ["azure.archive.ubuntu.com"]="http://azure.archive.ubuntu.com/ubuntu/dists/$CODENAME/Release.gpg"
-                  ["security.ubuntu.com"]="http://security.ubuntu.com/ubuntu/dists/$CODENAME-security/Release.gpg"
-                  ["mirror.csclub.uwaterloo.ca"]="http://mirror.csclub.uwaterloo.ca/ubuntu/dists/$CODENAME/Release.gpg"
-                  ["mirror.lagoon.nc"]="http://mirror.lagoon.nc/ubuntu/dists/$CODENAME/Release.gpg"
-                  ["ubuntu.mirror.rafal.ca"]="http://ubuntu.mirror.rafal.ca/ubuntu/dists/$CODENAME/Release.gpg"
-                  ["mirrors.coreix.net"]="http://mirrors.coreix.net/ubuntu/dists/$CODENAME/Release.gpg"
-                  ["mirror.koddos.net"]="http://mirror.koddos.net/ubuntu/dists/$CODENAME/Release.gpg"
-                  ["ftp.rrze.de"]="http://ftp.rrze.de/ubuntu/dists/$CODENAME/Release.gpg"
-                  ["mirrors.dotsrc.org"]="http://mirrors.dotsrc.org/ubuntu/dists/$CODENAME/Release.gpg"
+              ["archive.ubuntu.com"]="http://archive.ubuntu.com/ubuntu/dists/$CODENAME/Release.gpg"
+              ["azure.archive.ubuntu.com"]="http://azure.archive.ubuntu.com/ubuntu/dists/$CODENAME/Release.gpg"
+              ["security.ubuntu.com"]="http://security.ubuntu.com/ubuntu/dists/$CODENAME-security/Release.gpg"
+              ["mirror.csclub.uwaterloo.ca"]="http://mirror.csclub.uwaterloo.ca/ubuntu/dists/$CODENAME/Release.gpg"
+              ["mirror.lagoon.nc"]="http://mirror.lagoon.nc/ubuntu/dists/$CODENAME/Release.gpg"
+              ["ubuntu.mirror.rafal.ca"]="http://ubuntu.mirror.rafal.ca/ubuntu/dists/$CODENAME/Release.gpg"
+              ["mirrors.coreix.net"]="http://mirrors.coreix.net/ubuntu/dists/$CODENAME/Release.gpg"
+              ["mirror.koddos.net"]="http://mirror.koddos.net/ubuntu/dists/$CODENAME/Release.gpg"
+              ["ftp.rrze.de"]="http://ftp.rrze.de/ubuntu/dists/$CODENAME/Release.gpg"
+              ["mirrors.dotsrc.org"]="http://mirrors.dotsrc.org/ubuntu/dists/$CODENAME/Release.gpg"
           )
           
           FASTEST_MIRROR=""
@@ -51,21 +51,25 @@ jobs:
             echo -n "Testing $mirror ... "
             URL="${MIRROR_URLS[$mirror]}"
             
-            # 使用 curl 的 time_total 变量，单位是秒
-            HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" --connect-timeout 5 -m 10 "$URL" 2>/dev/null)
-            TIME_TOTAL=$(curl -s -o /dev/null -w "%{time_total}" --connect-timeout 5 -m 10 "$URL" 2>/dev/null)
+            # 一次性获取 HTTP 状态码和总耗时（秒），并捕获 curl 错误
+            response=$(curl -s -o /dev/null -w "%{http_code} %{time_total}" \
+                --connect-timeout 5 -m 10 "$URL" 2>/dev/null) || true
             
-            if [ "$HTTP_CODE" = "200" ]; then
-              # 转换为毫秒
-              TIME_MS=$(echo "$TIME_TOTAL * 1000" | bc | cut -d'.' -f1)
-              echo "${TIME_MS}ms"
-              
-              if [ "$TIME_MS" -lt "$FASTEST_TIME" ]; then
-                FASTEST_MIRROR="$mirror"
-                FASTEST_TIME="$TIME_MS"
+            if [ -n "$response" ]; then
+              read -r http_code time_total <<< "$response"
+              # 检查状态码是否为 200 且 time_total 为有效数字
+              if [ "$http_code" = "200" ] && [[ "$time_total" =~ ^[0-9.]+$ ]]; then
+                time_ms=$(echo "$time_total * 1000" | bc | cut -d'.' -f1)
+                echo "${time_ms}ms"
+                if [ "$time_ms" -lt "$FASTEST_TIME" ]; then
+                  FASTEST_MIRROR="$mirror"
+                  FASTEST_TIME="$time_ms"
+                fi
+              else
+                echo "failed (HTTP $http_code)"
               fi
             else
-              echo "failed"
+              echo "failed (curl error)"
             fi
           done
           
