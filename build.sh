@@ -40,6 +40,11 @@ duration1=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 sudo ln -s $(which ld.lld) /usr/bin/x86_64-w64-mingw32-ld.lld
 
 echo "x86_64-w64-mingw32-gcc版本是："
+# 1. 确认使用的是你自编译的路径
+which x86_64-w64-mingw32-gcc
+
+# 2. 查看这个 gcc 本身的文件架构（在 ARM 机器上，它必须显示为 ARM aarch64）
+file $(which x86_64-w64-mingw32-gcc)
 x86_64-w64-mingw32-gcc --version
 #x86_64-w64-mingw32-gcc -print-search-dirs
 
