@@ -320,7 +320,8 @@ prepare_c_ares() {
     -DCARES_BUILD_TOOLS=OFF \
     -DCARES_BUILD_TESTS=OFF
   cmake --build build
-  cp -f src/lib/libcares.a "${CROSS_PREFIX}/lib/" || exit 1
+  find / -name "libcares.a" 2>/dev/null
+  cp -f build/lib/libcares.a "${CROSS_PREFIX}/lib/" || exit 1
   cp -f include/*.h "${CROSS_PREFIX}/include/" || exit 1
   cp -f libcares.pc "${CROSS_PREFIX}/lib/pkgconfig/" || exit 1
   
