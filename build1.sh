@@ -276,11 +276,8 @@ prepare_sqlite() {
   mkdir -p "/usr/src/sqlite-${sqlite_tag}"
   tar -zxf "${DOWNLOADS_DIR}/sqlite-${sqlite_tag}.tar.gz" --strip-components=1 -C "/usr/src/sqlite-${sqlite_tag}"
   cd "/usr/src/sqlite-${sqlite_tag}"
-  if [ x"${TARGET_HOST}" = x"Windows" ]; then
-    SQLITE_EXT_CONF="config_TARGET_EXEEXT=.exe"
-  fi
   LDFLAGS="${LDFLAGS} -lwinpthread" \
-  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  "${SQLITE_EXT_CONF}" \
+  CFLAGS="$CFLAGS -DHAVE_PTHREAD" ./configure --build="${BUILD_ARCH}" --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --disable-shared  \
     --enable-threadsafe \
     --enable-static \
     --enable-silent-rules \
