@@ -268,22 +268,51 @@ end_time=$(date +%s.%N)
 duration7=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
 
 # 7. 下载并编译 aria2
-echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 aria2⭐⭐⭐⭐⭐⭐"
+echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并在内存中编译 aria2⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
-ARIA2_VERSION=master
-ARIA2_REF=refs/heads/master
-retry curl -s -H "Authorization: token $GITHUB_TOKEN"  -L -o version.json https://api.github.com/repos/aria2/aria2/git/$ARIA2_REF
-git clone -j$(nproc) --depth 1 https://github.com/aria2/aria2.git
-cd aria2
+
+# 1. 兼容变量定义
+HOST="${HOST:-${CROSS_HOST:-x86_64-w64-mingw32}}"
+PREFIX="${PREFIX:-${CROSS_PREFIX:-/cross_root/x86_64-w64-mingw32}}"
+SELF_DIR="${SELF_DIR:-$(dirname "$(realpath "${0}")")}"
+BUILD_INFO="${BUILD_INFO:-${SELF_DIR}/build_info.md}"
+
+# 2. 智能探测可用的内存盘目录（防止 /dev/shm 出现 noexec 权限问题）
+mount -o remount,exec /dev/shm 2>/dev/null || true
+if touch /dev/shm/test_exec.sh 2>/dev/null && chmod +x /dev/shm/test_exec.sh && /dev/shm/test_exec.sh 2>/dev/null; then
+  rm -f /dev/shm/test_exec.sh
+  ARIA2_RAM_DIR="/dev/shm/aria2_build_$$"
+else
+  rm -f /dev/shm/test_exec.sh 2>/dev/null || true
+  echo "提示: /dev/shm 存在 noexec 限制，自动切换至 /tmp 内存目录..."
+  ARIA2_RAM_DIR="/tmp/aria2_build_$$"
+fi
+
+# 3. 清理并进入内存编译目录
+rm -rf "${ARIA2_RAM_DIR}"
+mkdir -p "${ARIA2_RAM_DIR}"
+cd "${ARIA2_RAM_DIR}"
+
+# 4. 直接克隆到内存中
+ARIA2_REF="refs/heads/master"
+retry curl -s -H "Authorization: token $GITHUB_TOKEN" -L -o version.json "https://api.github.com/repos/aria2/aria2/git/${ARIA2_REF}" 2>/dev/null || true
+git clone -j$(nproc) --depth 1 https://github.com/aria2/aria2.git .
+
+# 5. 代码补丁修改
 sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
 sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
+
+# 6. 生成并赋予 configure 执行权限
 autoreconf -i
+chmod +x ./configure
+
+# 7. 配置与编译
 ./configure \
-    --host=$HOST \
-    --prefix=$PREFIX \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    --with-sysroot=$PREFIX \
-    --with-cppunit-prefix=$PREFIX \
+    --host="${HOST}" \
+    --prefix="${PREFIX}" \
+    --build="$(gcc -dumpmachine)" \
+    --with-sysroot="${PREFIX}" \
+    --with-cppunit-prefix="${PREFIX}" \
     --enable-silent-rules \
     --with-libz \
     --with-libgmp \
@@ -304,31 +333,44 @@ autoreconf -i
     --without-included-gettext \
     --disable-epoll \
     --disable-nls \
+    --disable-checking \
     --disable-dependency-tracking \
     --disable-libtool-lock \
-    --disable-checking \
     ARIA2_STATIC=yes \
-    SQLITE3_LIBS="-L$PREFIX/lib -lsqlite3 -lpthread" \
-    CPPFLAGS="-I$PREFIX/include" \
+    SQLITE3_LIBS="-L${PREFIX}/lib -lsqlite3 -lwinpthread" \
+    CPPFLAGS="-I${PREFIX}/include" \
     PKG_CONFIG="/usr/bin/pkg-config" \
-    PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig"
+    PKG_CONFIG_PATH="${PREFIX}/lib/pkgconfig:${PREFIX}/lib64/pkgconfig"
+
 make -j$(nproc)
-$HOST-strip \
+
+# 8. Strip 并提取最终生成物
+${HOST}-strip \
     --strip-all \
     --remove-section=.comment \
     --remove-section=.note \
     src/aria2c.exe
+
 mv -fv "src/aria2c.exe" "${SELF_DIR}/aria2c.exe"
-ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS)
+
+# 9. 记录版本信息
+ARIA2_VER=$(grep -oP 'aria2 \K\d+(\.\d+)*' NEWS || echo "master")
 aria2_latest_url="https://github.com/aria2/aria2/archive/master.tar.gz"
-echo "| aria2 |  ${ARIA2_VER} | ${aria2_latest_url:-cached aria2} |" >>"${BUILD_INFO}"
+echo "| aria2 | ${ARIA2_VER} | ${aria2_latest_url} |" >>"${BUILD_INFO}"
+
+# 10. 清理内存盘以释放 RAM 资源
+cd "${SELF_DIR}"
+rm -rf "${ARIA2_RAM_DIR}"
+
+# 11. 统计并输出耗时
 end_time=$(date +%s.%N)
-duration8=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
-echo "下载mingw-w64用时: ${duration1}s"
-echo "编译 GMP 用时: ${duration2}s"
-echo "编译 Expat 用时: ${duration3}s"
-echo "编译 SQLite 用时: ${duration4}s"
-echo "编译 zlib 用时: ${duration5}s"
-echo "编译 c-ares 用时: ${duration6}s"
-echo "编译 libssh2 用时: ${duration7}s"
+duration8=$(awk -v e="$end_time" -v s="$start_time" 'BEGIN {printf "%.1f", e - s}')
+
+echo "下载mingw-w64用时: ${duration1:-0}s"
+echo "编译 GMP 用时: ${duration2:-0}s"
+echo "编译 Expat 用时: ${duration3:-0}s"
+echo "编译 SQLite 用时: ${duration4:-0}s"
+echo "编译 zlib 用时: ${duration5:-0}s"
+echo "编译 c-ares 用时: ${duration6:-0}s"
+echo "编译 libssh2 用时: ${duration7:-0}s"
 echo "编译 aria2 用时: ${duration8}s"
