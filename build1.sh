@@ -438,7 +438,6 @@ build_aria2() {
     --disable-dependency-tracking \
     --disable-libtool-lock \
     --disable-checking \
-    --enable-checking=release \
 	--build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
     --disable-tests \
     ARIA2_STATIC=yes \
