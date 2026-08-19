@@ -277,7 +277,7 @@ SELF_DIR="${SELF_DIR:-$(dirname "$(realpath "${0}")")}"
 BUILD_INFO="${BUILD_INFO:-${SELF_DIR}/build_info.md}"
 
 # 2. 智能探测可用的内存盘目录（防止 /dev/shm 出现 noexec 权限问题）
-mount -o remount,exec /dev/shm 2>/dev/null || true
+sudo mount -o remount,exec /dev/shm 2>/dev/null || true
 if touch /dev/shm/test_exec.sh 2>/dev/null && chmod +x /dev/shm/test_exec.sh && /dev/shm/test_exec.sh 2>/dev/null; then
   rm -f /dev/shm/test_exec.sh
   ARIA2_RAM_DIR="/dev/shm/aria2_build_$$"
