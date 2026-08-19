@@ -243,18 +243,25 @@ prepare_libxml2() {
   mkdir -p "/usr/src/libxml2-${libxml2_tag}"
   tar -axf "${DOWNLOADS_DIR}/${libxml2_filename}" --strip-components=1 -C "/usr/src/libxml2-${libxml2_tag}"
   cd "/usr/src/libxml2-${libxml2_tag}"
-  ./configure \
-    --host="${CROSS_HOST}" \
-    --prefix="${CROSS_PREFIX}" \
-    --enable-silent-rules \
-    --enable-static \
-    --disable-shared \
-    --without-python \
-    --without-iconv \
-    --without-icu \
-    --without-zlib
-  make -j$(nproc)
-  make install
+  rm -rf build
+  cmake -B build \
+    -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_SYSTEM_NAME=Windows \
+    -DCMAKE_SYSTEM_PROCESSOR="${TARGET_ARCH}" \
+    -DCMAKE_INSTALL_PREFIX="${CROSS_PREFIX}" \
+    -DCMAKE_C_COMPILER="${CROSS_HOST}-gcc" \
+    -DCMAKE_C_FLAGS="${CFLAGS}" \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DLIBXML2_WITH_PROGRAMS=OFF \
+    -DLIBXML2_WITH_TESTS=OFF \
+    -DLIBXML2_WITH_PYTHON=OFF \
+    -DLIBXML2_WITH_ICONV=OFF \
+    -DLIBXML2_WITH_ICU=OFF \
+    -DLIBXML2_WITH_LZMA=OFF \
+    -DLIBXML2_WITH_ZLIB=OFF
+  cmake --build build
+  cmake --install build
   libxml2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/"libxml-*.pc | awk '{print $2}')"
   echo "| libxml2 | ${libxml2_ver} | ${libxml2_latest_url:-cached libxml2} |" >>"${BUILD_INFO}"
 }
