@@ -320,10 +320,7 @@ prepare_c_ares() {
     -DCARES_BUILD_TOOLS=OFF \
     -DCARES_BUILD_TESTS=OFF
   cmake --build build
-  find / -name "libcares.a" 2>/dev/null
-  cp -f build/lib/libcares.a "${CROSS_PREFIX}/lib/" || exit 1
-  cp -f include/*.h "${CROSS_PREFIX}/include/" || exit 1
-  cp -f libcares.pc "${CROSS_PREFIX}/lib/pkgconfig/" || exit 1
+  cmake --install buil
   
   cares_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libcares.pc" | awk '{print $2}')"
   echo "| c-ares | ${cares_ver} | ${cares_latest_url:-cached c-ares} |" >>"${BUILD_INFO}"
