@@ -391,7 +391,7 @@ build_aria2() {
     mv -fv "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz.part" "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz"
   fi
   
-  mount -o remount,exec /dev/shm 2>/dev/null || true
+  sudo mount -o remount,exec /dev/shm 2>/dev/null || true
   if touch /dev/shm/test_exec.sh 2>/dev/null && chmod +x /dev/shm/test_exec.sh && /dev/shm/test_exec.sh 2>/dev/null; then
     rm -f /dev/shm/test_exec.sh
     export ARIA2_BUILD_DIR="/dev/shm/aria2-${aria2_tag}"
