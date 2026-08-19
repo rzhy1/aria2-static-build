@@ -223,7 +223,7 @@ cd c-ares-*
 cmake -B build -G Ninja \
     -DCMAKE_SYSTEM_NAME=Windows \
     -DCMAKE_INSTALL_PREFIX=$PREFIX \
-    -DCMAKE_C_COMPILER="$PREFIX-gcc" \
+    -DCMAKE_C_COMPILER="$HOST-gcc" \
     -DCARES_STATIC=ON \
     -DCARES_SHARED=OFF \
     -DCARES_BUILD_TOOLS=OFF \
