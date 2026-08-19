@@ -391,15 +391,22 @@ build_aria2() {
     mv -fv "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz.part" "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz"
   fi
   
-  sudo mount -o remount,exec /dev/shm 2>/dev/null || true
-  if touch /dev/shm/test_exec.sh 2>/dev/null && chmod +x /dev/shm/test_exec.sh && /dev/shm/test_exec.sh 2>/dev/null; then
-    rm -f /dev/shm/test_exec.sh
-    export ARIA2_BUILD_DIR="/dev/shm/aria2-${aria2_tag}"
-  else
-    rm -f /dev/shm/test_exec.sh 2>/dev/null || true
-    echo "/dev/shm 存在 noexec 限制，自动切换至 /tmp 目录编译..."
-    export ARIA2_BUILD_DIR="/tmp/aria2-${aria2_tag}"
-  fi
+  # 1. 解除 /dev/shm 执行限制
+	sudo mount -o remount,exec /dev/shm 2>/dev/null || true
+	
+	# 2. 正确测试（写入真正的脚本内容，避免 0 字节空文件报错）
+	echo -e '#!/bin/sh\nexit 0' > /dev/shm/test_exec.sh
+	chmod +x /dev/shm/test_exec.sh
+	
+	if /dev/shm/test_exec.sh 2>/dev/null; then
+	  rm -f /dev/shm/test_exec.sh
+	  ARIA2_RAM_DIR="/dev/shm/aria2_build_$$"
+	  echo "✅ /dev/shm 可执行权限正常，将在 /dev/shm 内存盘中编译！"
+	else
+	  rm -f /dev/shm/test_exec.sh
+	  echo "⚠️ /dev/shm 确实受限，回退到 /tmp 内存目录..."
+	  ARIA2_RAM_DIR="/tmp/aria2_build_$$"
+	fi
   rm -rf "${ARIA2_BUILD_DIR}"
   mkdir -p "${ARIA2_BUILD_DIR}"
   tar -zxf "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz" --strip-components=1 -C "${ARIA2_BUILD_DIR}"
