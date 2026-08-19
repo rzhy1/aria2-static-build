@@ -390,11 +390,21 @@ build_aria2() {
     retry wget -cT10 -O "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz.part" "${aria2_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz.part" "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz"
   fi
-  export ARIA2_BUILD_DIR="/dev/shm/aria2-${aria2_tag}"
+  
+  mount -o remount,exec /dev/shm 2>/dev/null || true
+  if touch /dev/shm/test_exec.sh 2>/dev/null && chmod +x /dev/shm/test_exec.sh && /dev/shm/test_exec.sh 2>/dev/null; then
+    rm -f /dev/shm/test_exec.sh
+    export ARIA2_BUILD_DIR="/dev/shm/aria2-${aria2_tag}"
+  else
+    rm -f /dev/shm/test_exec.sh 2>/dev/null || true
+    echo "/dev/shm 存在 noexec 限制，自动切换至 /tmp 目录编译..."
+    export ARIA2_BUILD_DIR="/tmp/aria2-${aria2_tag}"
+  fi
   rm -rf "${ARIA2_BUILD_DIR}"
   mkdir -p "${ARIA2_BUILD_DIR}"
   tar -zxf "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz" --strip-components=1 -C "${ARIA2_BUILD_DIR}"
   cd "${ARIA2_BUILD_DIR}"
+  
   sed -i 's/res += "zlib\/" ZLIB_VERSION " ";/res += "zlib_ng\/" ZLIBNG_VERSION " ";/' "src/FeatureConfig.cc"
   sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
   sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
@@ -441,7 +451,7 @@ build_aria2() {
     --disable-dependency-tracking \
     --disable-libtool-lock \
     --disable-checking \
-	--build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
+	--build="$(gcc -dumpmachine)" \
     --disable-tests \
     ARIA2_STATIC=yes \
     ${ARIA2_EXT_CONF}
