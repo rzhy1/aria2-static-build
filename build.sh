@@ -222,8 +222,8 @@ retry  curl -L ${cares_latest_url} | tar xz
 cd c-ares-*
 cmake -B build -G Ninja \
     -DCMAKE_SYSTEM_NAME=Windows \
-    -DCMAKE_INSTALL_PREFIX="${$PREFIX}" \
-    -DCMAKE_C_COMPILER="${$PREFIX}-gcc" \
+    -DCMAKE_INSTALL_PREFIX=$PREFIX \
+    -DCMAKE_C_COMPILER="$PREFIX-gcc" \
     -DCARES_STATIC=ON \
     -DCARES_SHARED=OFF \
     -DCARES_BUILD_TOOLS=OFF \
