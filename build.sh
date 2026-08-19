@@ -220,17 +220,16 @@ cares_latest_url="https://github.com/c-ares/c-ares/releases/download/v${cares_ta
 echo "cares最新版本是${cares_tag} ，下载地址是${cares_latest_url}"
 retry  curl -L ${cares_latest_url} | tar xz
 cd c-ares-*
-./configure \
-    --disable-shared \
-    --enable-static \
-    --disable-tests \
-    --enable-silent-rules \
-    --without-random \
-    --prefix=$PREFIX \
-    --host=$HOST \
-    --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE) \
-    LIBS="-lws2_32"
-make -j$(nproc) install
+cmake -B build -G Ninja \
+    -DCMAKE_SYSTEM_NAME=Windows \
+    -DCMAKE_INSTALL_PREFIX="${$PREFIX}" \
+    -DCMAKE_C_COMPILER="${$PREFIX}-gcc" \
+    -DCARES_STATIC=ON \
+    -DCARES_SHARED=OFF \
+    -DCARES_BUILD_TOOLS=OFF \
+    -DCARES_BUILD_TESTS=OFF
+  cmake --build build
+  cmake --install build
 echo "| c-ares | ${cares_tag} | ${cares_latest_url} |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
@@ -294,9 +293,9 @@ mkdir -p "${ARIA2_RAM_DIR}"
 cd "${ARIA2_RAM_DIR}"
 
 # 4. 直接克隆到内存中
+git clone -j$(nproc) --depth 1 https://github.com/aria2/aria2.git .
 ARIA2_REF="refs/heads/master"
 retry curl -s -H "Authorization: token $GITHUB_TOKEN" -L -o version.json "https://api.github.com/repos/aria2/aria2/git/${ARIA2_REF}" 2>/dev/null || true
-git clone -j$(nproc) --depth 1 https://github.com/aria2/aria2.git .
 
 # 5. 代码补丁修改
 sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
