@@ -452,7 +452,7 @@ prepare_ninja
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 zlib_ng ⭐⭐⭐⭐⭐"
 prepare_zlib_ng
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 xz ⭐⭐⭐⭐⭐⭐"
-prepare_xz
+#prepare_xz
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 libxml2 ⭐⭐⭐⭐⭐⭐"
 prepare_libxml2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译  sqlite ⭐⭐⭐⭐⭐⭐"
