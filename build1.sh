@@ -176,6 +176,7 @@ prepare_zlib_ng() {
       -DCMAKE_INSTALL_PREFIX="${CROSS_PREFIX}" \
       -DCMAKE_C_COMPILER="${CROSS_HOST}-gcc" \
       -DCMAKE_CXX_COMPILER="${CROSS_HOST}-g++" \
+	  -DLIBXML2_WITH_PROGRAMS=OFF \
       -DCMAKE_SYSTEM_PROCESSOR="${TARGET_ARCH}" \
 	  -DCMAKE_C_FLAGS="${CFLAGS} -UHAVE_VISIBILITY_HIDDEN -UHAVE_VISIBILITY_INTERNAL" \
       -DWITH_GTEST=OFF
@@ -389,9 +390,11 @@ build_aria2() {
     retry wget -cT10 -O "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz.part" "${aria2_latest_url}"
     mv -fv "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz.part" "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz"
   fi
-  mkdir -p "/usr/src/aria2-${aria2_tag}"
-  tar -zxf "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz" --strip-components=1 -C "/usr/src/aria2-${aria2_tag}"
-  cd "/usr/src/aria2-${aria2_tag}"
+  export ARIA2_BUILD_DIR="/dev/shm/aria2-${aria2_tag}"
+  rm -rf "${ARIA2_BUILD_DIR}"
+  mkdir -p "${ARIA2_BUILD_DIR}"
+  tar -zxf "${DOWNLOADS_DIR}/aria2-${aria2_tag}.tar.gz" --strip-components=1 -C "${ARIA2_BUILD_DIR}"
+  cd "${ARIA2_BUILD_DIR}"
   sed -i 's/res += "zlib\/" ZLIB_VERSION " ";/res += "zlib_ng\/" ZLIBNG_VERSION " ";/' "src/FeatureConfig.cc"
   sed -i 's/"1", 1, 16/"1", 1, 1024/' src/OptionHandlerFactory.cc
   sed -i 's/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1M", 1_m, 1_g))/PREF_PIECE_LENGTH, TEXT_PIECE_LENGTH, "1K", 1_k, 1_g))/g' src/OptionHandlerFactory.cc
@@ -467,5 +470,9 @@ build_aria2
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐⭐⭐⭐⭐"
 
 # get release
-${CROSS_HOST}-strip --strip-all "/usr/src/aria2-${aria2_tag}/src/aria2c.exe"
-mv -fv "/usr/src/aria2-${aria2_tag}/src/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
+# get release
+${CROSS_HOST}-strip --strip-all "/dev/shm/aria2-${aria2_tag}/src/aria2c.exe"
+mv -fv "/dev/shm/aria2-${aria2_tag}/src/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
+
+# 编译完成后释放 /dev/shm 内存占用
+rm -rf "/dev/shm/aria2-${aria2_tag}"
