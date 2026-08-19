@@ -392,20 +392,20 @@ build_aria2() {
   fi
   
   # 1. 解除 /dev/shm 执行限制
-	sudo mount -o remount,exec /dev/shm 2>/dev/null || true
+  sudo mount -o remount,exec /dev/shm 2>/dev/null || true
 	
-	# 2. 正确测试（写入真正的脚本内容，避免 0 字节空文件报错）
-	echo -e '#!/bin/sh\nexit 0' > /dev/shm/test_exec.sh
+  # 2. 正确测试（写入真正的脚本内容，避免 0 字节空文件报错）
+  echo -e '#!/bin/sh\nexit 0' > /dev/shm/test_exec.sh
 	chmod +x /dev/shm/test_exec.sh
 	
 	if /dev/shm/test_exec.sh 2>/dev/null; then
 	  rm -f /dev/shm/test_exec.sh
-	  ARIA2_RAM_DIR="/dev/shm/aria2_build_$$"
+	  export ARIA2_BUILD_DIR="/dev/shm/aria2-${aria2_tag}"
 	  echo "✅ /dev/shm 可执行权限正常，将在 /dev/shm 内存盘中编译！"
 	else
 	  rm -f /dev/shm/test_exec.sh
 	  echo "⚠️ /dev/shm 确实受限，回退到 /tmp 内存目录..."
-	  ARIA2_RAM_DIR="/tmp/aria2_build_$$"
+	  export ARIA2_BUILD_DIR="/tmp/aria2-${aria2_tag}"
 	fi
   rm -rf "${ARIA2_BUILD_DIR}"
   mkdir -p "${ARIA2_BUILD_DIR}"
