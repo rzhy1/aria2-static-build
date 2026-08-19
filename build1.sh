@@ -311,17 +311,15 @@ prepare_c_ares() {
     cd c-ares-main
     echo "当前完整路径是: $PWD"
   fi
-  if [ ! -f "./configure" ]; then
-    autoreconf -i
-  fi
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" \
-    --enable-static \
-    --disable-shared \
-    --enable-silent-rules \
-    --disable-tests \
-    --without-random \
-	--build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-  make -j$(nproc)
+  cmake -B build -G Ninja \
+    -DCMAKE_SYSTEM_NAME=Windows \
+    -DCMAKE_INSTALL_PREFIX="${CROSS_PREFIX}" \
+    -DCMAKE_C_COMPILER="${CROSS_HOST}-gcc" \
+    -DCARES_STATIC=ON \
+    -DCARES_SHARED=OFF \
+    -DCARES_BUILD_TOOLS=OFF \
+    -DCARES_BUILD_TESTS=OFF
+  cmake --build build
   cp -f src/lib/.libs/libcares.a "${CROSS_PREFIX}/lib/" || exit 1
   cp -f include/*.h "${CROSS_PREFIX}/include/" || exit 1
   cp -f libcares.pc "${CROSS_PREFIX}/lib/pkgconfig/" || exit 1
@@ -340,14 +338,24 @@ prepare_libssh2() {
   mkdir -p "/usr/src/libssh2-${libssh2_tag}"
   tar -zxf "${DOWNLOADS_DIR}/libssh2-${libssh2_tag}.tar.gz" --strip-components=1 -C "/usr/src/libssh2-${libssh2_tag}"
   cd "/usr/src/libssh2-${libssh2_tag}"
-  ./configure --host="${CROSS_HOST}" --prefix="${CROSS_PREFIX}" --enable-static --disable-shared --enable-silent-rules \
-    --disable-examples-build \
-    --disable-docker-tests \
-    --disable-sshd-tests \
-    --disable-debug \
-	--build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
-  make -j$(nproc)
-  make install
+  rm -rf build
+  cmake -B build \
+    -G Ninja \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_SYSTEM_NAME=Windows \
+    -DCMAKE_SYSTEM_PROCESSOR="${TARGET_ARCH}" \
+    -DCMAKE_INSTALL_PREFIX="${CROSS_PREFIX}" \
+    -DCMAKE_C_COMPILER="${CROSS_HOST}-gcc" \
+    -DCMAKE_RC_COMPILER="${CROSS_HOST}-windres" \
+    -DCMAKE_C_FLAGS="${CFLAGS}" \
+    -DBUILD_SHARED_LIBS=OFF \
+    -DBUILD_STATIC_LIBS=ON \
+    -DBUILD_EXAMPLES=OFF \
+    -DBUILD_TESTING=OFF \
+    -DCRYPTO_BACKEND=WinCNG \
+    -DENABLE_ZLIB_COMPRESSION=ON
+  cmake --build build
+  cmake --install build
   libssh2_ver="$(grep 'Version:' "${CROSS_PREFIX}/lib/pkgconfig/libssh2.pc" | awk '{print $2}')"
   echo "| libssh2 | ${libssh2_ver} | ${libssh2_latest_url:-cached libssh2} |" >>"${BUILD_INFO}"
 }
