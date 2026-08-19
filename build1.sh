@@ -481,8 +481,9 @@ echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 编译完成⭐⭐�
 
 # get release
 # get release
-${CROSS_HOST}-strip --strip-all "/dev/shm/aria2-${aria2_tag}/src/aria2c.exe"
-mv -fv "/dev/shm/aria2-${aria2_tag}/src/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
+# get release
+${CROSS_HOST}-strip --strip-all "${ARIA2_BUILD_DIR}/src/aria2c.exe"
+mv -fv "${ARIA2_BUILD_DIR}/src/aria2c.exe" "${SELF_DIR}/aria2c1.exe"
 
-# 编译完成后释放 /dev/shm 内存占用
-rm -rf "/dev/shm/aria2-${aria2_tag}"
+# 清理内存编译目录
+rm -rf "${ARIA2_BUILD_DIR}"
