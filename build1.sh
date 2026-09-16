@@ -133,7 +133,7 @@ prepare_cmake() {
 
 prepare_ninja() {
   if ! which ninja &>/dev/null; then
-	ninja_ver="$(retry curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/ninja-build/ninja/releases/latest | jq -r '.tag_name | sub("^v"; "")')"
+	ninja_ver="$(retry curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/ninja-build/ninja/releases/latest  | jq -r '.tag_name')"
     ninja_binary_url="https://github.com/ninja-build/ninja/releases/download/${ninja_ver}/ninja-linux.zip"
     if [ ! -f "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip" ]; then
       rm -f "${DOWNLOADS_DIR}/ninja-${ninja_ver}-linux.zip.part"
