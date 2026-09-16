@@ -112,7 +112,7 @@ echo "|------------|---------|--------|" >>"${BUILD_INFO}"
 
 prepare_cmake() {
   if ! which cmake &>/dev/null; then
-    cmake_latest_ver="$(retry wget -qO- --compression=auto https://cmake.org/download/ | grep 'Latest Release' | sed -r 's/.*Latest Release\s*\((.+)\).*/\1/' | head -1)"
+    cmake_latest_ver="$(retry curl -s -H "Authorization: token $GITHUB_TOKEN" https://api.github.com/repos/Kitware/CMake/releases/latest | jq -r '.tag_name | sub("^v"; "")')"
     cmake_binary_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-linux-x86_64.tar.gz"
     cmake_sha256_url="https://github.com/Kitware/CMake/releases/download/v${cmake_latest_ver}/cmake-${cmake_latest_ver}-SHA-256.txt"
 
