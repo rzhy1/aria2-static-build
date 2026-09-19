@@ -423,7 +423,7 @@ build_aria2() {
 
   LDFLAGS="$LDFLAGS -lwinpthread -lws2_32 -liphlpapi" \
   CXXFLAGS="$CXXFLAGS -fno-rtti" \
-  ./configure \
+  ./configure -C \
     --host="${CROSS_HOST}" \
     --prefix="${CROSS_PREFIX}" \
     --enable-static \
