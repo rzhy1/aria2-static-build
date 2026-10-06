@@ -146,9 +146,35 @@ prepare_ninja() {
 }
 
 prepare_libiconv() {
-  libiconv_tag="$(retry curl -s https://ftp.gnu.org/gnu/libiconv/ | grep -oE 'href="libiconv-[0-9]+\.[0-9]+(\.[0-9]+)?\.tar\.gz"' | sort -rV | head -n 1 | sed -E 's/href="libiconv-([0-9.]+)\.tar\.gz"/\1/')"
-  echo "libiconv最新版本是${libiconv_tag} ，下载地址是https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.gz"
-  curl -L https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.gz | tar xz
+  # 选择最快的 GNU 镜像
+  local candidates=(
+    "https://mirrors.aliyun.com/gnu"
+    "https://ftp.gnu.org/gnu"
+    "http://mirrors.kernel.org/gnu"
+  )
+  local GNU_MIRROR=""
+  local fastest_time=999
+  local tmp_time
+
+  echo "[测速] 正在测试 GNU 镜像响应速度..." >&2
+  for mirror in "${candidates[@]}"; do
+    tmp_time=$(curl -o /dev/null -s -w '%{time_total}' --connect-timeout 3 --max-time 5 "${mirror}/" 2>/dev/null)
+    if [ -n "$tmp_time" ] && [ "$tmp_time" != "0" ]; then
+      printf "  %-40s %.3f 秒\n" "${mirror}" "${tmp_time}" >&2
+      if awk "BEGIN{exit !($tmp_time < $fastest_time)}"; then
+        fastest_time=$tmp_time
+        GNU_MIRROR=$mirror
+      fi
+    else
+      printf "  %-40s 失败\n" "${mirror}" >&2
+    fi
+  done
+  [ -z "$GNU_MIRROR" ] && GNU_MIRROR="https://ftp.gnu.org/gnu"
+  echo "[选择] 最快镜像: ${GNU_MIRROR} (${fastest_time} 秒)" >&2
+
+  libiconv_tag="$(retry curl -s "${GNU_MIRROR}/libiconv/" | grep -oE 'href="libiconv-[0-9]+\.[0-9]+(\.[0-9]+)?\.tar\.gz"' | sort -rV | head -n 1 | sed -E 's/href="libiconv-([0-9.]+)\.tar\.gz"/\1/')"
+  echo "libiconv最新版本是${libiconv_tag} ，下载地址是${GNU_MIRROR}/libiconv/libiconv-${libiconv_tag}.tar.gz"
+  retry curl -L "${GNU_MIRROR}/libiconv/libiconv-${libiconv_tag}.tar.gz" | tar xz
   cd libiconv-*
   ./configure \
     --host="${CROSS_HOST}" \
@@ -156,7 +182,7 @@ prepare_libiconv() {
     --disable-shared \
     --enable-static
   make -j$(nproc) install
-  echo "| libiconv | ${libiconv_tag} | https://ftp.gnu.org/gnu/libiconv/libiconv-${libiconv_tag}.tar.gz |" >>"${BUILD_INFO}"
+  echo "| libiconv | ${libiconv_tag} | ${GNU_MIRROR}/libiconv/libiconv-${libiconv_tag}.tar.gz |" >>"${BUILD_INFO}"
 }
 
 prepare_zlib_ng() {
