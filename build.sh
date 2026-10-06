@@ -54,8 +54,8 @@ echo "| Dependency | Version | Source |" >>"${BUILD_INFO}"
 echo "|------------|---------|--------|" >>"${BUILD_INFO}"
 
 retry() {
-  local max_retries=5
-  local sleep_seconds=3
+  local max_retries=3
+  local sleep_seconds=2
   for (( i=1; i<=max_retries; i++ )); do
     echo "正在执行 (重试次数: $i): $@" >&2
     if "$@"; then
@@ -69,17 +69,64 @@ retry() {
   return 1
 }
 
+select_fastest_gnu_mirror() {
+    local candidates=(
+        "https://mirrors.aliyun.com/gnu"
+        "https://ftp.gnu.org/gnu"
+        "http://mirrors.kernel.org/gnu"
+    )
+    local fastest_url=""
+    local fastest_time=999
+    local tmp_time
+
+    echo "[测速] 正在测试 GNU 镜像响应速度..." >&2
+    for mirror in "${candidates[@]}"; do
+        if command -v curl &>/dev/null; then
+            tmp_time=$(curl -o /dev/null -s -w '%{time_total}' --connect-timeout 3 --max-time 5 "${mirror}/" 2>/dev/null)
+        elif command -v wget &>/dev/null; then
+            tmp_time=$(wget --spider --timeout=3 --tries=1 -O /dev/null "${mirror}/" 2>&1 | grep -oE '[0-9.]+' | tail -1)
+        else
+            echo "错误: 需要 curl 或 wget" >&2
+            return 1
+        fi
+
+        if [ -n "$tmp_time" ] && [ "$tmp_time" != "0" ]; then
+            printf "  %-40s %.3f 秒\n" "${mirror}" "${tmp_time}" >&2
+            if (( $(echo "$tmp_time < $fastest_time" | bc -l 2>/dev/null) )) || [ -z "$fastest_url" ]; then
+                fastest_time=$tmp_time
+                fastest_url=$mirror
+            fi
+        else
+            printf "  %-40s 失败\n" "${mirror}" >&2
+        fi
+    done
+
+    echo >&2
+    if [ -n "$fastest_url" ]; then
+        echo "[选择] 最快镜像: ${fastest_url} (${fastest_time} 秒)" >&2
+        echo "$fastest_url"
+    else
+        echo "[警告] 所有镜像均不可用，使用默认镜像 https://ftp.gnu.org/gnu" >&2
+        echo "https://ftp.gnu.org/gnu"
+    fi
+}
+
 # 1. 下载并编译 GMP
 echo "⭐⭐⭐⭐⭐⭐$(date '+%Y/%m/%d %a %H:%M:%S.%N') - 下载并编译 GMP⭐⭐⭐⭐⭐⭐"
 start_time=$(date +%s.%N)
+
+# 选择最快的 GNU 镜像
+GNU_MIRROR="$(select_fastest_gnu_mirror)"
+echo "本次使用 GNU 镜像: ${GNU_MIRROR}"
+
 gmp_tag="$(
-    retry curl -s https://ftp.gnu.org/gnu/gmp/ |
+    retry curl -s "${GNU_MIRROR}/gmp/" |
     grep -oP 'gmp-\K[0-9.]+(?=\.tar\.(xz|gz))' |
     sort -V |
     tail -n1
 )"
-echo "gmp最新版本是${gmp_tag} ，下载地址是https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz"
-retry  curl -L https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz | tar x --xz
+echo "gmp最新版本是${gmp_tag} ，下载地址是${GNU_MIRROR}/gmp/gmp-${gmp_tag}.tar.xz"
+retry  curl -L "${GNU_MIRROR}/gmp/gmp-${gmp_tag}.tar.xz" | tar x --xz
 cd gmp-*
 find_and_comment() {
   local file="$1"
@@ -102,7 +149,7 @@ BUILD_CC=gcc BUILD_CXX=g++ ./configure \
     --host=$HOST \
     --build=$(dpkg-architecture -qDEB_BUILD_GNU_TYPE)
 make -j$(nproc) install
-echo "| gmp | ${gmp_tag} | https://ftp.gnu.org/gnu/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
+echo "| gmp | ${gmp_tag} | ${GNU_MIRROR}/gmp/gmp-${gmp_tag}.tar.xz |" >>"${BUILD_INFO}"
 cd ..
 end_time=$(date +%s.%N)
 duration2=$(echo "$end_time - $start_time" | bc | xargs printf "%.1f")
