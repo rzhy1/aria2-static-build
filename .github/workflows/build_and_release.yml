@@ -5,14 +5,11 @@ on:
   push:
     branches:
       - "*"
-  pull_request:
-    branches:
-      - "*"
   release:
     types:
       - released
   schedule:
-    - cron: "0 0 * * *"
+    - cron: "0 3 * * *"
 
 jobs:
   build-aria2c:
