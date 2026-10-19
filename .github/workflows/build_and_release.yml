@@ -9,7 +9,7 @@ on:
     types:
       - released
   schedule:
-    - cron: '15 3 * * *'
+    - cron: '15 11 * * *'
       timezone: 'Asia/Shanghai'
 
 jobs:
