@@ -9,8 +9,7 @@ on:
     types:
       - released
   schedule:
-    - cron: '15 11 * * *'
-      timezone: 'Asia/Shanghai'
+     - cron: "0 0 * * *"
 
 jobs:
   build-aria2c:
